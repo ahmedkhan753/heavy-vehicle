@@ -1,0 +1,275 @@
+@import "tailwindcss";
+
+:root {
+  --hw-orange: #f97316;
+  --hw-orange-dark: #c2410c;
+  --hw-amber: #f59e0b;
+  --hw-green: #10b981;
+  --hw-cyan: #22d3ee;
+  --hw-blue: #2563eb;
+  --hw-red: #ef4444;
+  --hw-bg-base: #070a0f;
+  --hw-bg-deep: #0b111a;
+  --hw-bg-card: #141c2b;
+  --hw-bg-elevated: #f8fafc;
+  --hw-bg-input: #0d1420;
+  --hw-bg-overlay: rgba(7, 10, 15, 0.88);
+  --hw-border-subtle: #243149;
+  --hw-border-default: #33435c;
+  --hw-border-strong: #64748b;
+  --hw-text-primary: #f8fafc;
+  --hw-text-secondary: #d7dee9;
+  --hw-text-muted: #93a3b8;
+  --hw-text-inverse: #071016;
+  --hw-soft-panel: rgba(248, 250, 252, 0.08);
+  --hw-soft-panel-strong: rgba(248, 250, 252, 0.14);
+}
+
+[data-theme="light"] {
+  --hw-orange: #ea580c;
+  --hw-orange-dark: #c2410c;
+  --hw-amber: #d97706;
+  --hw-green: #059669;
+  --hw-cyan: #0284c7;
+  --hw-blue: #2563eb;
+  --hw-red: #dc2626;
+  --hw-bg-base: #f4f7fb;
+  --hw-bg-deep: #ffffff;
+  --hw-bg-card: #ffffff;
+  --hw-bg-elevated: #eef3f8;
+  --hw-bg-input: #ffffff;
+  --hw-bg-overlay: rgba(255, 255, 255, 0.88);
+  --hw-border-subtle: #e2e8f0;
+  --hw-border-default: #cbd5e1;
+  --hw-border-strong: #94a3b8;
+  --hw-text-primary: #0f172a;
+  --hw-text-secondary: #334155;
+  --hw-text-muted: #64748b;
+  --hw-text-inverse: #ffffff;
+  --hw-soft-panel: rgba(15, 23, 42, 0.04);
+  --hw-soft-panel-strong: rgba(15, 23, 42, 0.08);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background:
+    linear-gradient(180deg, var(--hw-soft-panel-strong), rgba(7, 10, 15, 0) 340px),
+    var(--hw-bg-base);
+  color: var(--hw-text-primary);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+::selection {
+  background: rgba(249, 115, 22, 0.35);
+  color: white;
+}
+
+.hw-container {
+  width: min(1180px, calc(100% - 32px));
+  margin-inline: auto;
+}
+
+.hw-section {
+  padding-block: 52px;
+}
+
+.hw-subtle-grid {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 42px 42px;
+}
+
+.hw-scrollbar::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+
+.hw-scrollbar::-webkit-scrollbar-track {
+  background: var(--hw-bg-deep);
+}
+
+.hw-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--hw-border-strong);
+  border-radius: 999px;
+}
+
+.hw-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--hw-orange);
+}
+
+/* ── Plan banners (featured page) ──────────────────────────────
+   Sleek dark glass cards with an animated neon edge. Each card sets
+   its accent via the --neon custom property. */
+.hw-neon-card {
+  position: relative;
+  isolation: isolate;
+  background:
+    linear-gradient(160deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0) 60%),
+    var(--hw-bg-card);
+  border: 1px solid var(--neon, var(--hw-orange));
+  border: 1px solid color-mix(in srgb, var(--neon, var(--hw-orange)) 32%, transparent);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.02), 0 18px 40px -24px rgba(0, 0, 0, 0.8);
+  transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.35s ease, border-color 0.35s ease;
+}
+
+/* Animated neon border that sweeps around the card. */
+.hw-neon-card::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  z-index: -1;
+  border-radius: inherit;
+  padding: 1px;
+  background: conic-gradient(
+    from var(--hw-angle, 0deg),
+    transparent 0deg,
+    var(--neon, var(--hw-orange)) 70deg,
+    transparent 140deg,
+    transparent 360deg
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0.55;
+  animation: hw-border-spin 6s linear infinite;
+}
+
+/* Soft neon glow that breathes underneath the card. */
+.hw-neon-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  border-radius: inherit;
+  background: radial-gradient(120% 120% at 50% 0%, color-mix(in srgb, var(--neon, var(--hw-orange)) 28%, transparent), transparent 70%);
+  filter: blur(18px);
+  opacity: 0.35;
+  animation: hw-glow-pulse 4.5s ease-in-out infinite;
+}
+
+.hw-neon-card:hover {
+  transform: translateY(-6px);
+  border-color: color-mix(in srgb, var(--neon, var(--hw-orange)) 70%, transparent);
+  box-shadow: 0 0 28px -6px color-mix(in srgb, var(--neon, var(--hw-orange)) 55%, transparent), 0 28px 50px -28px rgba(0, 0, 0, 0.9);
+}
+
+.hw-neon-card:hover::before { opacity: 1; }
+.hw-neon-card:hover::after { opacity: 0.55; }
+
+/* Featured/popular card sits slightly proud of the row. */
+.hw-neon-card-featured {
+  transform: translateY(-6px) scale(1.02);
+}
+.hw-neon-card-featured:hover {
+  transform: translateY(-12px) scale(1.02);
+}
+
+/* Shimmer used on the headline price / badge. */
+.hw-neon-text {
+  color: var(--neon, var(--hw-orange));
+  text-shadow: 0 0 18px color-mix(in srgb, var(--neon, var(--hw-orange)) 45%, transparent);
+}
+
+.hw-shimmer {
+  background: linear-gradient(100deg, var(--neon, var(--hw-orange)) 0%, #fff 50%, var(--neon, var(--hw-orange)) 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: hw-shimmer-move 3.5s linear infinite;
+}
+
+/* The conic --hw-angle needs to be a registered property to animate. */
+@property --hw-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes hw-border-spin {
+  to { --hw-angle: 360deg; }
+}
+
+@keyframes hw-glow-pulse {
+  0%, 100% { opacity: 0.28; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes hw-shimmer-move {
+  to { background-position: 200% center; }
+}
+
+@keyframes hw-rise-in {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.hw-rise-in {
+  opacity: 0;
+  animation: hw-rise-in 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+/* Respect users who prefer less motion: keep the look, drop the movement. */
+@media (prefers-reduced-motion: reduce) {
+  .hw-neon-card::before,
+  .hw-neon-card::after,
+  .hw-shimmer,
+  .hw-rise-in {
+    animation: none;
+  }
+  .hw-rise-in { opacity: 1; }
+}
+
+/* ── Urdu typography + RTL support ──────────────────────────────
+   Urdu renders badly in Latin sans-serif fonts, so use an Urdu/Arabic
+   script stack and give the script more vertical room. Layout direction
+   (flex, text-align, gap) flips automatically from <html dir="rtl">. */
+[lang="ur"] {
+  font-family: "Noto Nastaliq Urdu", "Jameel Noori Nastaleeq", "Urdu Typesetting",
+    "Noto Naskh Arabic", "Segoe UI", Tahoma, system-ui, sans-serif;
+  line-height: 2;
+}
+
+/* Tighter line-height where tall Nastaliq would overflow (controls, headings). */
+[lang="ur"] h1,
+[lang="ur"] h2,
+[lang="ur"] h3,
+[lang="ur"] button,
+[lang="ur"] input,
+[lang="ur"] select,
+[lang="ur"] textarea {
+  line-height: 1.7;
+}
+
+/* Numbers, prices, phones and the brand stay left-to-right inside RTL text. */
+[dir="rtl"] input[type="tel"],
+[dir="rtl"] input[type="number"],
+[dir="rtl"] .hw-ltr {
+  direction: ltr;
+  text-align: start;
+}
+
+/* The few physical helpers used in the app, flipped for RTL. */
+[dir="rtl"] .ml-auto { margin-left: 0; margin-right: auto; }
+[dir="rtl"] .mr-auto { margin-right: 0; margin-left: auto; }

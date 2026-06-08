@@ -1,0 +1,24 @@
+# ───────── Dependencies ─────────
+node_modules/
+
+# ───────── Secrets / env — NEVER commit ─────────
+.env
+.env.*
+!.env.example
+
+# ───────── Logs ─────────
+*.log
+logs/
+
+# ───────── Build output ─────────
+dist/
+build/
+.next/
+out/
+
+# ───────── OS / editor cruft ─────────
+.DS_Store
+Thumbs.db
+
+# ───────── Claude Code local agent state ─────────
+.claude/
