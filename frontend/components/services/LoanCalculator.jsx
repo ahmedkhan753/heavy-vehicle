@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useLanguage } from "@/Context/LanguageContext";
 
 /**
  * LoanCalculator
@@ -54,6 +55,7 @@ const inputClass =
 const labelClass = "text-xs font-bold uppercase tracking-wide text-[var(--hw-text-muted)]";
 
 export default function LoanCalculator({ initialPrice }) {
+  const { t } = useLanguage();
   const startPrice = toNumber(initialPrice) || 5000000;
 
   const [price, setPrice] = useState(String(startPrice));
@@ -80,7 +82,7 @@ export default function LoanCalculator({ initialPrice }) {
         <div className="grid gap-5">
           {/* Vehicle price */}
           <label className="grid gap-2">
-            <span className={labelClass}>Vehicle price (PKR)</span>
+            <span className={labelClass}>{t("loan.vehiclePrice")}</span>
             <input
               type="text"
               inputMode="numeric"
@@ -94,8 +96,8 @@ export default function LoanCalculator({ initialPrice }) {
           {/* Down payment */}
           <div className="grid gap-2">
             <div className="flex items-center justify-between">
-              <span className={labelClass}>Down payment (PKR)</span>
-              <span className="text-xs font-bold text-[var(--hw-text-muted)]">{downPercent}% of price</span>
+              <span className={labelClass}>{t("loan.downPayment")}</span>
+              <span className="text-xs font-bold text-[var(--hw-text-muted)]">{downPercent}% {t("loan.ofPrice")}</span>
             </div>
             <input
               type="text"
@@ -119,14 +121,14 @@ export default function LoanCalculator({ initialPrice }) {
             </div>
             {downExceeds ? (
               <p className="text-xs font-semibold text-[var(--hw-amber,#f59e0b)]">
-                Down payment can&apos;t exceed the price — capped at {pkr(priceNum)}.
+                {t("loan.downCapBefore")}{pkr(priceNum)}.
               </p>
             ) : null}
           </div>
 
           {/* Profit / interest rate */}
           <label className="grid gap-2">
-            <span className={labelClass}>Profit / interest rate (% per year)</span>
+            <span className={labelClass}>{t("loan.rate")}</span>
             <input
               type="text"
               inputMode="decimal"
@@ -135,12 +137,12 @@ export default function LoanCalculator({ initialPrice }) {
               onChange={(e) => setRate(e.target.value)}
               placeholder="20"
             />
-            <span className="text-xs text-[var(--hw-text-muted)]">Set to 0 for interest-free / Islamic financing.</span>
+            <span className="text-xs text-[var(--hw-text-muted)]">{t("loan.rateHint")}</span>
           </label>
 
           {/* Tenure */}
           <div className="grid gap-2">
-            <span className={labelClass}>Loan tenure (years)</span>
+            <span className={labelClass}>{t("loan.tenure")}</span>
             <div className="flex flex-wrap gap-2">
               {YEAR_OPTIONS.map((y) => (
                 <button
@@ -165,23 +167,20 @@ export default function LoanCalculator({ initialPrice }) {
       {/* Use --hw-bg-card (solid, theme-aware) not --hw-bg-elevated, which is a
           near-white chip colour in dark mode and made the text invisible. */}
       <div className="rounded-xl border border-[var(--hw-border-strong)] bg-[var(--hw-bg-card)] p-6">
-        <p className={labelClass}>Estimated monthly installment</p>
+        <p className={labelClass}>{t("loan.estimatedEmi")}</p>
         <p className="mt-2 text-4xl font-black text-[var(--hw-orange)]">{pkr(result.emi)}</p>
         <p className="mt-1 text-xs text-[var(--hw-text-muted)]">
-          for {result.months} months ({years} {years === 1 ? "year" : "years"})
+          {t("loan.for")} {result.months} {t("loan.months")} ({years} {years === 1 ? t("loan.year") : t("loan.years")})
         </p>
 
         <div className="mt-6 grid gap-3">
-          <Row label="Amount financed" value={pkr(result.principal)} />
-          <Row label="Total profit / interest" value={pkr(result.totalInterest)} />
+          <Row label={t("loan.amountFinanced")} value={pkr(result.principal)} />
+          <Row label={t("loan.totalInterest")} value={pkr(result.totalInterest)} />
           <div className="my-1 h-px bg-[var(--hw-border-default)]" />
-          <Row label="Total payable" value={pkr(result.totalPayable)} strong />
+          <Row label={t("loan.totalPayable")} value={pkr(result.totalPayable)} strong />
         </div>
 
-        <p className="mt-6 text-xs leading-5 text-[var(--hw-text-muted)]">
-          This is an estimate for guidance only. Actual installments, rates, and eligibility vary by
-          bank or financing provider.
-        </p>
+        <p className="mt-6 text-xs leading-5 text-[var(--hw-text-muted)]">{t("loan.disclaimer")}</p>
       </div>
     </div>
   );

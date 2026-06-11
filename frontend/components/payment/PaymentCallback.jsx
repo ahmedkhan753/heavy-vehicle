@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { paymentApi, normalizeApiError } from "@/lib/api";
+import { useLanguage } from "@/Context/LanguageContext";
 
 // Poll the payment status a few times — the webhook usually confirms within a
 // second or two, and getStatus also does a server-side re-check as a fallback.
@@ -11,6 +12,7 @@ const MAX_POLLS = 6;
 const INTERVAL_MS = 2000;
 
 export default function PaymentCallback() {
+  const { t } = useLanguage();
   const searchParams = useSearchParams();
   const paymentId = searchParams.get("paymentId") || "";
   const cancelled = searchParams.get("payment") === "cancelled";
@@ -56,46 +58,44 @@ export default function PaymentCallback() {
     checking: {
       icon: "⏳",
       tone: "var(--hw-amber)",
-      title: "Confirming your payment…",
-      body: "Hang tight — this usually takes a couple of seconds.",
+      title: t("pay.checkingTitle"),
+      body: t("pay.checkingBody"),
       cta: null,
     },
     success: {
       icon: "✅",
       tone: "var(--hw-green)",
-      title: "Payment successful!",
-      body: type === "subscription"
-        ? "Your subscription is now active. Your dealer badge and featured slots are ready to use."
-        : "Your boost has been applied to your listing.",
-      cta: { href: successHref, label: "Go to dashboard" },
+      title: t("pay.successTitle"),
+      body: type === "subscription" ? t("pay.successSub") : t("pay.successBoost"),
+      cta: { href: successHref, label: t("pay.goDashboard") },
     },
     pending: {
       icon: "🕓",
       tone: "var(--hw-amber)",
-      title: "Payment is processing",
-      body: "We haven't received final confirmation yet. If you completed the payment, it will activate automatically within a few minutes — no need to pay again.",
-      cta: { href: "/dashboard/billing", label: "Back to billing" },
+      title: t("pay.pendingTitle"),
+      body: t("pay.pendingBody"),
+      cta: { href: "/dashboard/billing", label: t("pay.backBilling") },
     },
     failed: {
       icon: "❌",
       tone: "#ef4444",
-      title: "Payment was not completed",
-      body: "Your card payment didn't go through and you have not been charged. You can try again or pay manually by transfer.",
-      cta: { href: "/dashboard/billing", label: "Try again" },
+      title: t("pay.failedTitle"),
+      body: t("pay.failedBody"),
+      cta: { href: "/dashboard/billing", label: t("pay.tryAgain") },
     },
     cancelled: {
       icon: "↩️",
       tone: "var(--hw-text-muted)",
-      title: "Checkout cancelled",
-      body: "You cancelled the payment and have not been charged.",
-      cta: { href: "/dashboard/billing", label: "Back to billing" },
+      title: t("pay.cancelledTitle"),
+      body: t("pay.cancelledBody"),
+      cta: { href: "/dashboard/billing", label: t("pay.backBilling") },
     },
     missing: {
       icon: "❓",
       tone: "var(--hw-text-muted)",
-      title: "No payment reference",
-      body: "We couldn't find a payment to confirm. If you just paid, check your billing page.",
-      cta: { href: "/dashboard/billing", label: "Go to billing" },
+      title: t("pay.missingTitle"),
+      body: t("pay.missingBody"),
+      cta: { href: "/dashboard/billing", label: t("pay.goBilling") },
     },
   };
 

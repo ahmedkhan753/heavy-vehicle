@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { API_BASE_URL } from "@/lib/api";
 import PlanBanners from "@/components/marketing/PlanBanners";
+import { getT } from "@/lib/i18n-server";
 
 export const revalidate = 3600;
 
@@ -31,19 +32,19 @@ export default async function SubscriptionPricingsPage() {
 
   const plans = planData?.plans || [];
   const boosts = boostData?.boosts || [];
+  const t = await getT();
 
   return (
     <main>
       {/* Hero */}
       <section className="border-b border-[var(--hw-border-subtle)] bg-[var(--hw-bg-deep)] hw-subtle-grid">
         <div className="hw-container py-16 text-center">
-          <p className="text-xs font-black uppercase tracking-wide text-[var(--hw-orange)]">Pricing</p>
+          <p className="text-xs font-black uppercase tracking-wide text-[var(--hw-orange)]">{t("pricing.eyebrow")}</p>
           <h1 className="mx-auto mt-3 max-w-2xl text-4xl font-black text-[var(--hw-text-primary)] md:text-5xl">
-            Plans &amp; pricing for every seller
+            {t("pricing.heroTitle")}
           </h1>
           <p className="mx-auto mt-4 max-w-xl text-lg text-[var(--hw-text-secondary)]">
-            Browse the plans here whether you&apos;re buying or selling — no account needed. Pick a dealer plan for
-            ongoing perks, or grab a one-time boost for a single ad.
+            {t("pricing.heroSubtitle")}
           </p>
         </div>
       </section>
@@ -54,9 +55,9 @@ export default async function SubscriptionPricingsPage() {
           <PlanBanners plans={plans} free={planData?.free} />
         ) : (
           <div className="rounded-2xl border border-dashed border-[var(--hw-border-default)] bg-[var(--hw-bg-card)] p-12 text-center">
-            <h2 className="text-xl font-black text-[var(--hw-text-primary)]">Pricing is loading</h2>
+            <h2 className="text-xl font-black text-[var(--hw-text-primary)]">{t("pricing.loadingTitle")}</h2>
             <p className="mt-2 text-[var(--hw-text-secondary)]">
-              We couldn&apos;t reach the pricing service just now. Please refresh in a moment.
+              {t("pricing.loadingBody")}
             </p>
           </div>
         )}
@@ -66,10 +67,9 @@ export default async function SubscriptionPricingsPage() {
       {boosts.length ? (
         <section className="border-t border-[var(--hw-border-subtle)] bg-[var(--hw-bg-deep)]">
           <div className="hw-container py-14">
-            <h2 className="text-2xl font-black text-[var(--hw-text-primary)]">One-time ad boosts</h2>
+            <h2 className="text-2xl font-black text-[var(--hw-text-primary)]">{t("pricing.boostsTitle")}</h2>
             <p className="mt-2 max-w-2xl text-[var(--hw-text-secondary)]">
-              No subscription needed — buy per ad from <strong className="text-[var(--hw-text-primary)]">My Ads → Boost</strong>.
-              Renewing an ad before it expires uses the same Extend boost.
+              {t("pricing.boostsSubBefore")}<strong className="text-[var(--hw-text-primary)]">{t("pricing.boostsMyAds")}</strong>{t("pricing.boostsSubAfter")}
             </p>
             <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {boosts.map((b) => (
@@ -92,15 +92,15 @@ export default async function SubscriptionPricingsPage() {
       {/* CTA */}
       <section className="hw-container py-12 text-center">
         <p className="text-[var(--hw-text-secondary)]">
-          Ready to stand out?{" "}
+          {t("pricing.ctaBefore")}
           <Link href="/dashboard/billing" className="font-bold text-[var(--hw-orange)] hover:underline">
-            Choose a plan
-          </Link>{" "}
-          or{" "}
-          <Link href="/post-ad" className="font-bold text-[var(--hw-orange)] hover:underline">
-            post a free ad
+            {t("pricing.choosePlan")}
           </Link>
-          .
+          {t("pricing.ctaOr")}
+          <Link href="/post-ad" className="font-bold text-[var(--hw-orange)] hover:underline">
+            {t("pricing.postFreeAd")}
+          </Link>
+          {t("pricing.ctaAfter")}
         </p>
       </section>
     </main>

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { API_BASE_URL } from "@/lib/api";
+import { getT } from "@/lib/i18n-server";
 
 export const revalidate = 3600;
 
@@ -9,7 +10,6 @@ export const metadata = {
 };
 
 const fmt = (n) => Number(n || 0).toLocaleString("en-PK");
-const slotLabel = (n) => (n === -1 ? "Unlimited" : n);
 
 async function getJson(path) {
   try {
@@ -30,28 +30,30 @@ export default async function PromotePage() {
 
   const boosts = boostData?.boosts || [];
   const plans = planData?.plans || [];
+  const t = await getT();
+  const slotLabel = (n) => (n === -1 ? t("promote.unlimited") : n);
 
   return (
     <main>
       {/* Hero */}
       <section className="border-b border-[var(--hw-border-subtle)] bg-[var(--hw-bg-deep)]">
         <div className="hw-container py-16 text-center">
-          <p className="text-xs font-black uppercase tracking-wide text-[var(--hw-orange)]">Promote</p>
+          <p className="text-xs font-black uppercase tracking-wide text-[var(--hw-orange)]">{t("promote.eyebrow")}</p>
           <h1 className="mx-auto mt-3 max-w-2xl text-4xl font-black text-[var(--hw-text-primary)] md:text-5xl">
-            Sell faster. Get seen first.
+            {t("promote.heroTitle")}
           </h1>
           <p className="mx-auto mt-4 max-w-xl text-lg text-[var(--hw-text-secondary)]">
-            Feature a single ad or go pro with a dealer plan. More visibility, more buyers, quicker sales.
+            {t("promote.heroSubtitle")}
           </p>
           <div className="mt-7 flex flex-wrap justify-center gap-3">
             <Link href="/dashboard/my-ads" className="inline-flex h-12 items-center justify-center rounded-lg bg-[var(--hw-orange)] px-6 text-sm font-black text-[var(--hw-text-inverse)] transition hover:bg-[var(--hw-amber)]">
-              Boost an ad
+              {t("promote.boostAnAd")}
             </Link>
             <Link href="/dashboard/billing" className="inline-flex h-12 items-center justify-center rounded-lg border border-[var(--hw-border-strong)] px-6 text-sm font-black text-[var(--hw-text-primary)] transition hover:border-[var(--hw-orange)]">
-              View dealer plans
+              {t("promote.viewDealerPlans")}
             </Link>
             <Link href="/featured" className="inline-flex h-12 items-center justify-center rounded-lg px-6 text-sm font-bold text-[var(--hw-text-secondary)] underline hover:text-[var(--hw-orange)]">
-              See featured listings →
+              {t("promote.seeFeatured")}
             </Link>
           </div>
         </div>
@@ -59,8 +61,8 @@ export default async function PromotePage() {
 
       {/* One-time boosts */}
       <section className="hw-container py-14">
-        <h2 className="text-2xl font-black text-[var(--hw-text-primary)]">Boost a single ad</h2>
-        <p className="mt-2 text-[var(--hw-text-secondary)]">No subscription needed — pay once, applied after quick verification.</p>
+        <h2 className="text-2xl font-black text-[var(--hw-text-primary)]">{t("promote.boostSingleTitle")}</h2>
+        <p className="mt-2 text-[var(--hw-text-secondary)]">{t("promote.boostSingleSub")}</p>
         <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {boosts.map((b) => (
             <div key={b.key} className="rounded-xl border border-[var(--hw-border-default)] bg-[var(--hw-bg-card)] p-5">
@@ -73,44 +75,41 @@ export default async function PromotePage() {
           ))}
         </div>
         <Link href="/dashboard/my-ads" className="mt-6 inline-flex h-11 items-center rounded-lg bg-[var(--hw-orange)] px-5 text-sm font-black text-[var(--hw-text-inverse)]">
-          Boost one of my ads
+          {t("promote.boostMyAds")}
         </Link>
       </section>
 
       {/* Dealer plans */}
       <section className="border-t border-[var(--hw-border-subtle)] bg-[var(--hw-bg-deep)]">
         <div className="hw-container py-14">
-          <h2 className="text-2xl font-black text-[var(--hw-text-primary)]">Dealer plans</h2>
-          <p className="mt-2 text-[var(--hw-text-secondary)]">
-            For sellers with inventory — more featured slots, more listings, and longer payment grace.
-          </p>
+          <h2 className="text-2xl font-black text-[var(--hw-text-primary)]">{t("promote.dealerPlansTitle")}</h2>
+          <p className="mt-2 text-[var(--hw-text-secondary)]">{t("promote.dealerPlansSub")}</p>
           <div className="mt-6 grid gap-4 md:grid-cols-3">
             {plans.map((p) => (
               <div key={p.key} className={`flex flex-col rounded-xl border bg-[var(--hw-bg-card)] p-6 ${p.key === "pro" ? "border-[var(--hw-orange)]" : "border-[var(--hw-border-default)]"}`}>
-                {p.key === "pro" ? <span className="mb-2 inline-block w-fit rounded-full bg-[var(--hw-orange)] px-3 py-0.5 text-[10px] font-black uppercase text-[var(--hw-text-inverse)]">Most popular</span> : null}
+                {p.key === "pro" ? <span className="mb-2 inline-block w-fit rounded-full bg-[var(--hw-orange)] px-3 py-0.5 text-[10px] font-black uppercase text-[var(--hw-text-inverse)]">{t("promote.mostPopular")}</span> : null}
                 <h3 className="text-xl font-black text-[var(--hw-text-primary)]">{p.name}</h3>
-                <p className="mt-2 text-3xl font-black text-[var(--hw-text-primary)]">Rs {fmt(p.monthly)}<span className="text-sm font-bold text-[var(--hw-text-muted)]">/mo</span></p>
+                <p className="mt-2 text-3xl font-black text-[var(--hw-text-primary)]">Rs {fmt(p.monthly)}<span className="text-sm font-bold text-[var(--hw-text-muted)]">{t("promote.perMonth")}</span></p>
                 <ul className="mt-4 grid flex-1 gap-2 text-sm text-[var(--hw-text-secondary)]">
-                  <li>★ {slotLabel(p.featuredSlots)} featured slots</li>
-                  {p.premiumSlots ? <li>★ {p.premiumSlots} premium slots</li> : null}
-                  <li>★ {slotLabel(p.maxActiveAds)} active ads</li>
-                  <li>★ {p.graceDays} days to settle commission</li>
+                  <li>★ {slotLabel(p.featuredSlots)} {t("promote.featuredSlots")}</li>
+                  {p.premiumSlots ? <li>★ {p.premiumSlots} {t("promote.premiumSlots")}</li> : null}
+                  <li>★ {slotLabel(p.maxActiveAds)} {t("promote.activeAdsWord")}</li>
+                  <li>★ {p.graceDays} {t("promote.graceSettle")}</li>
                 </ul>
                 <Link href="/dashboard/billing" className="mt-6 inline-flex h-11 items-center justify-center rounded-lg bg-[var(--hw-orange)] text-sm font-black text-[var(--hw-text-inverse)] transition hover:bg-[var(--hw-amber)]">
-                  Choose {p.name}
+                  {t("promote.choose")} {p.name}
                 </Link>
               </div>
             ))}
           </div>
-          <p className="mt-4 text-sm text-[var(--hw-text-muted)]">Annual billing available — pay for 10 months, get 12.</p>
+          <p className="mt-4 text-sm text-[var(--hw-text-muted)]">{t("promote.annualNote")}</p>
         </div>
       </section>
 
       {/* Free tier note */}
       <section className="hw-container py-12 text-center">
         <p className="text-[var(--hw-text-secondary)]">
-          Free accounts can post up to <strong className="text-[var(--hw-text-primary)]">{planData?.free?.maxActiveAds ?? 5} active ads</strong>.
-          Upgrade any time to list more and stand out.
+          {t("promote.freeNoteBefore")}<strong className="text-[var(--hw-text-primary)]">{planData?.free?.maxActiveAds ?? 5} {t("promote.freeActiveAds")}</strong>{t("promote.freeNoteAfter")}
         </p>
       </section>
     </main>

@@ -5,9 +5,9 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/Context/AuthContext";
 import { useToast } from "@/Context/ToastContext";
+import { useLanguage } from "@/Context/LanguageContext";
 import { inspectorApi, normalizeApiError } from "@/lib/api";
-import { CITIES, VEHICLE_TYPES } from "@/lib/constants";
-import { titleCase } from "@/lib/format";
+import { CITIES, VEHICLE_TYPES, cityLabel, typeLabel } from "@/lib/constants";
 
 const inputClass =
   "mt-2 h-12 w-full rounded-lg border border-[var(--hw-border-default)] bg-[var(--hw-bg-input)] px-4 text-[var(--hw-text-primary)] outline-none focus:border-[var(--hw-orange)]";
@@ -17,6 +17,7 @@ export default function InspectorRegisterForm() {
   const { user, isAuthenticated, loading } = useAuth();
   const router = useRouter();
   const toast = useToast();
+  const { t, lang } = useLanguage();
 
   const [existing, setExisting] = useState(null);
   const [ready, setReady] = useState(false);
@@ -56,10 +57,10 @@ export default function InspectorRegisterForm() {
     try {
       if (existing) {
         await inspectorApi.updateMine(body);
-        toast.success("Profile updated");
+        toast.success(t("insp.toastUpdated"));
       } else {
         await inspectorApi.register(body);
-        toast.success("Submitted for review");
+        toast.success(t("insp.toastSubmitted"));
       }
       router.push("/dashboard");
     } catch (err) {
@@ -74,8 +75,8 @@ export default function InspectorRegisterForm() {
   if (!isAuthenticated) {
     return (
       <div className="rounded-xl border border-[var(--hw-border-default)] bg-[var(--hw-bg-card)] p-8 text-center">
-        <h2 className="text-xl font-black text-[var(--hw-text-primary)]">Sign in to become an inspector</h2>
-        <Link href="/auth/login?redirect=/inspectors/register" className="mt-4 inline-flex h-11 items-center rounded-lg bg-[var(--hw-orange)] px-5 text-sm font-black text-[var(--hw-text-inverse)]">Login</Link>
+        <h2 className="text-xl font-black text-[var(--hw-text-primary)]">{t("insp.formSignin")}</h2>
+        <Link href="/auth/login?redirect=/inspectors/register" className="mt-4 inline-flex h-11 items-center rounded-lg bg-[var(--hw-orange)] px-5 text-sm font-black text-[var(--hw-text-inverse)]">{t("nav.login")}</Link>
       </div>
     );
   }
@@ -86,71 +87,69 @@ export default function InspectorRegisterForm() {
     <form onSubmit={submit} className="rounded-xl border border-[var(--hw-border-default)] bg-[var(--hw-bg-card)] p-5">
       {existing ? (
         <div className={`mb-5 rounded-lg border p-3 text-sm font-bold ${existing.isVerified ? "border-[var(--hw-green)] text-[var(--hw-green)]" : "border-[var(--hw-border-strong)] text-[var(--hw-text-secondary)]"}`}>
-          {existing.isVerified ? "✅ Your profile is verified and live in the directory." : "⏳ Your profile is awaiting admin approval."}
+          {existing.isVerified ? t("insp.statusVerified") : t("insp.statusPending")}
         </div>
       ) : null}
       {error ? <div className="mb-5 rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-sm font-bold text-red-200">{error}</div> : null}
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <label className={labelClass}>Name / business name
+        <label className={labelClass}>{t("insp.fName")}
           <input name="displayName" required maxLength={100} defaultValue={e.displayName || user?.name || ""} className={inputClass} />
         </label>
-        <label className={labelClass}>Type
+        <label className={labelClass}>{t("insp.fType")}
           <select name="type" defaultValue={e.type || "individual"} className={inputClass}>
-            <option value="individual">Individual inspector</option>
-            <option value="company">Inspection company</option>
+            <option value="individual">{t("insp.optIndividual")}</option>
+            <option value="company">{t("insp.optCompany")}</option>
           </select>
         </label>
-        <label className={labelClass}>Inspection fee (PKR)
+        <label className={labelClass}>{t("insp.fFee")}
           <input name="inspectionFee" type="number" min="0" required defaultValue={e.inspectionFee ?? ""} placeholder="5000" className={inputClass} />
         </label>
-        <label className={labelClass}>Fee note
-          <input name="feeNote" defaultValue={e.feeNote || ""} placeholder="per vehicle, on-site" className={inputClass} />
+        <label className={labelClass}>{t("insp.fFeeNote")}
+          <input name="feeNote" defaultValue={e.feeNote || ""} placeholder={t("insp.feeNotePlaceholder")} className={inputClass} />
         </label>
-        <label className={labelClass}>Base city
+        <label className={labelClass}>{t("insp.fBaseCity")}
           <select name="city" required defaultValue={e.city || user?.city || ""} className={inputClass}>
-            <option value="">Select city</option>
-            {CITIES.map((c) => <option key={c} value={c}>{titleCase(c)}</option>)}
+            <option value="">{t("svc.selectCity")}</option>
+            {CITIES.map((c) => <option key={c} value={c}>{cityLabel(c, lang)}</option>)}
           </select>
         </label>
-        <label className={labelClass}>Experience (years)
+        <label className={labelClass}>{t("insp.fExperience")}
           <input name="experienceYears" type="number" min="0" defaultValue={e.experienceYears || ""} className={inputClass} />
         </label>
-        <label className={labelClass}>Phone
+        <label className={labelClass}>{t("insp.fPhone")}
           <input name="phone" defaultValue={e.phone || user?.phone || ""} placeholder="03001234567" className={inputClass} />
         </label>
-        <label className={labelClass}>WhatsApp
+        <label className={labelClass}>{t("insp.fWhatsapp")}
           <input name="whatsapp" defaultValue={e.whatsapp || ""} placeholder="03001234567" className={inputClass} />
         </label>
-        <label className={labelClass}>Email
+        <label className={labelClass}>{t("insp.fEmail")}
           <input name="email" type="email" defaultValue={e.email || user?.email || ""} className={inputClass} />
         </label>
-        <label className={labelClass}>Certifications
-          <input name="certifications" defaultValue={e.certifications || ""} placeholder="e.g. mechanical engineer, 3rd-party certified" className={inputClass} />
+        <label className={labelClass}>{t("insp.fCertifications")}
+          <input name="certifications" defaultValue={e.certifications || ""} placeholder={t("insp.certPlaceholder")} className={inputClass} />
         </label>
-        <label className={`${labelClass} sm:col-span-2`}>About you
-          <textarea name="bio" maxLength={1000} defaultValue={e.bio || ""} placeholder="Describe your inspection experience and what's included…" className="mt-2 min-h-28 w-full rounded-lg border border-[var(--hw-border-default)] bg-[var(--hw-bg-input)] p-4 text-[var(--hw-text-primary)] outline-none focus:border-[var(--hw-orange)]" />
+        <label className={`${labelClass} sm:col-span-2`}>{t("insp.fAbout")}
+          <textarea name="bio" maxLength={1000} defaultValue={e.bio || ""} placeholder={t("insp.aboutPlaceholder")} className="mt-2 min-h-28 w-full rounded-lg border border-[var(--hw-border-default)] bg-[var(--hw-bg-input)] p-4 text-[var(--hw-text-primary)] outline-none focus:border-[var(--hw-orange)]" />
         </label>
       </div>
 
       <div className="mt-5 grid gap-5 md:grid-cols-2">
-        <CheckboxGroup title="Service areas (cities)" name="serviceAreas" items={CITIES} selected={e.serviceAreas || []} />
-        <CheckboxGroup title="Vehicle specializations" name="specializations" items={VEHICLE_TYPES.slice(0, 12)} selected={e.specializations || []} />
+        <CheckboxGroup title={t("insp.serviceAreasCities")} name="serviceAreas" items={CITIES} selected={e.serviceAreas || []} lang={lang} />
+        <CheckboxGroup title={t("insp.vehicleSpecs")} name="specializations" items={VEHICLE_TYPES.slice(0, 12)} selected={e.specializations || []} lang={lang} />
       </div>
 
       <button disabled={saving} className="mt-6 h-12 w-full rounded-lg bg-[var(--hw-orange)] text-sm font-black text-[var(--hw-text-inverse)] disabled:opacity-60">
-        {saving ? "Saving…" : existing ? "Update profile" : "Submit for review"}
+        {saving ? t("form.saving") : existing ? t("insp.updateProfile") : t("insp.submitReview")}
       </button>
       {!existing ? (
-        <p className="mt-3 text-center text-xs text-[var(--hw-text-muted)]">
-          Your profile is reviewed by our team before it appears in the directory.
-        </p>
+        <p className="mt-3 text-center text-xs text-[var(--hw-text-muted)]">{t("insp.reviewNote")}</p>
       ) : null}
     </form>
   );
 }
 
-function CheckboxGroup({ title, name, items, selected }) {
+function CheckboxGroup({ title, name, items, selected, lang }) {
   const set = new Set(selected);
   return (
     <fieldset className="rounded-lg border border-[var(--hw-border-subtle)] bg-[var(--hw-bg-deep)] p-4">
@@ -158,7 +157,7 @@ function CheckboxGroup({ title, name, items, selected }) {
       <div className="mt-2 grid grid-cols-2 gap-2">
         {items.map((item) => {
           const value = typeof item === "string" ? item : item.value;
-          const label = typeof item === "string" ? titleCase(item) : item.label;
+          const label = typeof item === "string" ? cityLabel(item, lang) : typeLabel(item, lang);
           return (
             <label key={value} className="flex items-center gap-2 text-sm text-[var(--hw-text-secondary)]">
               <input type="checkbox" name={name} value={value} defaultChecked={set.has(value)} />

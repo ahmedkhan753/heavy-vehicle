@@ -117,6 +117,15 @@ textarea {
   background: var(--hw-orange);
 }
 
+/* Hidden scrollbar for the homepage browse carousels (arrows drive scrolling). */
+.hw-no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.hw-no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
 /* ── Plan banners (featured page) ──────────────────────────────
    Sleek dark glass cards with an animated neon edge. Each card sets
    its accent via the --neon custom property. */

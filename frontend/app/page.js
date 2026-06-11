@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import VehicleCard from "@/components/vehicles/VehicleCard";
 import BrandBrowse from "@/components/home/BrandBrowse";
+import CategoryBrowse from "@/components/home/CategoryBrowse";
 import { API_BASE_URL } from "@/lib/api";
 import { CITIES, VEHICLE_TYPES, fallbackImage, typeLabel, cityLabel } from "@/lib/constants";
 import { titleCase } from "@/lib/format";
@@ -86,16 +87,7 @@ export default async function HomePage() {
       <main>
         <section className="hw-section hw-container">
           <SectionHeader eyebrow={t("home.browseEyebrow")} title={t("home.browseTitle")} action={t("common.viewAll")} href="/vehicles" />
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {VEHICLE_TYPES.slice(0, 8).map((type) => (
-              <Link key={type.value} href={`/vehicles?type=${type.value}`} className="group rounded-lg border border-[var(--hw-border-default)] bg-[var(--hw-bg-card)] p-5 transition hover:-translate-y-1 hover:border-[var(--hw-orange)]">
-                <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-lg bg-[var(--hw-bg-elevated)] text-[var(--hw-orange)]">
-                  <TruckIcon />
-                </div>
-                <h3 className="text-lg font-black text-[var(--hw-text-primary)] group-hover:text-[var(--hw-orange)]">{typeLabel(type, lang)}</h3>
-              </Link>
-            ))}
-          </div>
+          <CategoryBrowse />
         </section>
 
         <section className="border-t border-[var(--hw-border-subtle)] bg-[var(--hw-bg-deep)]">
@@ -190,16 +182,5 @@ function EmptyState({ title, body, href, action }) {
       <p className="mt-2 text-[var(--hw-text-secondary)]">{body}</p>
       <Link href={href} className="mt-5 inline-flex h-11 items-center rounded-lg bg-[var(--hw-orange)] px-5 text-sm font-black text-[var(--hw-text-inverse)]">{action}</Link>
     </div>
-  );
-}
-
-function TruckIcon() {
-  return (
-    <svg className="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-      <path d="M3 8h12v8H3z" />
-      <path d="M15 11h3l3 3v2h-6z" />
-      <circle cx="7" cy="18" r="2" />
-      <circle cx="18" cy="18" r="2" />
-    </svg>
   );
 }
