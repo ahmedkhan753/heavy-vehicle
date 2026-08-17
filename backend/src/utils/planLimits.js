@@ -59,14 +59,18 @@ async function getEffectiveLimits(userId) {
 }
 
 /**
- * Count a user's live (active) listings across vehicles and parts.
+ * Count a user's live listings across vehicles and parts — i.e. ads that are
+ * actually visible on the site. "Live" means status "active" AND not past
+ * expiresAt. Deleted, sold, expired, rejected or draft ads never count, even
+ * if the 30-day deletion sweep hasn't removed them from the DB yet.
  * @param {ObjectId|string} userId
  * @returns {Promise<number>}
  */
 async function countActiveListings(userId) {
+  const now = new Date();
   const [vehicles, parts] = await Promise.all([
-    Vehicle.countDocuments({ sellerId: userId, status: "active" }),
-    Part.countDocuments({ sellerId: userId, status: "active" }),
+    Vehicle.countDocuments({ sellerId: userId, status: "active", expiresAt: { $gt: now } }),
+    Part.countDocuments({ sellerId: userId, status: "active", expiresAt: { $gt: now } }),
   ]);
   return vehicles + parts;
 }

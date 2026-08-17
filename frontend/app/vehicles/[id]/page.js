@@ -11,6 +11,7 @@ import { fallbackImage } from "@/lib/constants";
 import { formatMileage, formatPrice, titleCase, vehicleImage } from "@/lib/format";
 import { getT, getLang } from "@/lib/i18n-server";
 import TranslatedText from "@/components/ui/TranslatedText";
+import VehicleGallery from "@/components/vehicles/VehicleGallery";
 
 export const revalidate = 60;
 
@@ -108,18 +109,11 @@ export default async function VehicleDetailPage({ params }) {
 
       <div className="grid gap-8 lg:grid-cols-[1fr_360px]">
         <section>
-          <div className="overflow-hidden rounded-lg border border-[var(--hw-border-default)] bg-[var(--hw-bg-card)]">
-            <div className="relative aspect-[16/9] w-full">
-              <Image src={image} alt={vehicle.title} fill priority sizes="(max-width: 1024px) 100vw, 66vw" className="object-cover" />
-            </div>
-            <div className="grid grid-cols-4 gap-2 border-t border-[var(--hw-border-subtle)] p-3">
-              {(vehicle.images || []).slice(0, 4).map((item) => (
-                <div key={item.publicId || item.url} className="relative aspect-[16/10] overflow-hidden rounded-md">
-                  <Image src={item.url} alt="" fill sizes="(max-width: 1024px) 25vw, 180px" className="object-cover" />
-                </div>
-              ))}
-            </div>
-          </div>
+          <VehicleGallery 
+            images={vehicle.images} 
+            title={title} 
+            fallbackImage={fallbackImage} 
+          />
 
           <div className="mt-6 rounded-lg border border-[var(--hw-border-default)] bg-[var(--hw-bg-card)] p-5">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">

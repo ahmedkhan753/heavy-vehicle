@@ -1,0 +1,17 @@
+node_modules/
+.next/
+npm-debug.log*
+.env
+.env.local
+.env.production
+*.log
+logs/
+.DS_Store
+Thumbs.db
+.git/
+.gitignore
+Dockerfile
+.dockerignore
+dev-err.log
+dev-out.log
+README.md

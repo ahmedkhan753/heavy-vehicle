@@ -3,6 +3,7 @@ import Image from "next/image";
 import VehicleCard from "@/components/vehicles/VehicleCard";
 import BrandBrowse from "@/components/home/BrandBrowse";
 import CategoryBrowse from "@/components/home/CategoryBrowse";
+import PartCategoryBrowse from "@/components/home/PartCategoryBrowse";
 import { API_BASE_URL } from "@/lib/api";
 import { CITIES, VEHICLE_TYPES, fallbackImage, typeLabel, cityLabel } from "@/lib/constants";
 import { titleCase } from "@/lib/format";
@@ -73,8 +74,8 @@ export default async function HomePage() {
             <div className="grid gap-3">
               <input name="q" className="h-12 rounded-lg border border-[var(--hw-border-default)] bg-[var(--hw-bg-input)] px-4 text-sm text-[var(--hw-text-primary)] outline-none focus:border-[var(--hw-orange)]" placeholder={t("home.searchPlaceholder")} />
               <div className="grid gap-3 sm:grid-cols-2">
-                <Select name="type" label={t("filter.type")} allText={t("filter.allTypes")} options={VEHICLE_TYPES.slice(0, 8)} lang={lang} />
-                <Select name="city" label={t("filter.city")} allText={t("filter.allCities")} options={CITIES.slice(0, 8)} lang={lang} />
+                <Select name="type" label={t("filter.type")} allText={t("filter.allTypes")} options={VEHICLE_TYPES} lang={lang} />
+                <Select name="city" label={t("filter.city")} allText={t("filter.allCities")} options={CITIES} lang={lang} />
               </div>
               <button className="mt-1 h-12 rounded-lg bg-[var(--hw-green)] px-5 text-sm font-black text-[var(--hw-text-inverse)]">
                 {t("home.searchBtn")}
@@ -88,6 +89,13 @@ export default async function HomePage() {
         <section className="hw-section hw-container">
           <SectionHeader eyebrow={t("home.browseEyebrow")} title={t("home.browseTitle")} action={t("common.viewAll")} href="/vehicles" />
           <CategoryBrowse />
+        </section>
+
+        <section className="border-t border-[var(--hw-border-subtle)] bg-[var(--hw-bg-deep)]">
+          <div className="hw-section hw-container">
+            <SectionHeader eyebrow={t("home.partsEyebrow")} title={t("home.partsTitle")} action={t("common.viewAll")} href="/parts" />
+            <PartCategoryBrowse />
+          </div>
         </section>
 
         <section className="border-t border-[var(--hw-border-subtle)] bg-[var(--hw-bg-deep)]">

@@ -59,13 +59,13 @@ export default function Navbar() {
   ];
 
   return (
-    <header className="sticky top-0 z-50 border-b border-[var(--hw-border-subtle)] bg-[var(--hw-bg-overlay)] backdrop-blur-xl">
+    <header className="sticky top-0 z-50 border-b border-[var(--hw-border-subtle)] bg-[var(--hw-bg-overlay)] backdrop-blur-xl" suppressHydrationWarning={true}>
       <div className="hw-container flex h-20 items-center justify-between gap-4 md:h-24">
         <Link href="/" className="flex items-center" aria-label="HeavyWheels home">
           <BrandLogo className="h-16 w-auto md:h-20" />
         </Link>
 
-        <nav className="hidden items-center gap-1 lg:flex">
+        <nav suppressHydrationWarning className="hidden items-center gap-1 lg:flex">
           {/* New Vehicles — mega */}
           <MegaItem label={t("nav.newVehicles")} active={openMenu === "new"} onOpen={() => setOpenMenu("new")} onClose={close}>
             <MegaPanel mega={vehicleMega("new", "makes")} onNavigate={close} />
@@ -95,7 +95,7 @@ export default function Navbar() {
           <Link href="/subscription-pricings" className="rounded-lg px-3 py-2 text-sm font-semibold text-[var(--hw-text-secondary)] hover:bg-[var(--hw-soft-panel)] hover:text-[var(--hw-text-primary)]">{t("nav.pricing")}</Link>
         </nav>
 
-        <div className="hidden items-center gap-2 md:flex">
+        <div suppressHydrationWarning className="hidden items-center gap-2 md:flex">
           <LanguageToggle />
           <ThemeToggle />
           {isAuthenticated ? (

@@ -48,7 +48,10 @@ export default function DashboardHome() {
     );
   }
 
-  const activeAds = ads.filter((ad) => ad.status === "active").length;
+  // Live count comes straight from the profile endpoint (status "active" AND
+  // not expired. Deleted, sold or expired ads never count). Never fall back
+  // to user.totalAds — that's a lifetime counter and stays inflated.
+  const activeAds = profile?.activeAds ?? 0;
   const totalViews = ads.reduce((sum, ad) => sum + Number(ad.views || 0), 0);
   const isDealer = user?.role === "dealer";
   const plan = user?.plan || profile?.plan;
@@ -58,7 +61,7 @@ export default function DashboardHome() {
   const stats = [
     {
       label: t("dash.activeAds"),
-      value: activeAds || profile?.totalAds || user?.totalAds || 0,
+      value: activeAds,
       accent: "var(--hw-orange)",
       icon: <StatIcon d={<><path d="M3 7h18M3 12h18M3 17h12" /></>} />,
     },

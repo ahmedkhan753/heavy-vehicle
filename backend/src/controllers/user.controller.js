@@ -12,6 +12,7 @@
 const { validationResult } = require("express-validator");
 const User                 = require("../models/User");
 const Vehicle              = require("../models/Vehicle");
+const Part                 = require("../models/Part");
 const { uploadToCloudinary, deleteFromCloudinary } = require("../config/cloudinary");
 const { AppError }         = require("../middleware/error.middleware");
 const { env }              = require("../config/env");
@@ -35,6 +36,15 @@ async function getProfile(req, res, next) {
 
     if (!user) return next(new AppError("User not found.", 404));
 
+    // Live count of listings actually visible on the site (status "active"
+    // AND not past expiresAt). Deleted, sold, expired or pending ads never
+    // count — unlike totalAds, which is a lifetime counter.
+    const now = new Date();
+    const [activeVehicles, activeParts] = await Promise.all([
+      Vehicle.countDocuments({ sellerId: user._id, status: "active", expiresAt: { $gt: now } }),
+      Part.countDocuments({ sellerId: user._id, status: "active", expiresAt: { $gt: now } }),
+    ]);
+
     respond(res, 200, {
       _id:              user._id,
       name:             user.name,
@@ -48,7 +58,11 @@ async function getProfile(req, res, next) {
       isEmailVerified:  user.isEmailVerified,
       isPhoneVerified:  user.isPhoneVerified,
       totalAds:         user.totalAds,
+      activeAds:        activeVehicles + activeParts,
       savedAds:         user.savedAds,
+      bio:              user.bio,
+      whatsapp:         user.whatsapp,
+      links:            user.links,
       createdAt:        user.createdAt,
     });
   } catch (err) {
@@ -73,13 +87,21 @@ async function updateProfile(req, res, next) {
     }
 
     // Only allow updating these fields
-    const ALLOWED_UPDATES = ["name", "city", "address"];
+    const ALLOWED_UPDATES = ["name", "city", "address", "bio", "whatsapp", "links"];
     const updates = {};
     ALLOWED_UPDATES.forEach((field) => {
       if (req.body[field] !== undefined) {
-        updates[field] = typeof req.body[field] === "string"
-          ? req.body[field].trim()
-          : req.body[field];
+        if (field === "links" && typeof req.body[field] === "string") {
+          try {
+            updates[field] = JSON.parse(req.body[field]);
+          } catch {
+            updates[field] = [req.body[field]]; // fallback to single item array
+          }
+        } else {
+          updates[field] = typeof req.body[field] === "string"
+            ? req.body[field].trim()
+            : req.body[field];
+        }
       }
     });
 
@@ -121,6 +143,9 @@ async function updateProfile(req, res, next) {
       city:    user.city,
       address: user.address,
       avatar:  user.avatar,
+      bio:     user.bio,
+      whatsapp:user.whatsapp,
+      links:   user.links,
       role:    user.role,
     }, "Profile updated successfully");
 

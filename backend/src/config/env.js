@@ -97,6 +97,10 @@ module.exports = {
     RATE_LIMIT_MAX_REQUESTS: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 100,
     AUTH_RATE_LIMIT_MAX:     parseInt(process.env.AUTH_RATE_LIMIT_MAX)     || 10,
 
+    // Google OAuth (optional — button stays hidden when unset)
+    GOOGLE_CLIENT_ID:     process.env.GOOGLE_CLIENT_ID || "",
+    GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET || "",
+
     // Admin
     ADMIN_EMAIL:    process.env.ADMIN_EMAIL,
     ADMIN_PASSWORD: process.env.ADMIN_PASSWORD,

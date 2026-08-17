@@ -8,11 +8,12 @@ import { useToast } from "@/Context/ToastContext";
 import { useLanguage } from "@/Context/LanguageContext";
 import { LANGUAGES } from "@/lib/i18n";
 import { normalizeApiError } from "@/lib/api";
+import { GoogleLogin } from "@react-oauth/google";
 
 export default function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { login } = useAuth();
+  const { login, googleLogin } = useAuth();
   const toast = useToast();
   const { t, lang, setLang } = useLanguage();
   const [loading, setLoading] = useState(false);
@@ -74,7 +75,40 @@ export default function LoginForm() {
         </div>
       ) : null}
 
-      <form onSubmit={submit} className="mt-6 grid gap-4">
+      <div className="mt-6 flex flex-col gap-4">
+        <GoogleLogin
+          onSuccess={async (credentialResponse) => {
+            try {
+              setLoading(true);
+              setError("");
+              await googleLogin(credentialResponse.credential);
+              toast.success("Logged in with Google successfully");
+              router.push(searchParams.get("redirect") || "/dashboard");
+            } catch (err) {
+              setError(normalizeApiError(err.payload || err));
+              setLoading(false);
+            }
+          }}
+          onError={() => {
+            setError("Google Login Failed");
+          }}
+          theme="filled_black"
+          size="large"
+          text="continue_with"
+        />
+        <div className="relative my-2">
+          <div className="absolute inset-0 flex items-center">
+            <span className="w-full border-t border-[var(--hw-border-subtle)]" />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-[var(--hw-bg-card)] px-2 text-[var(--hw-text-muted)]">
+              Or continue with email
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <form onSubmit={submit} className="mt-4 grid gap-4">
         <label className="text-sm font-bold text-[var(--hw-text-secondary)]">
           {t("auth.email")}
           <input name="email" type="email" required className="mt-2 h-12 w-full rounded-lg border border-[var(--hw-border-default)] bg-[var(--hw-bg-input)] px-4 text-[var(--hw-text-primary)] outline-none focus:border-[var(--hw-orange)]" placeholder="seller@example.com" />

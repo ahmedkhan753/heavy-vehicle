@@ -301,6 +301,11 @@ async function deletePart(req, res, next) {
     }
 
     await part.deleteOne();
+
+    // Keep the lifetime counter consistent with vehicle deletion so both
+    // listing types behave the same.
+    await User.findByIdAndUpdate(part.sellerId, { $inc: { totalAds: -1 } });
+
     res.status(200).json({ success: true, message: "Part listing deleted successfully", data: null });
   } catch (err) {
     next(err);

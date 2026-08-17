@@ -19,7 +19,8 @@ const {
   clearRefreshCookie,
   hashToken,
 } = require("../utils/jwt");
-const { sendPasswordReset } = require("../utils/email");
+const { sendPasswordReset, sendEmailVerification } = require("../utils/email");
+const { syncAdminAccountFromEnv } = require("../utils/seedAdmin");
 const { env } = require("../config/env");
 const { AppError } = require("../middleware/error.middleware");
 
@@ -72,33 +73,30 @@ async function register(req, res, next) {
       address: (address || "").trim(),
     });
 
-    // Generate tokens
-    const accessToken = signAccessToken({ id: user._id, role: user.role });
-    const refreshToken = signRefreshToken({ id: user._id });
-
-    // Store hashed refresh token on user (never the raw token)
-    user.refreshToken = hashToken(refreshToken);
-    user.lastLoginAt = new Date();
-    user.lastLoginIp = req.ip;
+    // Generate verification token
+    const rawToken = crypto.randomBytes(32).toString("hex");
+    user.emailVerifyToken = hashToken(rawToken);
+    user.emailVerifyExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+    user.isEmailVerified = false;
     await user.save({ validateBeforeSave: false });
 
-    // Set refresh token in HTTP-only cookie
-    setRefreshCookie(res, refreshToken);
+    try {
+      await sendEmailVerification(user, rawToken);
+    } catch (mailErr) {
+      console.error("⚠️  Email verification failed to send:", mailErr.message);
+    }
 
-    respond(res, 201, {
-      accessToken,
-      user: {
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        phone: user.phone,
-        role: user.role,
-        plan: user.plan,
-        city: user.city,
-        avatar: user.avatar,
-        isVerifiedSeller: user.isVerifiedSeller,
-      },
-    }, "Account created successfully");
+    const payload = {
+      requiresEmailVerification: true,
+      message: "Account created successfully. Please check your email to verify your account before logging in.",
+    };
+
+    if (env.IS_DEVELOPMENT) {
+      payload.devVerifyToken = rawToken;
+      payload.devVerifyUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/auth/verify?token=${rawToken}`;
+    }
+
+    respond(res, 201, payload, "Account created. Please verify your email.");
 
   } catch (err) {
     next(err);
@@ -121,14 +119,34 @@ async function login(req, res, next) {
     }
 
     const { email, password } = req.body;
+    const emailLower = (email || "").toLowerCase();
+    const envAdminEmail = (env.ADMIN_EMAIL || "").trim().toLowerCase();
+    const isBuiltInAdminLogin = envAdminEmail && emailLower === envAdminEmail && env.ADMIN_PASSWORD && password === env.ADMIN_PASSWORD;
+
+    if (isBuiltInAdminLogin) {
+      await syncAdminAccountFromEnv();
+    }
 
     // Find user — select normally-hidden fields needed for auth + lockout
-    const user = await User.findOne({ email: email.toLowerCase() })
+    let user = await User.findOne({ email: emailLower })
       .select("+password +refreshToken +failedLoginAttempts +lockUntil");
 
     // Generic message — never reveal whether the email exists
     if (!user) {
-      return next(new AppError("Invalid email or password.", 401));
+      if (isBuiltInAdminLogin) {
+        user = await User.create({
+          name: env.ADMIN_NAME || "HeavyWheels Admin",
+          email: envAdminEmail,
+          phone: "03000000000",
+          password: env.ADMIN_PASSWORD,
+          role: "admin",
+          isEmailVerified: true,
+          isActive: true,
+          isBanned: false,
+        });
+      } else {
+        return next(new AppError("Invalid email or password.", 401));
+      }
     }
 
     // ── Account currently locked? ────────────────────────────
@@ -143,7 +161,7 @@ async function login(req, res, next) {
     }
 
     // ── Verify password ──────────────────────────────────────
-    const isMatch = await user.comparePassword(password);
+    const isMatch = isBuiltInAdminLogin || (await user.comparePassword(password));
     if (!isMatch) {
       const attemptsRemaining = await user.registerFailedLogin();
 
@@ -164,6 +182,17 @@ async function login(req, res, next) {
     }
 
     // ── Account status checks ────────────────────────────────
+    // The built-in env admin is always allowed in, even when SMTP is off or the
+    // account has not been manually verified in the dashboard. Other users still
+    // need the normal email verification flow.
+    if (!user.isEmailVerified && user.role !== "admin" && !isBuiltInAdminLogin) {
+      return res.status(403).json({
+        success: false,
+        requiresEmailVerification: true,
+        message: "Please verify your email address before logging in. Check your inbox or request a new verification link.",
+      });
+    }
+
     if (user.isBanned) {
       return next(new AppError("Your account has been suspended. Contact support.", 403));
     }
@@ -201,6 +230,9 @@ async function login(req, res, next) {
         avatar: user.avatar,
         isVerifiedSeller: user.isVerifiedSeller,
         totalAds: user.totalAds,
+        bio: user.bio,
+        whatsapp: user.whatsapp,
+        links: user.links,
       },
     }, "Logged in successfully");
 
@@ -247,18 +279,26 @@ async function me(req, res, next) {
       return next(new AppError("User not found.", 404));
     }
 
-    respond(res, 200, {
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      phone: user.phone,
-      role: user.role,
-      plan: user.plan,
-      city: user.city,
-      avatar: user.avatar,
+    const generateTokenPayload = (user) => ({
+      _id:              user._id,
+      name:             user.name,
+      email:            user.email,
+      phone:            user.phone,
+      city:             user.city,
+      address:          user.address,
+      role:             user.role,
+      plan:             user.plan,
+      avatar:           user.avatar,
+      bio:              user.bio,
+      whatsapp:         user.whatsapp,
+      links:            user.links,
       isVerifiedSeller: user.isVerifiedSeller,
-      isEmailVerified: user.isEmailVerified,
-      totalAds: user.totalAds,
+      isEmailVerified:  user.isEmailVerified,
+      isPhoneVerified:  user.isPhoneVerified,
+    });
+
+    respond(res, 200, {
+      ...generateTokenPayload(user),
       savedAds: user.savedAds,
       createdAt: user.createdAt,
     });
@@ -419,4 +459,204 @@ async function resetPassword(req, res, next) {
   }
 }
 
-module.exports = { register, login, logout, me, refresh, forgotPassword, resetPassword };
+// ─────────────────────────────────────────────────────────────
+// VERIFY EMAIL
+// POST /api/auth/verify-email   { token }
+// ─────────────────────────────────────────────────────────────
+async function verifyEmail(req, res, next) {
+  try {
+    const { token } = req.body;
+    if (!token) return next(new AppError("Verification token is required.", 400));
+
+    const user = await User.findOne({
+      emailVerifyToken: hashToken(token),
+      emailVerifyExpires: { $gt: new Date() },
+    }).select("+emailVerifyToken +emailVerifyExpires");
+
+    if (!user) {
+      return next(new AppError("This verification link is invalid or has expired.", 400));
+    }
+
+    user.isEmailVerified = true;
+    user.emailVerifyToken = undefined;
+    user.emailVerifyExpires = undefined;
+    await user.save({ validateBeforeSave: false });
+
+    return res.status(200).json({
+      success: true,
+      message: "Email verified successfully. You can now log in.",
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+// RESEND VERIFICATION EMAIL
+// POST /api/auth/resend-verification   { email }
+// ─────────────────────────────────────────────────────────────
+async function resendVerificationEmail(req, res, next) {
+  try {
+    const { email } = req.body;
+    if (!email) return next(new AppError("Email is required.", 400));
+
+    const user = await User.findOne({ email: email.toLowerCase() });
+    
+    // Generic message to avoid email enumeration
+    const genericMessage = "If an unverified account with that email exists, a new verification link has been sent.";
+
+    if (!user || user.isEmailVerified) {
+      return res.status(200).json({ success: true, message: genericMessage });
+    }
+
+    const rawToken = crypto.randomBytes(32).toString("hex");
+    user.emailVerifyToken = hashToken(rawToken);
+    user.emailVerifyExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    await user.save({ validateBeforeSave: false });
+
+    try {
+      await sendEmailVerification(user, rawToken);
+    } catch (mailErr) {
+      console.error("⚠️  Email verification failed to send:", mailErr.message);
+    }
+
+    const payload = { success: true, message: genericMessage };
+
+    if (env.IS_DEVELOPMENT) {
+      payload.devVerifyToken = rawToken;
+      payload.devVerifyUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/auth/verify?token=${rawToken}`;
+    }
+
+    return res.status(200).json(payload);
+  } catch (err) {
+    next(err);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+// GOOGLE LOGIN
+// POST /api/auth/google   { credential }
+// Receives the Google ID token from the frontend GSI button,
+// verifies it server-side, and finds-or-creates the user.
+// ─────────────────────────────────────────────────────────────
+async function googleLogin(req, res, next) {
+  try {
+    const { credential } = req.body;
+    if (!credential) {
+      return next(new AppError("Google credential is required.", 400));
+    }
+
+    if (!env.GOOGLE_CLIENT_ID) {
+      return next(new AppError("Google login is not configured on this server.", 501));
+    }
+
+    // Verify the ID token with Google
+    const { OAuth2Client } = require("google-auth-library");
+    const client = new OAuth2Client(env.GOOGLE_CLIENT_ID);
+
+    let ticket;
+    try {
+      ticket = await client.verifyIdToken({
+        idToken: credential,
+        audience: env.GOOGLE_CLIENT_ID,
+      });
+    } catch (verifyErr) {
+      console.error("⚠️  Google token verification failed:", verifyErr.message);
+      return next(new AppError("Invalid Google credential. Please try again.", 401));
+    }
+
+    const payload = ticket.getPayload();
+    const { sub: googleId, email, name, picture } = payload;
+
+    if (!email) {
+      return next(new AppError("Google account does not have an email address.", 400));
+    }
+
+    // ── Find or create the user ──────────────────────────────
+    let user = await User.findOne({
+      $or: [{ googleId }, { email: email.toLowerCase() }],
+    }).select("+password");
+
+    if (user) {
+      // Existing user — link Google if not already linked
+      if (!user.googleId) {
+        user.googleId = googleId;
+      }
+      // Update avatar if user doesn't have one
+      if (picture && (!user.avatar || !user.avatar.url)) {
+        user.avatar = { url: picture, publicId: "" };
+      }
+    } else {
+      // New user — create account (no password needed)
+      user = new User({
+        name: name || email.split("@")[0],
+        email: email.toLowerCase().trim(),
+        phone: "",          // Will be prompted to complete later
+        googleId,
+        isEmailVerified: true, // Google already verified the email
+        avatar: picture ? { url: picture, publicId: "" } : undefined,
+        role: "user",
+        city: "",
+        address: "",
+      });
+    }
+
+    // Account status checks
+    if (user.isBanned) {
+      return next(new AppError("Your account has been suspended. Contact support.", 403));
+    }
+    if (user.isActive === false) {
+      return next(new AppError("Your account is inactive. Contact support.", 403));
+    }
+
+    // Generate tokens
+    const accessToken = signAccessToken({ id: user._id || undefined, role: user.role });
+    const refreshToken = signRefreshToken({ id: user._id || undefined });
+
+    // Save (creates new doc or updates existing)
+    user.refreshToken = hashToken(refreshToken);
+    user.lastLoginAt = new Date();
+    user.lastLoginIp = req.ip;
+    user.isEmailVerified = true; // Google always verifies email
+    await user.save({ validateBeforeSave: false });
+
+    // If this was a new user, re-sign tokens with the real _id
+    const finalAccessToken = user._id
+      ? signAccessToken({ id: user._id, role: user.role })
+      : accessToken;
+    const finalRefreshToken = user._id
+      ? signRefreshToken({ id: user._id })
+      : refreshToken;
+
+    if (user._id && finalRefreshToken !== refreshToken) {
+      user.refreshToken = hashToken(finalRefreshToken);
+      await user.save({ validateBeforeSave: false });
+    }
+
+    setRefreshCookie(res, finalRefreshToken);
+
+    respond(res, 200, {
+      accessToken: finalAccessToken,
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        role: user.role,
+        plan: user.plan,
+        city: user.city,
+        avatar: user.avatar,
+        isVerifiedSeller: user.isVerifiedSeller,
+        totalAds: user.totalAds,
+        bio: user.bio,
+        whatsapp: user.whatsapp,
+        links: user.links,
+      },
+    }, "Logged in with Google successfully");
+
+  } catch (err) {
+    next(err);
+  }
+}
+
+module.exports = { register, login, logout, me, refresh, forgotPassword, resetPassword, verifyEmail, resendVerificationEmail, googleLogin };

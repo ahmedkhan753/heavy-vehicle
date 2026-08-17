@@ -85,6 +85,7 @@ export async function safeApiRequest(endpoint, options = {}) {
 export const authApi = {
   register: (body) => apiRequest("/auth/register", { method: "POST", body: JSON.stringify(body) }),
   login: (body) => apiRequest("/auth/login", { method: "POST", body: JSON.stringify(body) }),
+  google: (credential) => apiRequest("/auth/google", { method: "POST", body: JSON.stringify({ credential }) }),
   logout: () => apiRequest("/auth/logout", { method: "POST" }),
   me: () => apiRequest("/auth/me"),
   forgotPassword: (body) => apiRequest("/auth/forgot-password", { method: "POST", body: JSON.stringify(body) }),
@@ -132,7 +133,10 @@ export const uploadApi = {
 
 export const userApi = {
   profile: () => apiRequest("/users/profile"),
-  updateProfile: (body) => apiRequest("/users/profile", { method: "PUT", body: JSON.stringify(body) }),
+  updateProfile: (body) => {
+    const isFormData = typeof FormData !== "undefined" && body instanceof FormData;
+    return apiRequest("/users/profile", { method: "PUT", body: isFormData ? body : JSON.stringify(body) });
+  },
   saved: () => apiRequest("/users/saved"),
   savedAds: () => apiRequest("/users/saved"),
   saveAd: (vehicleId) => apiRequest(`/users/saved/${vehicleId}`, { method: "POST" }),
@@ -142,6 +146,10 @@ export const userApi = {
 export const metaApi = {
   // Distinct makes/cities from real listings (merged with static seeds client-side).
   filters: () => apiRequest("/meta/filters"),
+};
+
+export const assistantApi = {
+  chat: (body) => apiRequest("/assistant/chat", { method: "POST", body: JSON.stringify(body) }),
 };
 
 export const dealerApi = {

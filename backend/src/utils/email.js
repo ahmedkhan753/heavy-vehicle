@@ -50,6 +50,37 @@ async function sendEmail({ to, subject, html, text }) {
 }
 
 /**
+ * Email verification
+ */
+async function sendEmailVerification(user, token) {
+  const verifyUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/auth/verify?token=${token}`;
+
+  await sendEmail({
+    to:      user.email,
+    subject: "Verify your email - HeavyWheels Pakistan",
+    html: `
+      <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;background:#f4f6f9;padding:24px;border-radius:12px;">
+        <div style="background:#070b14;border-radius:10px;padding:24px;text-align:center;margin-bottom:20px;">
+          <h1 style="color:#f97316;font-size:28px;margin:0;letter-spacing:2px;">🚛 HEAVYWHEELS</h1>
+        </div>
+        <div style="background:#fff;border-radius:10px;padding:28px;">
+          <h2 style="color:#1a1f2e;margin-top:0;">Verify Your Email</h2>
+          <p style="color:#475569;line-height:1.7;">
+            Hi ${user.name}, please click the button below to verify your email address. This link is valid for 24 hours.
+          </p>
+          <a href="${verifyUrl}" style="display:inline-block;background:#f97316;color:#fff;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:700;margin-top:16px;">
+            Verify Email
+          </a>
+          <p style="color:#94a3b8;font-size:13px;margin-top:24px;">
+            If you did not create an account, you can safely ignore this email.
+          </p>
+        </div>
+      </div>
+    `,
+  });
+}
+
+/**
  * Welcome email after registration
  */
 async function sendWelcome(user) {
@@ -270,6 +301,7 @@ async function sendPartnershipLead(lead) {
 module.exports = {
   sendEmail,
   sendWelcome,
+  sendEmailVerification,
   sendPasswordReset,
   sendAdPosted,
   sendRenewalReminder,

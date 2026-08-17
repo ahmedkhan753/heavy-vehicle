@@ -6,6 +6,7 @@ import { LanguageProvider } from "@/Context/LanguageContext";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import MobileNav from "@/components/layout/MobileNav";
+import HeavyWheelsAssistant from "@/components/assistant/HeavyWheelsAssistant";
 import { getLang } from "@/lib/i18n-server";
 
 export const metadata = {
@@ -21,10 +22,10 @@ export default async function RootLayout({ children }) {
   const dir = lang === "ur" ? "rtl" : "ltr";
 
   return (
-    <html lang={lang} dir={dir}>
+    <html lang={lang} dir={dir} suppressHydrationWarning>
       {/* pb-16 reserves space for the fixed mobile bottom nav (h-16) so the
           footer isn't hidden behind it; removed at lg where the bar is hidden. */}
-      <body className="min-h-screen flex flex-col bg-[var(--hw-bg-base)] text-[var(--hw-text-primary)] antialiased font-sans pb-16 lg:pb-0">
+      <body suppressHydrationWarning className="min-h-screen flex flex-col bg-[var(--hw-bg-base)] text-[var(--hw-text-primary)] antialiased font-sans pb-16 lg:pb-0">
 
         <ToastProvider>
           <ThemeProvider>
@@ -34,6 +35,7 @@ export default async function RootLayout({ children }) {
                 {children}
                 <Footer />
                 <MobileNav />
+                <HeavyWheelsAssistant />
               </AuthProvider>
             </LanguageProvider>
           </ThemeProvider>

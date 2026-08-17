@@ -43,8 +43,10 @@ const inspectorRoutes    = require("./routes/inspector.routes");
 const chatRoutes         = require("./routes/chat.routes");
 const commentRoutes      = require("./routes/comment.routes");
 const paymentRoutes      = require("./routes/payment.routes");
+const assistantRoutes    = require("./routes/assistant.routes");
 
 const { startSubscriptionMaintenance } = require("./utils/subscriptionMaintenance");
+const { syncAdminAccountFromEnv } = require("./utils/seedAdmin");
 
 // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // 1. VALIDATE ENVIRONMENT
@@ -55,6 +57,12 @@ validateEnv();
 // 2. CONNECT DATABASE
 // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 connectDB();
+
+// Ensure the built-in admin user exists/has the correct privileges as soon as the
+// database is connected, without requiring a manual seed step or email verification.
+syncAdminAccountFromEnv().catch((err) => {
+  console.error("⚠️ Failed to sync built-in admin account:", err.message);
+});
 
 // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // 3. CREATE EXPRESS APP
@@ -161,6 +169,7 @@ app.use("/api/service-requests", serviceRequestRoutes);
 app.use("/api/inspectors", inspectorRoutes);
 app.use("/api/chat", chatRoutes);
 app.use("/api/comments", commentRoutes);
+app.use("/api/assistant", assistantRoutes);
 
 // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // 9. HANDLE 404 â€” Route not found

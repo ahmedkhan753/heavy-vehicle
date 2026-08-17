@@ -38,9 +38,17 @@ const userSchema = new mongoose.Schema(
 
     password: {
       type: String,
-      required: [true, "Password is required"],
       minlength: [8, "Password must be at least 8 characters"],
       select: false, // Never returned in queries by default
+      // Not required — Google OAuth users don't have a password.
+      // Enforced conditionally in the pre-validate hook below.
+    },
+
+    // ── Google OAuth ────────────────────────────────────────
+    googleId: {
+      type: String,
+      sparse: true,
+      unique: true,
     },
 
     // ── Profile ─────────────────────────────────────────────
@@ -60,6 +68,24 @@ const userSchema = new mongoose.Schema(
       trim: true,
       maxlength: [200, "Address cannot exceed 200 characters"],
       default: "",
+    },
+
+    bio: {
+      type: String,
+      trim: true,
+      maxlength: [500, "Bio cannot exceed 500 characters"],
+      default: "",
+    },
+
+    whatsapp: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+
+    links: {
+      type: [String],
+      default: [],
     },
 
     role: {
@@ -175,6 +201,7 @@ const userSchema = new mongoose.Schema(
 // declaring them again here would trigger Mongoose "duplicate index" warnings.
 userSchema.index({ role: 1 });
 userSchema.index({ createdAt: -1 });
+userSchema.index({ googleId: 1 }, { sparse: true });
 
 // ── BRUTE-FORCE LOCKOUT CONFIG ───────────────────────────────
 const MAX_LOGIN_ATTEMPTS = 5;
@@ -193,12 +220,19 @@ userSchema.virtual("isLocked").get(function () {
   return Boolean(this.lockUntil && this.lockUntil.getTime() > Date.now());
 });
 
+// ── PRE-VALIDATE: Require password unless Google-linked ──────
+userSchema.pre("validate", function () {
+  if (!this.googleId && !this.password) {
+    this.invalidate("password", "Password is required");
+  }
+});
+
 // ── PRE-SAVE: Hash password before saving ────────────────────
 // NOTE: async pre hooks in Mongoose v9 are NOT passed a `next` callback —
 // just await/return (or throw). Calling next() here threw "next is not a function".
 userSchema.pre("save", async function () {
   // Only hash if password has been modified
-  if (!this.isModified("password")) return;
+  if (!this.isModified("password") || !this.password) return;
 
   // Defensive guard against double-hashing: if the current value is already a
   // bcrypt hash (e.g. an already-hashed value got reassigned and marked dirty),
@@ -257,6 +291,9 @@ userSchema.methods.getPublicProfile = function () {
     isVerifiedSeller: this.isVerifiedSeller,
     totalAds: this.totalAds,
     memberSince: this.memberSince,
+    bio: this.bio,
+    whatsapp: this.whatsapp,
+    links: this.links,
     createdAt: this.createdAt,
   };
 };

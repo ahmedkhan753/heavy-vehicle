@@ -73,7 +73,7 @@ async function list(req, res, next) {
 async function getById(req, res, next) {
   try {
     const vehicle = await Vehicle.findById(req.params.id)
-      .populate("sellerId", "name phone city avatar isVerifiedSeller totalAds createdAt")
+      .populate("sellerId", "name phone city avatar isVerifiedSeller totalAds createdAt bio whatsapp links plan")
       .lean();
 
     if (!vehicle) {
@@ -286,7 +286,7 @@ async function create(req, res, next) {
       seller: {
         name: seller.name,
         phone: seller.phone,
-        whatsapp: seller.phone,
+        whatsapp: seller.whatsapp || seller.phone,
         city: seller.city,
         verified: seller.isVerifiedSeller,
         warranty: sellerHasWarranty,
@@ -294,6 +294,8 @@ async function create(req, res, next) {
         memberSince: seller.createdAt?.getFullYear(),
         avatar: seller.avatar?.url || "",
         plan: limits.planKey,
+        bio: seller.bio || "",
+        links: seller.links || [],
       },
       // Record the seller's commission agreement for this listing.
       // Rate is the seller's effective plan rate (Elite Pro pays a reduced

@@ -11,7 +11,7 @@ const express      = require("express");
 const rateLimit    = require("express-rate-limit");
 const { body }     = require("express-validator");
 const {
-  register, login, logout, me, refresh, forgotPassword, resetPassword,
+  register, login, logout, me, refresh, forgotPassword, resetPassword, verifyEmail, resendVerificationEmail, googleLogin
 } = require("../controllers/auth.controller");
 const { protect }  = require("../middleware/auth.middleware");
 const { env }      = require("../config/env");
@@ -102,10 +102,13 @@ const resetPasswordValidation = [
 
 // ── Routes ────────────────────────────────────────────────────
 
-router.post("/register",        authLimiter, registerValidation,       register);
-router.post("/login",           authLimiter, loginValidation,          login);
-router.post("/forgot-password", authLimiter, forgotPasswordValidation, forgotPassword);
-router.post("/reset-password",  authLimiter, resetPasswordValidation,  resetPassword);
+router.post("/register",             authLimiter, registerValidation,       register);
+router.post("/login",                authLimiter, loginValidation,          login);
+router.post("/google",               authLimiter,                           googleLogin);
+router.post("/forgot-password",      authLimiter, forgotPasswordValidation, forgotPassword);
+router.post("/reset-password",       authLimiter, resetPasswordValidation,  resetPassword);
+router.post("/verify-email",         authLimiter,                           verifyEmail);
+router.post("/resend-verification",  authLimiter,                           resendVerificationEmail);
 router.post("/logout",          protect,                               logout);
 router.get( "/me",              protect,                               me);
 router.post("/refresh",                                                refresh);

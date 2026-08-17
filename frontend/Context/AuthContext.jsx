@@ -3,6 +3,8 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { authApi, setStoredToken, getStoredToken, normalizeApiError } from "@/lib/api";
 
+import { GoogleOAuthProvider } from "@react-oauth/google";
+
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
@@ -46,6 +48,14 @@ export function AuthProvider({ children }) {
     return response;
   }
 
+  async function googleLogin(credential) {
+    const response = await authApi.google(credential);
+    setStoredToken(response.data.accessToken);
+    setToken(response.data.accessToken);
+    setUser(response.data.user);
+    return response;
+  }
+
   async function register(payload) {
     const response = await authApi.register(payload);
     setStoredToken(response.data.accessToken);
@@ -72,6 +82,7 @@ export function AuthProvider({ children }) {
       loading,
       isAuthenticated: Boolean(user && token),
       login,
+      googleLogin,
       register,
       logout,
       setUser,
@@ -80,7 +91,11 @@ export function AuthProvider({ children }) {
     [user, token, loading]
   );
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "466794030994-2j835aan28mjnk9t10mdi9kakqaaspsr.apps.googleusercontent.com"}>
+      <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+    </GoogleOAuthProvider>
+  );
 }
 
 export function useAuth() {
