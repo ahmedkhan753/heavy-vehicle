@@ -39,10 +39,27 @@ export function normalizeApiError(error) {
   return "Something went wrong. Please try again.";
 }
 
-export async function apiRequest(endpoint, options = {}) {
-  const token = getStoredToken();
-  const isFormData = options.body instanceof FormData;
+let refreshPromise = null;
 
+async function callRefreshEndpoint() {
+  const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
+    method: "POST",
+    credentials: "include",
+  });
+  if (!response.ok) {
+    throw new Error("refresh_failed");
+  }
+  const payload = await response.json();
+  const newToken = payload?.data?.accessToken || payload?.accessToken;
+  if (!newToken) {
+    throw new Error("refresh_failed");
+  }
+  setStoredToken(newToken);
+  return newToken;
+}
+
+async function performFetch(endpoint, options, token) {
+  const isFormData = options.body instanceof FormData;
   const response = await fetch(`${API_BASE_URL}${endpoint}`, {
     ...options,
     credentials: "include",
@@ -52,9 +69,30 @@ export async function apiRequest(endpoint, options = {}) {
       ...(options.headers || {}),
     },
   });
-
   const contentType = response.headers.get("content-type") || "";
   const payload = contentType.includes("application/json") ? await response.json() : null;
+  return { response, payload };
+}
+
+export async function apiRequest(endpoint, options = {}) {
+  const token = getStoredToken();
+  let { response, payload } = await performFetch(endpoint, options, token);
+
+  // Access token expired -> try ONE silent refresh, then retry the original request.
+  if (response.status === 401 && endpoint !== "/auth/refresh" && endpoint !== "/auth/login") {
+    try {
+      if (!refreshPromise) {
+        refreshPromise = callRefreshEndpoint().finally(() => {
+          refreshPromise = null;
+        });
+      }
+      const newToken = await refreshPromise;
+      ({ response, payload } = await performFetch(endpoint, options, newToken));
+    } catch {
+      setStoredToken("");
+      // fall through — the original 401 response/payload will be thrown below
+    }
+  }
 
   if (!response.ok) {
     throw {

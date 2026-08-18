@@ -185,13 +185,13 @@ async function login(req, res, next) {
     // The built-in env admin is always allowed in, even when SMTP is off or the
     // account has not been manually verified in the dashboard. Other users still
     // need the normal email verification flow.
-    if (!user.isEmailVerified && user.role !== "admin" && !isBuiltInAdminLogin) {
-      return res.status(403).json({
-        success: false,
-        requiresEmailVerification: true,
-        message: "Please verify your email address before logging in. Check your inbox or request a new verification link.",
-      });
-    }
+//    if (!user.isEmailVerified && user.role !== "admin" && !isBuiltInAdminLogin) {
+  //    return res.status(403).json({
+    //    success: false,
+      //  requiresEmailVerification: true,
+      //  message: "Please verify your email address before logging in. Check your inbox or request a new verification link.",
+     // });
+   // }
 
     if (user.isBanned) {
       return next(new AppError("Your account has been suspended. Contact support.", 403));
