@@ -113,9 +113,23 @@ export default function Navbar() {
           <Link href="/post-ad"><Button size="sm">{t("nav.postAd")}</Button></Link>
         </div>
 
+        {/* Always visible below md — language/theme stay reachable without opening the menu */}
+        <div className="flex items-center gap-1.5 md:hidden">
+          <LanguageToggle />
+          <ThemeToggle />
+          <button
+            type="button"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--hw-border-default)] text-[var(--hw-text-primary)]"
+            aria-label="Open menu"
+            onClick={() => setMobileOpen((v) => !v)}
+          >
+            <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
+          </button>
+        </div>
+
         <button
           type="button"
-          className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-[var(--hw-border-default)] text-[var(--hw-text-primary)] lg:hidden"
+          className="hidden h-10 w-10 items-center justify-center rounded-lg border border-[var(--hw-border-default)] text-[var(--hw-text-primary)] md:inline-flex lg:hidden"
           aria-label="Open menu"
           onClick={() => setMobileOpen((v) => !v)}
         >
@@ -139,11 +153,12 @@ export default function Navbar() {
                 <span>{label}</span>
               </Link>
             ))}
+            {isAuthenticated && user?.role === "admin" ? (
+              <Link href="/admin" onClick={() => setMobileOpen(false)} className="flex items-center justify-between rounded-lg border border-[var(--hw-orange)] bg-[var(--hw-soft-panel)] px-3 py-3 text-sm font-bold text-[var(--hw-orange)]">
+                <span>Admin Dashboard</span>
+              </Link>
+            ) : null}
             <Link href="/post-ad" onClick={() => setMobileOpen(false)}><Button className="w-full">{t("nav.postFreeAd")}</Button></Link>
-            <div className="flex items-center gap-2">
-              <LanguageToggle className="flex-1" />
-              <ThemeToggle />
-            </div>
             {isAuthenticated ? (
               <button onClick={() => { logout(); setMobileOpen(false); }} className="h-11 rounded-lg border border-[var(--hw-border-default)] text-sm font-bold text-[var(--hw-text-primary)]">{t("nav.logout")}</button>
             ) : (

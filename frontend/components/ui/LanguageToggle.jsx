@@ -10,7 +10,7 @@ export default function LanguageToggle({ className = "" }) {
     <button
       type="button"
       onClick={toggleLang}
-      className={`inline-flex h-9 items-center gap-2 rounded-lg border border-[var(--hw-border-default)] bg-[var(--hw-soft-panel)] px-3 text-xs font-black text-[var(--hw-text-secondary)] hover:border-[var(--hw-orange)] hover:text-[var(--hw-text-primary)] ${className}`}
+      className={`inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-[var(--hw-border-default)] bg-[var(--hw-soft-panel)] px-2 text-xs font-black text-[var(--hw-text-secondary)] hover:border-[var(--hw-orange)] hover:text-[var(--hw-text-primary)] sm:px-3 ${className}`}
       aria-label="Switch language"
       title={isUrdu ? "Switch to English" : "اردو میں دیکھیں"}
     >
@@ -20,7 +20,7 @@ export default function LanguageToggle({ className = "" }) {
           <path d="M3 12h18M12 3c2.5 2.7 2.5 15.3 0 18M12 3c-2.5 2.7-2.5 15.3 0 18" />
         </svg>
       </span>
-      {isUrdu ? "English" : "اردو"}
+      <span className="hidden sm:inline">{isUrdu ? "English" : "اردو"}</span>
     </button>
   );
 }

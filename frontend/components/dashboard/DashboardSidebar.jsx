@@ -56,7 +56,7 @@ export default function DashboardSidebar() {
   const initial = (user?.name || "?").trim().charAt(0).toUpperCase();
 
   return (
-    <aside className="lg:sticky lg:top-24 lg:self-start">
+    <aside className="min-w-0 lg:sticky lg:top-24 lg:self-start">
       {/* Identity card */}
       <div className="rounded-xl border border-[var(--hw-border-default)] bg-[var(--hw-bg-card)] p-4">
         <div className="flex items-center gap-3">

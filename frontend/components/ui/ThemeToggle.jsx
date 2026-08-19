@@ -2,7 +2,7 @@
 
 import { useTheme } from "@/Context/ThemeContext";
 
-export default function ThemeToggle() {
+export default function ThemeToggle({ className = "" }) {
   const { theme, toggleTheme } = useTheme();
   const isLight = theme === "light";
 
@@ -10,7 +10,7 @@ export default function ThemeToggle() {
     <button
       type="button"
       onClick={toggleTheme}
-      className="inline-flex h-9 items-center gap-2 rounded-lg border border-[var(--hw-border-default)] bg-[var(--hw-soft-panel)] px-3 text-xs font-black text-[var(--hw-text-secondary)] hover:border-[var(--hw-orange)] hover:text-[var(--hw-text-primary)]"
+      className={`inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-[var(--hw-border-default)] bg-[var(--hw-soft-panel)] px-2 text-xs font-black text-[var(--hw-text-secondary)] hover:border-[var(--hw-orange)] hover:text-[var(--hw-text-primary)] sm:px-3 ${className}`}
       aria-label="Toggle theme"
       title={isLight ? "Switch to dark theme" : "Switch to light theme"}
     >
@@ -26,7 +26,7 @@ export default function ThemeToggle() {
           </svg>
         )}
       </span>
-      {isLight ? "Dark" : "Light"}
+      <span className="hidden sm:inline">{isLight ? "Dark" : "Light"}</span>
     </button>
   );
 }

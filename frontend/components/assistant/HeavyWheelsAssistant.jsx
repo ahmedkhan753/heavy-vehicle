@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
 import { assistantApi } from "@/lib/api";
 import { useLanguage } from "@/Context/LanguageContext";
 import AssistantButton from "./AssistantButton";
@@ -15,6 +16,7 @@ import {
 
 
 export default function HeavyWheelsAssistant() {
+  const pathname = usePathname();
   const { lang, isRtl } = useLanguage();
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
@@ -107,6 +109,12 @@ export default function HeavyWheelsAssistant() {
       setLoading(false);
     }
   }
+
+  // On auth screens the floating button sits directly over the submit
+  // button on short mobile viewports (the form is short enough that the
+  // fixed-position bubble always lands on its last field/CTA) — hide it
+  // there rather than trying to dodge a moving target.
+  if (pathname?.startsWith("/auth")) return null;
 
   return (
     <>
