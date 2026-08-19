@@ -92,17 +92,15 @@ export default function MyAds() {
         else await vehicleApi.remove(ad._id);
         toast.success(t("dash.deleted"));
       } else {
-        if (ad.kind === "part") {
-          await partApi.markSold(ad._id);
-        } else {
-          const price = Number(String(salePrice).replace(/[^\d]/g, ""));
-          if (!price || price < 1) {
-            toast.error(t("dash.salePriceLabel"));
-            setBusyId("");
-            return;
-          }
-          await vehicleApi.markSold(ad._id, price, buyerContact.trim());
+        const price = Number(String(salePrice).replace(/[^\d]/g, ""));
+        if (!price || price < 1) {
+          toast.error(t("dash.salePriceLabel"));
+          setBusyId("");
+          return;
         }
+        const contact = buyerContact.trim();
+        if (ad.kind === "part") await partApi.markSold(ad._id, price, contact);
+        else await vehicleApi.markSold(ad._id, price, contact);
         toast.success(t("dash.markedSold"));
       }
       setDialog(null);
@@ -218,9 +216,9 @@ export default function MyAds() {
         onCancel={() => setDialog(null)}
         onConfirm={confirmDialog}
       >
-        {/* Vehicles record a commission on sale, so they need the final price.
-            Parts settle outside the commission flow and just flip status. */}
-        {isSoldDialog && dialog.ad.kind === "vehicle" ? (
+        {/* Both listing kinds record a commission on sale, so both need the
+            final price and (optionally) the buyer for two-party confirmation. */}
+        {isSoldDialog ? (
           <div className="grid gap-3">
             <label className="text-[12px] font-bold text-[var(--hw-text-secondary)]">
               {t("dash.salePriceLabel")}

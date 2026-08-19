@@ -71,9 +71,18 @@ export default function DashboardSidebar() {
             <p className="truncate text-[14px] font-black text-[var(--hw-text-primary)] sm:text-base">
               {isAuthenticated ? user?.name : t("dash.loginRequired")}
             </p>
-            <span className="mt-0.5 inline-flex items-center rounded-full bg-[var(--hw-soft-panel)] px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-[var(--hw-text-muted)] sm:text-[10px]">
-              {user?.role || "user"}
-            </span>
+            <div className="mt-0.5 flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center rounded-full bg-[var(--hw-soft-panel)] px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-[var(--hw-text-muted)] sm:text-[10px]">
+                {user?.role || "user"}
+              </span>
+              {/* Editing your bio/description lives on a sidebar page people
+                  never scrolled to — surface it right under the name. */}
+              {isAuthenticated ? (
+                <Link href="/dashboard/profile" className="text-[10px] font-bold text-[var(--hw-orange)] hover:underline sm:text-[11px]">
+                  {t("dash.editProfile")}
+                </Link>
+              ) : null}
+            </div>
           </div>
         </div>
 

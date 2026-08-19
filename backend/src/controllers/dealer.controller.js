@@ -338,18 +338,32 @@ async function adminReviewApplication(req, res, next) {
     const approve = req.body.approve === true;
     dealer.approvalStatus = approve ? "approved" : "rejected";
     dealer.reviewNote = req.body.note || "";
-    if (approve) dealer.approvedAt = new Date();
-    else dealer.rejectedAt = new Date();
+    // An approved dealer is a verified seller — that's what earns the badge.
+    dealer.isVerified = approve;
+    if (approve) {
+      dealer.approvedAt = new Date();
+      dealer.verifiedAt = new Date();
+    } else {
+      dealer.rejectedAt = new Date();
+    }
     await dealer.save({ validateBeforeSave: false });
 
     // The role change is the whole point of approval — and it must be undone
     // on rejection so a previously-approved dealer doesn't keep dealer perks.
     // Admins keep their own role either way.
     const user = await User.findById(dealer.userId);
-    if (user && user.role !== "admin") {
-      user.role = approve ? "dealer" : "user";
+    if (user) {
+      if (user.role !== "admin") user.role = approve ? "dealer" : "user";
+      user.isVerifiedSeller = approve;
       await user.save({ validateBeforeSave: false });
     }
+
+    // Listings carry a denormalized seller.verified flag used to render the
+    // badge on cards without joining the user — keep both collections in sync.
+    await Promise.all([
+      Vehicle.updateMany({ sellerId: dealer.userId }, { $set: { "seller.verified": approve } }),
+      Part.updateMany({ sellerId: dealer.userId }, { $set: { "seller.verified": approve } }),
+    ]);
 
     respond(res, 200, dealer, approve ? "Dealer approved." : "Dealer application rejected.");
   } catch (err) {

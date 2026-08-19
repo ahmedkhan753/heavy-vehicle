@@ -263,6 +263,54 @@ async function changePassword(req, res, next) {
   }
 }
 
+// ─────────────────────────────────────────────────────────────
+// PUBLIC SELLER PROFILE
+// GET /api/users/:id/public
+// Anyone can view a seller's public details plus their live listings.
+// Contact details stay private — buyers reach sellers through chat.
+// ─────────────────────────────────────────────────────────────
+async function getPublicProfile(req, res, next) {
+  try {
+    const user = await User.findById(req.params.id)
+      .select("name city avatar bio role isVerifiedSeller createdAt links whatsapp")
+      .lean();
+
+    if (!user || user.isBanned) return next(new AppError("Seller not found.", 404));
+
+    const liveFilter = {
+      sellerId: user._id,
+      status: "active",
+      expiresAt: { $gt: new Date() },
+    };
+
+    const [vehicles, parts, dealer] = await Promise.all([
+      Vehicle.find(liveFilter)
+        .sort({ createdAt: -1 }).limit(24)
+        .select("title shortTitle price priceDisplay year city condition make model type images featured status createdAt views")
+        .lean(),
+      Part.find(liveFilter)
+        .sort({ createdAt: -1 }).limit(24)
+        .select("title price priceDisplay city condition make model category quantity negotiable images coverImage featured status createdAt views")
+        .lean(),
+      // Surface an approved storefront so the profile can link to it.
+      require("../models/Dealer")
+        .findOne({ userId: user._id, approvalStatus: "approved" })
+        .select("businessName city isVerified specialization")
+        .lean(),
+    ]);
+
+    respond(res, 200, {
+      user,
+      dealer: dealer || null,
+      vehicles,
+      parts,
+      totalActive: vehicles.length + parts.length,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
 module.exports = {
   getProfile,
   updateProfile,
@@ -270,4 +318,5 @@ module.exports = {
   saveAd,
   unsaveAd,
   changePassword,
+  getPublicProfile,
 };

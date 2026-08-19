@@ -176,6 +176,11 @@ export const translations = {
     "listing.overview": "Overview",
     "listing.viewAll": "View all",
     "listing.soldNotice": "This item has been sold and is no longer available.",
+    "seller.notFound": "Seller not found",
+    "seller.memberSince": "member since",
+    "seller.listings": "Active listings",
+    "seller.noListings": "This seller has no active listings right now.",
+    "seller.viewProfile": "View seller profile",
 
     // ── Plan banners (pricing page) ───────────────
     "plan.eyebrow": "Sell like a pro",
@@ -1060,6 +1065,11 @@ export const translations = {
     "listing.overview": "جائزہ",
     "listing.viewAll": "سب دیکھیں",
     "listing.soldNotice": "یہ آئٹم فروخت ہو چکا ہے اور اب دستیاب نہیں۔",
+    "seller.notFound": "فروخت کنندہ نہیں ملا",
+    "seller.memberSince": "رکنیت",
+    "seller.listings": "فعال اشتہارات",
+    "seller.noListings": "اس فروخت کنندہ کے پاس ابھی کوئی فعال اشتہار نہیں۔",
+    "seller.viewProfile": "فروخت کنندہ کی پروفائل دیکھیں",
 
     // ── Plan banners (pricing page) ───────────────
     "plan.eyebrow": "پیشہ ور کی طرح بیچیں",

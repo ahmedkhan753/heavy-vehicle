@@ -111,7 +111,13 @@ export default function DealersPanel() {
             </div>
 
             <div className="mt-2.5 flex flex-wrap gap-1.5">
-              <Link href={`/dealers/${d._id}`} className="rounded-lg border border-[var(--hw-border-strong)] px-3 py-1.5 text-[12px] font-bold text-[var(--hw-text-primary)] transition hover:border-[var(--hw-orange)]">
+              {/* The applicant's seller profile, not the dealer storefront —
+                  a pending storefront isn't public yet, and what an admin
+                  needs to judge is the person and their existing listings. */}
+              <Link
+                href={`/sellers/${d.userId?._id}`}
+                className="rounded-lg border border-[var(--hw-border-strong)] px-3 py-1.5 text-[12px] font-bold text-[var(--hw-text-primary)] transition hover:border-[var(--hw-orange)]"
+              >
                 View profile
               </Link>
               {d.approvalStatus !== "approved" ? (

@@ -151,7 +151,9 @@ export const partApi = {
   create: (body) => apiRequest("/parts", { method: "POST", body: JSON.stringify(body) }),
   update: (id, body) => apiRequest(`/parts/${id}`, { method: "PUT", body: JSON.stringify(body) }),
   remove: (id) => apiRequest(`/parts/${id}`, { method: "DELETE" }),
-  markSold: (id) => apiRequest(`/parts/${id}/sold`, { method: "PATCH" }),
+  // Parts settle exactly like vehicles: the endpoint requires the final sale
+  // price so a commission can be recorded, so send the same payload.
+  markSold: (id, salePrice, buyerContact) => apiRequest(`/parts/${id}/sold`, { method: "PATCH", body: JSON.stringify({ salePrice, buyerContact }) }),
   incrementView: (id) => apiRequest(`/parts/${id}/view`, { method: "POST" }),
 };
 
@@ -175,6 +177,7 @@ export const userApi = {
     const isFormData = typeof FormData !== "undefined" && body instanceof FormData;
     return apiRequest("/users/profile", { method: "PUT", body: isFormData ? body : JSON.stringify(body) });
   },
+  publicProfile: (id) => apiRequest(`/users/${id}/public`),
   saved: () => apiRequest("/users/saved"),
   savedAds: () => apiRequest("/users/saved"),
   saveAd: (vehicleId) => apiRequest(`/users/saved/${vehicleId}`, { method: "POST" }),

@@ -12,14 +12,18 @@ const express  = require("express");
 const { body } = require("express-validator");
 const {
   getProfile, updateProfile, getSavedAds,
-  saveAd, unsaveAd, changePassword,
+  saveAd, unsaveAd, changePassword, getPublicProfile,
 } = require("../controllers/user.controller");
 const { protect }            = require("../middleware/auth.middleware");
 const { handleSingleUpload } = require("../middleware/upload.middleware");
 
 const router = express.Router();
 
-// All user routes require authentication
+// Public seller profile — declared BEFORE the auth guard below so buyers can
+// view a seller without signing in.
+router.get("/:id/public", getPublicProfile);
+
+// All remaining user routes require authentication
 router.use(protect);
 
 const updateProfileValidation = [
