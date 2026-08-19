@@ -5,6 +5,8 @@
  * PATCH /api/dealers/me/warranty      → request warranty badge
  * GET   /api/dealers/admin/warranty   → admin: warranty requests
  * PATCH /api/dealers/admin/:id/warranty → admin: approve/reject warranty
+ * GET   /api/dealers/admin/applications → admin: dealer applications
+ * PATCH /api/dealers/admin/:id/approval → admin: approve/reject dealer
  * GET   /api/dealers/:id              → single dealer + listings
  * POST  /api/dealers/register         → register as dealer
  * PUT   /api/dealers/:id              → update dealer profile
@@ -15,8 +17,9 @@ const { body } = require("express-validator");
 const {
   list, getById, register, update,
   getMine, requestWarranty, adminListWarranty, adminReviewWarranty,
+  adminListApplications, adminReviewApplication,
 } = require("../controllers/dealer.controller");
-const { protect, restrictTo } = require("../middleware/auth.middleware");
+const { protect, restrictTo, optionalAuth } = require("../middleware/auth.middleware");
 
 const router = express.Router();
 
@@ -50,11 +53,14 @@ router.get("/me", protect, getMine);
 router.patch("/me/warranty", protect, warrantyValidation, requestWarranty);
 router.get("/admin/warranty", protect, restrictTo("admin"), adminListWarranty);
 router.patch("/admin/:id/warranty", protect, restrictTo("admin"), adminReviewWarranty);
+router.get("/admin/applications", protect, restrictTo("admin"), adminListApplications);
+router.patch("/admin/:id/approval", protect, restrictTo("admin"), adminReviewApplication);
 
 router.post("/register", protect, registerValidation, register);
 
-// Parameterized (keep last)
-router.get("/:id", getById);
+// Parameterized (keep last). optionalAuth so an applicant can view their own
+// not-yet-approved profile without making the route login-only.
+router.get("/:id", optionalAuth, getById);
 router.put("/:id", protect, update);
 
 module.exports = router;

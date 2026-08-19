@@ -31,7 +31,8 @@ async function list(req, res, next) {
     const limit = Math.min(50, parseInt(req.query.limit) || 20);
     const skip  = (page - 1) * limit;
 
-    const filter = { isActive: true };
+    // Only admin-approved storefronts are public.
+    const filter = { isActive: true, approvalStatus: "approved" };
     if (req.query.city)       filter.city       = { $regex: `^${req.query.city}$`, $options: "i" };
     if (req.query.verified)   filter.isVerified  = true;
 
@@ -62,7 +63,11 @@ async function getById(req, res, next) {
       .populate("userId", "name phone city avatar createdAt totalAds plan")
       .lean();
 
-    if (!dealer || !dealer.isActive) {
+    // A pending/rejected application has no public page. The owner and admins
+    // can still open it so the applicant can see their own submission.
+    const isOwner = req.user && dealer && String(dealer.userId?._id) === String(req.user._id);
+    const isAdmin = req.user?.role === "admin";
+    if (!dealer || !dealer.isActive || (dealer.approvalStatus !== "approved" && !isOwner && !isAdmin)) {
       return next(new AppError("Dealer not found.", 404));
     }
 
@@ -117,10 +122,18 @@ async function register(req, res, next) {
       });
     }
 
-    // Check if already a dealer
+    // One request per account. A rejected application can be resubmitted;
+    // a pending or approved one cannot.
     const existingDealer = await Dealer.findOne({ userId: req.user._id });
     if (existingDealer) {
-      return next(new AppError("You already have a dealer profile.", 409));
+      if (existingDealer.approvalStatus === "pending") {
+        return next(new AppError("Your dealer application is already awaiting review.", 409));
+      }
+      if (existingDealer.approvalStatus === "approved") {
+        return next(new AppError("You already have a dealer profile.", 409));
+      }
+      // Rejected → let them re-apply by clearing the old application.
+      await Dealer.deleteOne({ _id: existingDealer._id });
     }
 
     const {
@@ -150,10 +163,9 @@ async function register(req, res, next) {
       workingHours:    workingHours || "Mon–Sat: 9am–6pm",
     });
 
-    // Upgrade user role to dealer
-    await User.findByIdAndUpdate(req.user._id, { role: "dealer" });
-
-    respond(res, 201, dealer, "Dealer profile created successfully");
+    // Deliberately NOT upgrading the user's role here — that happens on admin
+    // approval (adminApprove below). Until then this is just an application.
+    respond(res, 201, dealer, "Dealer application submitted. An admin will review it shortly.");
   } catch (err) {
     next(err);
   }
@@ -285,7 +297,68 @@ async function adminReviewWarranty(req, res, next) {
   }
 }
 
+// ─────────────────────────────────────────────────────────────
+// ADMIN — dealer applications
+// GET /api/dealers/admin/applications?status=pending
+// ─────────────────────────────────────────────────────────────
+async function adminListApplications(req, res, next) {
+  try {
+    const status = ["pending", "approved", "rejected"].includes(req.query.status)
+      ? req.query.status
+      : "pending";
+
+    const dealers = await Dealer.find({ approvalStatus: status })
+      .populate("userId", "name email phone city createdAt role")
+      .sort({ createdAt: -1 })
+      .limit(100)
+      .lean();
+
+    const counts = await Dealer.aggregate([
+      { $group: { _id: "$approvalStatus", count: { $sum: 1 } } },
+    ]);
+
+    respond(res, 200, {
+      dealers,
+      counts: counts.reduce((acc, r) => { acc[r._id] = r.count; return acc; }, {}),
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+// ADMIN — approve / reject a dealer application
+// PATCH /api/dealers/admin/:id/approval   { approve: true|false, note }
+// ─────────────────────────────────────────────────────────────
+async function adminReviewApplication(req, res, next) {
+  try {
+    const dealer = await Dealer.findById(req.params.id);
+    if (!dealer) return next(new AppError("Dealer application not found.", 404));
+
+    const approve = req.body.approve === true;
+    dealer.approvalStatus = approve ? "approved" : "rejected";
+    dealer.reviewNote = req.body.note || "";
+    if (approve) dealer.approvedAt = new Date();
+    else dealer.rejectedAt = new Date();
+    await dealer.save({ validateBeforeSave: false });
+
+    // The role change is the whole point of approval — and it must be undone
+    // on rejection so a previously-approved dealer doesn't keep dealer perks.
+    // Admins keep their own role either way.
+    const user = await User.findById(dealer.userId);
+    if (user && user.role !== "admin") {
+      user.role = approve ? "dealer" : "user";
+      await user.save({ validateBeforeSave: false });
+    }
+
+    respond(res, 200, dealer, approve ? "Dealer approved." : "Dealer application rejected.");
+  } catch (err) {
+    next(err);
+  }
+}
+
 module.exports = {
   list, getById, register, update,
   getMine, requestWarranty, adminListWarranty, adminReviewWarranty,
+  adminListApplications, adminReviewApplication,
 };

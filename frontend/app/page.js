@@ -25,7 +25,10 @@ async function getHomeData() {
     const [vehiclesRes, partsRes, dealersRes] = await Promise.all([
       fetch(`${API_BASE_URL}/vehicles?limit=${HOME_LISTINGS_LIMIT}&sort=newest`, { next: { revalidate: 60 } }),
       fetch(`${API_BASE_URL}/parts?limit=${HOME_LISTINGS_LIMIT}&sort=newest`, { next: { revalidate: 60 } }),
-      fetch(`${API_BASE_URL}/dealers?limit=4&verified=true`, { next: { revalidate: 60 } }),
+      // Every admin-approved dealer belongs here. Filtering on verified=true
+      // meant the section stayed empty until a dealer also earned the
+      // separate "verified" badge, which almost none have.
+      fetch(`${API_BASE_URL}/dealers?limit=4`, { next: { revalidate: 60 } }),
     ]);
 
     const vehiclesJson = vehiclesRes.ok ? await vehiclesRes.json() : { data: [] };

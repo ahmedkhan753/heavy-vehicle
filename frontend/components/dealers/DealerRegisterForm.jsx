@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/Context/AuthContext";
@@ -44,6 +44,16 @@ export default function DealerRegisterForm() {
   const toast = useToast();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  // null = still checking, false = no application yet, object = existing one.
+  const [existing, setExisting] = useState(null);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    dealerApi
+      .mine()
+      .then((res) => setExisting(res?.data || false))
+      .catch(() => setExisting(false));
+  }, [isAuthenticated]);
 
   async function submit(event) {
     event.preventDefault();
@@ -69,7 +79,8 @@ export default function DealerRegisterForm() {
         workingHours: String(formData.get("workingHours") || ""),
       });
       toast.success(t("dealerForm.created"));
-      router.push(`/dealers/${response.data._id}`);
+      setExisting(response.data);
+      router.refresh();
     } catch (err) {
       setError(normalizeApiError(err.payload || err));
     } finally {
@@ -87,9 +98,47 @@ export default function DealerRegisterForm() {
     );
   }
 
+  // Already applied — show where the application stands instead of a form
+  // they'd only be told they can't submit.
+  if (existing && existing.approvalStatus === "pending") {
+    return (
+      <div className="rounded-xl border border-[var(--hw-orange)] bg-[var(--hw-soft-panel)] p-5 text-center sm:p-8">
+        <p className="text-3xl">⏳</p>
+        <h2 className="mt-2 text-lg font-black text-[var(--hw-text-primary)] sm:text-2xl">{t("dealerForm.pendingTitle")}</h2>
+        <p className="mt-2 text-[13px] leading-6 text-[var(--hw-text-secondary)] sm:text-base">{t("dealerForm.pendingBody")}</p>
+      </div>
+    );
+  }
+
+  if (existing && existing.approvalStatus === "approved") {
+    return (
+      <div className="rounded-xl border border-[var(--hw-green)] bg-[var(--hw-soft-panel)] p-5 text-center sm:p-8">
+        <p className="text-3xl">✅</p>
+        <h2 className="mt-2 text-lg font-black text-[var(--hw-text-primary)] sm:text-2xl">{existing.businessName}</h2>
+        <Link href={`/dealers/${existing._id}`} className="mt-4 inline-flex h-11 items-center rounded-lg bg-[var(--hw-orange)] px-5 text-[13px] font-black text-[var(--hw-text-inverse)] sm:text-sm">
+          {t("dealer.title")}
+        </Link>
+      </div>
+    );
+  }
+
   return (
     <form onSubmit={submit} className="rounded-xl border border-[var(--hw-border-default)] bg-[var(--hw-bg-card)] p-3.5 sm:p-5">
       {error ? <div className="mb-4 rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-[13px] font-bold text-red-200">{error}</div> : null}
+
+      {existing && existing.approvalStatus === "rejected" ? (
+        <div className="mb-4 rounded-lg border border-[var(--hw-red)] bg-[var(--hw-soft-panel)] p-3">
+          <p className="text-[13px] font-black text-[var(--hw-red)]">{t("dealerForm.rejectedTitle")}</p>
+          <p className="mt-1 text-[12px] text-[var(--hw-text-secondary)]">{t("dealerForm.rejectedBody")}</p>
+          {existing.reviewNote ? (
+            <p className="mt-1 text-[11px] italic text-[var(--hw-text-muted)]">{existing.reviewNote}</p>
+          ) : null}
+        </div>
+      ) : null}
+
+      <p className="mb-3 rounded-lg border border-[var(--hw-border-subtle)] bg-[var(--hw-bg-deep)] p-2.5 text-[11px] leading-5 text-[var(--hw-text-secondary)] sm:text-xs">
+        {t("dealerForm.reviewNotice")}
+      </p>
 
       <p className="mb-4 text-[11px] text-[var(--hw-text-muted)] sm:text-xs">{t("dealerForm.requiredNote")}</p>
 

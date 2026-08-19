@@ -110,7 +110,23 @@ const dealerSchema = new mongoose.Schema(
       },
     ],
 
+    // ── Admin approval ────────────────────────────────────────
+    // Registering is a *request*: the profile stays hidden and the user keeps
+    // their existing role until an admin approves it. Only on approval does
+    // the storefront go live and the account become a dealer.
+    approvalStatus: {
+      type: String,
+      enum: ["pending", "approved", "rejected"],
+      default: "pending",
+      index: true,
+    },
+    approvedAt:  { type: Date },
+    rejectedAt:  { type: Date },
+    reviewNote:  { type: String, trim: true, maxlength: 500, default: "" },
+
     // ── Verification ──────────────────────────────────────────
+    // Separate from approval: an approved dealer can additionally be marked
+    // "verified" to earn the badge.
     isVerified: {
       type:    Boolean,
       default: false,

@@ -199,6 +199,8 @@ export const dealerApi = {
   // Admin
   adminWarrantyList: (status) => apiRequest(`/dealers/admin/warranty${status ? `?status=${status}` : ""}`),
   adminReviewWarranty: (id, approve, note) => apiRequest(`/dealers/admin/${id}/warranty`, { method: "PATCH", body: JSON.stringify({ approve, note: note || "" }) }),
+  adminApplications: (status) => apiRequest(`/dealers/admin/applications${status ? `?status=${status}` : ""}`),
+  adminReviewApplication: (id, approve, note) => apiRequest(`/dealers/admin/${id}/approval`, { method: "PATCH", body: JSON.stringify({ approve, note: note || "" }) }),
 };
 
 export const subscriptionApi = {
