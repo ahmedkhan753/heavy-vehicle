@@ -22,18 +22,18 @@ export default function CategoryBrowse() {
         <Link
           key={type.value}
           href={`/vehicles?type=${type.value}`}
-          className="group flex w-44 shrink-0 snap-start flex-col rounded-lg border border-[var(--hw-border-default)] bg-[var(--hw-bg-card)] p-5 transition hover:-translate-y-1 hover:border-[var(--hw-orange)]"
+          className="group flex w-20 shrink-0 snap-start flex-col rounded-lg border border-[var(--hw-border-default)] bg-[var(--hw-bg-card)] p-2.5 transition hover:-translate-y-1 hover:border-[var(--hw-orange)] sm:w-44 sm:p-5"
         >
-          <div className="mb-5 flex h-20 w-20 items-center justify-center overflow-hidden rounded-lg bg-[var(--hw-bg-elevated)]">
+          <div className="mb-2 flex h-10 w-10 items-center justify-center overflow-hidden rounded-lg bg-[var(--hw-bg-elevated)] sm:mb-5 sm:h-20 sm:w-20">
             <Image
               src={getVehicleTypeIcon(type.value)}
               alt={typeLabel(type, lang)}
               width={80}
               height={80}
-              className="h-16 w-16 object-contain"
+              className="h-7 w-7 object-contain sm:h-16 sm:w-16"
             />
           </div>
-          <h3 className="text-base font-black leading-snug text-[var(--hw-text-primary)] group-hover:text-[var(--hw-orange)]">
+          <h3 className="line-clamp-2 text-[11px] font-black leading-snug text-[var(--hw-text-primary)] group-hover:text-[var(--hw-orange)] sm:text-base">
             {typeLabel(type, lang)}
           </h3>
         </Link>

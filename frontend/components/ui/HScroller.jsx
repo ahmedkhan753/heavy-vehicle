@@ -52,7 +52,7 @@ export default function HScroller({ children, ariaLabel }) {
         ref={trackRef}
         dir="ltr"
         aria-label={ariaLabel}
-        className="hw-no-scrollbar flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth pb-1"
+        className="hw-no-scrollbar grid grid-flow-col grid-rows-2 gap-2 overflow-x-auto scroll-smooth pb-1 sm:flex sm:snap-x sm:snap-mandatory sm:gap-4"
       >
         {children}
       </div>
