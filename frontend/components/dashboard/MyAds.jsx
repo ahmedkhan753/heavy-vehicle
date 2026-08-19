@@ -177,7 +177,10 @@ export default function MyAds() {
               {/* Actions wrap onto their own row so they never squeeze the title */}
               <div className="mt-2.5 flex flex-wrap gap-1.5 sm:gap-2">
                 <Link href={href} className="rounded-lg border border-[var(--hw-border-strong)] px-3 py-1.5 text-[12px] font-bold text-[var(--hw-text-primary)] transition hover:border-[var(--hw-orange)] sm:px-4 sm:py-2 sm:text-sm">{t("dash.view")}</Link>
-                {ad.kind === "vehicle" && ad.status === "active" ? (
+                {/* Boosting and featuring apply to part ads too — the boost
+                    API already took a listingType, and featuring now resolves
+                    across both collections server-side. */}
+                {ad.status === "active" ? (
                   <>
                     <button onClick={() => setBoostAd(ad)} className="rounded-lg bg-[var(--hw-orange)] px-3 py-1.5 text-[12px] font-black text-[var(--hw-text-inverse)] transition hover:bg-[var(--hw-amber)] sm:px-4 sm:py-2 sm:text-sm">Boost</button>
                     <button disabled={busyId === ad._id} onClick={() => toggleFeature(ad)} className={`rounded-lg border px-3 py-1.5 text-[12px] font-bold transition disabled:opacity-60 sm:px-4 sm:py-2 sm:text-sm ${ad.featured ? "border-[var(--hw-orange)] text-[var(--hw-orange)]" : "border-[var(--hw-border-strong)] text-[var(--hw-text-primary)] hover:border-[var(--hw-orange)]"}`}>
@@ -246,7 +249,7 @@ export default function MyAds() {
       {boostAd ? (
         <BoostModal
           listing={boostAd}
-          listingType="Vehicle"
+          listingType={boostAd.kind === "part" ? "Part" : "Vehicle"}
           onClose={() => setBoostAd(null)}
           onDone={() => Promise.all([loadAds(), loadUsage()])}
         />

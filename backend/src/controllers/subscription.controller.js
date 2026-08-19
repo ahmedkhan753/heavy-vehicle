@@ -19,6 +19,7 @@
 const Subscription = require("../models/Subscription");
 const Payment = require("../models/Payment");
 const Vehicle = require("../models/Vehicle");
+const Part = require("../models/Part");
 const { AppError } = require("../middleware/error.middleware");
 const pricing = require("../config/pricing");
 const { getGateway } = require("../services/payments/gateway");
@@ -38,8 +39,25 @@ async function findActiveSubscription(userId) {
 }
 
 // Count a seller's live featured / premium listings (consumed slots).
+// Featured slots are a single pool shared by vehicle and part ads — a plan
+// that grants 15 slots means 15 featured listings of either kind.
 async function countActiveFeatured(userId) {
-  return Vehicle.countDocuments({ sellerId: userId, featured: true, status: "active" });
+  const [vehicles, parts] = await Promise.all([
+    Vehicle.countDocuments({ sellerId: userId, featured: true, status: "active" }),
+    Part.countDocuments({ sellerId: userId, featured: true, status: "active" }),
+  ]);
+  return vehicles + parts;
+}
+
+/**
+ * Resolve a listing by id across both collections.
+ * The feature routes take a bare listing id, so try vehicles first and fall
+ * back to parts rather than forcing callers to say which kind it is.
+ */
+async function findListingById(id) {
+  const vehicle = await Vehicle.findById(id);
+  if (vehicle) return vehicle;
+  return Part.findById(id);
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -247,14 +265,14 @@ async function featureListing(req, res, next) {
       return next(new AppError("You need an active subscription to feature listings.", 403));
     }
 
-    const vehicle = await Vehicle.findById(req.params.vehicleId);
-    if (!vehicle) return next(new AppError("Listing not found.", 404));
-    if (vehicle.sellerId.toString() !== req.user._id.toString()) {
+    const listing = await findListingById(req.params.vehicleId);
+    if (!listing) return next(new AppError("Listing not found.", 404));
+    if (listing.sellerId.toString() !== req.user._id.toString()) {
       return next(new AppError("You can only feature your own listings.", 403));
     }
 
-    if (vehicle.featured) {
-      return respond(res, 200, vehicle, "Listing is already featured.");
+    if (listing.featured) {
+      return respond(res, 200, listing, "Listing is already featured.");
     }
 
     // Slot check (UNLIMITED = -1 bypasses the cap).
@@ -265,11 +283,11 @@ async function featureListing(req, res, next) {
       }
     }
 
-    vehicle.featured = true;
-    if (vehicle.adType === "free") vehicle.adType = "featured";
-    await vehicle.save({ validateBeforeSave: false });
+    listing.featured = true;
+    if (listing.adType === "free") listing.adType = "featured";
+    await listing.save({ validateBeforeSave: false });
 
-    respond(res, 200, vehicle, "Listing featured.");
+    respond(res, 200, listing, "Listing featured.");
   } catch (err) {
     next(err);
   }
@@ -280,17 +298,17 @@ async function featureListing(req, res, next) {
 // ─────────────────────────────────────────────────────────────
 async function unfeatureListing(req, res, next) {
   try {
-    const vehicle = await Vehicle.findById(req.params.vehicleId);
-    if (!vehicle) return next(new AppError("Listing not found.", 404));
-    if (vehicle.sellerId.toString() !== req.user._id.toString()) {
+    const listing = await findListingById(req.params.vehicleId);
+    if (!listing) return next(new AppError("Listing not found.", 404));
+    if (listing.sellerId.toString() !== req.user._id.toString()) {
       return next(new AppError("You can only modify your own listings.", 403));
     }
 
-    vehicle.featured = false;
-    if (vehicle.adType === "featured") vehicle.adType = "free";
-    await vehicle.save({ validateBeforeSave: false });
+    listing.featured = false;
+    if (listing.adType === "featured") listing.adType = "free";
+    await listing.save({ validateBeforeSave: false });
 
-    respond(res, 200, vehicle, "Listing un-featured.");
+    respond(res, 200, listing, "Listing un-featured.");
   } catch (err) {
     next(err);
   }

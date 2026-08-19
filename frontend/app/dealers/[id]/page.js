@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import VehicleCard from "@/components/vehicles/VehicleCard";
+import PartCard from "@/components/parts/PartCard";
 import PlanBadge from "@/components/marketing/PlanBadge";
 import { planBorderStyle } from "@/components/marketing/PlanAdornments";
 import { getPlanMeta, isPaidPlan } from "@/lib/plans";
@@ -25,6 +26,8 @@ export default async function DealerProfilePage({ params }) {
   const result = await getDealer(id);
   const dealer = result.data?.dealer;
   const listings = result.data?.listings || [];
+  const partListings = result.data?.partListings || [];
+  const totalActive = result.data?.totalActive ?? listings.length + partListings.length;
   const plan = dealer?.userId?.plan;
   const planMeta = getPlanMeta(plan);
   const t = await getT();
@@ -65,7 +68,7 @@ export default async function DealerProfilePage({ params }) {
                   <PlanBadge plan={plan} size="sm" hideFree />
                 </div>
                 <h1 className="mt-1 text-3xl font-black text-[var(--hw-text-primary)]">{dealer.businessName}</h1>
-                <p className="mt-1 text-sm text-[var(--hw-text-muted)]">{cityLabel(dealer.city, lang)} | {dealer.totalListings || listings.length} {t("dealerp.activeAds")}</p>
+                <p className="mt-1 text-sm text-[var(--hw-text-muted)]">{cityLabel(dealer.city, lang)} | {totalActive} {t("dealerp.activeAds")}</p>
               </div>
             </div>
             <div className="flex gap-3">
@@ -79,9 +82,10 @@ export default async function DealerProfilePage({ params }) {
       <section className="mt-6 grid gap-5 lg:grid-cols-[1fr_320px]">
         <div className="min-w-0 rounded-lg border border-[var(--hw-border-default)] bg-[var(--hw-bg-card)] p-5">
           <h2 className="text-xl font-black text-[var(--hw-text-primary)]">{t("dealer.inventory")}</h2>
-          {listings.length ? (
-            <div className="mt-5 grid gap-4 md:grid-cols-2">
-              {listings.map((item) => <VehicleCard key={item._id} vehicle={item} />)}
+          {listings.length || partListings.length ? (
+            <div className="mt-5 grid grid-cols-2 gap-2.5 sm:gap-4">
+              {listings.map((item) => <VehicleCard key={`v-${item._id}`} vehicle={item} />)}
+              {partListings.map((item) => <PartCard key={`p-${item._id}`} part={item} />)}
             </div>
           ) : (
             <p className="mt-5 rounded-lg border border-dashed border-[var(--hw-border-default)] p-6 text-[var(--hw-text-secondary)]">{t("dealerp.noListings")}</p>

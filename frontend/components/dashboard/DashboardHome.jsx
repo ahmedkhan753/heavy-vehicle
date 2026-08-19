@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useAuth } from "@/Context/AuthContext";
 import { useLanguage } from "@/Context/LanguageContext";
-import { userApi, vehicleApi } from "@/lib/api";
+import { userApi, vehicleApi, partApi } from "@/lib/api";
 import { formatPrice } from "@/lib/format";
 import Badge from "@/components/ui/Badge";
 import PlanBadge from "@/components/marketing/PlanBadge";
@@ -26,12 +26,22 @@ export default function DashboardHome() {
 
   useEffect(() => {
     if (!isAuthenticated) return;
+    // Recent ads and total views must span both collections — querying only
+    // vehicles left part ads invisible here even though they were counted in
+    // the activeAds figure coming back from the profile endpoint.
     Promise.all([
       userApi.profile().catch(() => null),
       vehicleApi.myAds({ limit: 5 }).catch(() => null),
-    ]).then(([profileRes, adsRes]) => {
+      partApi.myParts({ limit: 5 }).catch(() => null),
+    ]).then(([profileRes, adsRes, partsRes]) => {
       setProfile(profileRes?.data || null);
-      setAds(adsRes?.data || []);
+      const vehicles = (adsRes?.data || []).map((ad) => ({ ...ad, kind: "vehicle" }));
+      const parts = (partsRes?.data || []).map((ad) => ({ ...ad, kind: "part" }));
+      setAds(
+        [...vehicles, ...parts]
+          .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))
+          .slice(0, 5)
+      );
     });
   }, [isAuthenticated]);
 
@@ -137,7 +147,7 @@ export default function DashboardHome() {
           </div>
           <div className="mt-3 grid gap-2 sm:mt-4 sm:gap-3">
             {ads.length ? ads.map((ad) => (
-              <Link key={ad._id} href={`/vehicles/${ad._id}`} className="flex items-center gap-2.5 rounded-lg border border-[var(--hw-border-subtle)] bg-[var(--hw-bg-deep)] p-2.5 transition hover:border-[var(--hw-orange)] sm:gap-3 sm:p-3">
+              <Link key={`${ad.kind}-${ad._id}`} href={ad.kind === "part" ? `/parts/${ad._id}` : `/vehicles/${ad._id}`} className="flex items-center gap-2.5 rounded-lg border border-[var(--hw-border-subtle)] bg-[var(--hw-bg-deep)] p-2.5 transition hover:border-[var(--hw-orange)] sm:gap-3 sm:p-3">
                 <Thumb ad={ad} />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-[13px] font-bold text-[var(--hw-text-primary)] sm:text-base">{ad.title}</p>
@@ -178,7 +188,7 @@ export default function DashboardHome() {
 }
 
 function Thumb({ ad }) {
-  const cover = ad.images?.find((i) => i.isCover)?.url || ad.images?.[0]?.url;
+  const cover = ad.images?.find((i) => i.isCover)?.url || ad.images?.[0]?.url || ad.coverImage;
   return (
     <div className="h-12 w-16 shrink-0 overflow-hidden rounded-md bg-[var(--hw-bg-elevated)]">
       {cover ? (

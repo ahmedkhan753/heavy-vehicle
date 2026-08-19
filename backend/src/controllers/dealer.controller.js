@@ -11,6 +11,7 @@ const { validationResult } = require("express-validator");
 const Dealer               = require("../models/Dealer");
 const User                 = require("../models/User");
 const Vehicle              = require("../models/Vehicle");
+const Part                 = require("../models/Part");
 const { AppError }         = require("../middleware/error.middleware");
 const { getPaginationMeta }= require("../utils/apiFeatures");
 
@@ -65,18 +66,36 @@ async function getById(req, res, next) {
       return next(new AppError("Dealer not found.", 404));
     }
 
-    // Get dealer's active listings
-    const listings = await Vehicle.find({
+    // The dealer's live listings — both kinds. A parts dealer's storefront
+    // was previously empty because only vehicles were queried here.
+    const liveFilter = {
       sellerId:  dealer.userId._id,
       status:    "active",
       expiresAt: { $gt: new Date() },
-    })
-      .sort({ createdAt: -1 })
-      .limit(12)
-      .select("title shortTitle price priceDisplay year city condition make model type images createdAt views")
-      .lean();
+    };
 
-    respond(res, 200, { dealer, listings });
+    const [vehicles, parts] = await Promise.all([
+      Vehicle.find(liveFilter)
+        .sort({ createdAt: -1 })
+        .limit(12)
+        .select("title shortTitle price priceDisplay year city condition make model type images featured createdAt views")
+        .lean(),
+      Part.find(liveFilter)
+        .sort({ createdAt: -1 })
+        .limit(12)
+        .select("title price priceDisplay city condition make model category quantity negotiable images coverImage featured createdAt views")
+        .lean(),
+    ]);
+
+    const listings = vehicles.map((v) => ({ ...v, kind: "vehicle" }));
+    const partListings = parts.map((p) => ({ ...p, kind: "part" }));
+
+    respond(res, 200, {
+      dealer,
+      listings,
+      partListings,
+      totalActive: vehicles.length + parts.length,
+    });
   } catch (err) {
     next(err);
   }
