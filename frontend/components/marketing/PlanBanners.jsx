@@ -39,38 +39,57 @@ function PlanCard({ plan, neon, tag, featured, best, delay }) {
   const isFree = plan.key === "free";
   return (
     <div
-      className={`hw-rise-in flex h-full flex-col rounded-2xl p-6 hw-neon-card${featured ? " hw-neon-card-featured" : ""}`}
+      className={`hw-rise-in flex h-full flex-col rounded-2xl p-4 hw-neon-card sm:p-6${featured ? " hw-neon-card-featured" : ""}`}
       style={{ "--neon": neon, animationDelay: `${delay}ms` }}
     >
-      {/* Badge */}
-      {(tag && (featured || best)) ? (
-        <span
-          className="mb-3 inline-flex w-fit items-center gap-1 rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-wide"
-          style={{ background: `color-mix(in srgb, ${neon} 18%, transparent)`, color: neon }}
-        >
-          {best ? "★ Best value" : "★ " + tag}
-        </span>
-      ) : (
-        <span className="mb-3 text-[10px] font-black uppercase tracking-wide" style={{ color: neon }}>
-          {tag}
-        </span>
-      )}
+      {/* Name, badge and price share the top row on phones — stacking them
+          cost three lines per card across five cards. */}
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          {(tag && (featured || best)) ? (
+            <span
+              className="mb-1.5 inline-flex w-fit items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-wide sm:mb-3 sm:px-3 sm:py-1 sm:text-[10px]"
+              style={{ background: `color-mix(in srgb, ${neon} 18%, transparent)`, color: neon }}
+            >
+              {best ? "★ Best value" : "★ " + tag}
+            </span>
+          ) : (
+            <span className="mb-1.5 block text-[9px] font-black uppercase tracking-wide sm:mb-3 sm:text-[10px]" style={{ color: neon }}>
+              {tag}
+            </span>
+          )}
 
-      <div className="flex items-center gap-2.5">
-        <span
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl shadow-lg ring-1 ring-white/10"
-          style={{
-            color: "#fff",
-            background: `linear-gradient(135deg, color-mix(in srgb, ${neon} 70%, #000), ${neon})`,
-          }}
-        >
-          <PlanIcon plan={plan.key} size={19} />
-        </span>
-        <h3 className="text-xl font-black text-[var(--hw-text-primary)]">{plan.name}</h3>
+          <div className="flex items-center gap-2 sm:gap-2.5">
+            <span
+              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg shadow-lg ring-1 ring-white/10 sm:h-9 sm:w-9 sm:rounded-xl"
+              style={{
+                color: "#fff",
+                background: `linear-gradient(135deg, color-mix(in srgb, ${neon} 70%, #000), ${neon})`,
+              }}
+            >
+              <PlanIcon plan={plan.key} size={16} />
+            </span>
+            <h3 className="truncate text-base font-black text-[var(--hw-text-primary)] sm:text-xl">{plan.name}</h3>
+          </div>
+        </div>
+
+        <p className="flex shrink-0 items-baseline gap-1 sm:hidden">
+          {isFree ? (
+            <span className="text-xl font-black text-[var(--hw-text-primary)]">Free</span>
+          ) : (
+            <>
+              <span className="text-[10px] font-bold text-[var(--hw-text-muted)]">Rs</span>
+              <span className={`text-xl font-black ${featured || best ? "hw-shimmer" : "hw-neon-text"}`} style={{ "--neon": neon }}>
+                {fmt(plan.monthly)}
+              </span>
+              <span className="text-[10px] font-bold text-[var(--hw-text-muted)]">/mo</span>
+            </>
+          )}
+        </p>
       </div>
 
-      {/* Price */}
-      <p className="mt-2 flex items-baseline gap-1">
+      {/* Price — full size from sm up */}
+      <p className="mt-2 hidden items-baseline gap-1 sm:flex">
         {isFree ? (
           <span className="text-3xl font-black text-[var(--hw-text-primary)]">Free</span>
         ) : (
@@ -85,7 +104,7 @@ function PlanCard({ plan, neon, tag, featured, best, delay }) {
       </p>
 
       {/* Features */}
-      <ul className="mt-5 grid flex-1 gap-2.5 text-sm text-[var(--hw-text-secondary)]">
+      <ul className="mt-3 grid flex-1 gap-1.5 text-[12px] leading-5 text-[var(--hw-text-secondary)] sm:mt-5 sm:gap-2.5 sm:text-sm sm:leading-6">
         <Feature neon={neon}>
           {isFree ? "No featured slots" : `${slots(plan.featuredSlots)} featured slots`}
         </Feature>
@@ -113,7 +132,7 @@ function PlanCard({ plan, neon, tag, featured, best, delay }) {
       {/* CTA */}
       <Link
         href={isFree ? "/post-ad" : "/dashboard/billing"}
-        className="mt-6 inline-flex h-11 items-center justify-center rounded-lg text-sm font-black transition"
+        className="mt-3.5 inline-flex h-10 items-center justify-center rounded-lg text-[13px] font-black transition sm:mt-6 sm:h-11 sm:text-sm"
         style={
           featured || best
             ? { background: neon, color: "var(--hw-text-inverse)" }
@@ -147,18 +166,18 @@ export default function PlanBanners({ plans = [], free }) {
   const cards = [freeCard, ...plans].filter(Boolean);
 
   return (
-    <section className="mb-12 overflow-hidden rounded-3xl border border-[var(--hw-border-subtle)] bg-[var(--hw-bg-deep)] p-6 hw-subtle-grid sm:p-8">
-      <div className="mb-7 max-w-2xl">
-        <p className="text-xs font-black uppercase tracking-wide text-[var(--hw-orange)]">Sell like a pro</p>
-        <h2 className="mt-2 text-2xl font-black text-[var(--hw-text-primary)] md:text-3xl">
+    <section className="mb-6 overflow-hidden rounded-2xl border border-[var(--hw-border-subtle)] bg-[var(--hw-bg-deep)] p-3.5 hw-subtle-grid sm:mb-12 sm:rounded-3xl sm:p-8">
+      <div className="mb-4 max-w-2xl sm:mb-7">
+        <p className="text-[10px] font-black uppercase tracking-wide text-[var(--hw-orange)] sm:text-xs">Sell like a pro</p>
+        <h2 className="mt-1.5 text-[17px] font-black leading-tight text-[var(--hw-text-primary)] sm:mt-2 sm:text-2xl md:text-3xl">
           Plans that put your ads up here
         </h2>
-        <p className="mt-2 text-[var(--hw-text-secondary)]">
+        <p className="mt-1.5 text-[13px] leading-6 text-[var(--hw-text-secondary)] sm:mt-2 sm:text-base sm:leading-7">
           Featured slots, longer listings, and lower fees as you scale. Upgrade any time — pay once a month, cancel whenever.
         </p>
       </div>
 
-      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+      <div className="grid gap-2.5 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 xl:grid-cols-5">
         {cards.map((plan, i) => {
           const tier = TIERS[plan.key] || TIERS.starter;
           return (
@@ -175,7 +194,7 @@ export default function PlanBanners({ plans = [], free }) {
         })}
       </div>
 
-      <p className="mt-6 text-sm text-[var(--hw-text-muted)]">
+      <p className="mt-4 text-[11px] text-[var(--hw-text-muted)] sm:mt-6 sm:text-sm">
         Annual billing available — pay for 10 months, get 12.{" "}
         <Link href="/promote" className="font-bold text-[var(--hw-orange)] hover:underline">
           Compare all plans →

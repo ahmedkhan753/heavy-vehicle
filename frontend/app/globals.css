@@ -213,12 +213,16 @@ textarea {
 .hw-neon-card:hover::before { opacity: 1; }
 .hw-neon-card:hover::after { opacity: 0.55; }
 
-/* Featured/popular card sits slightly proud of the row. */
-.hw-neon-card-featured {
-  transform: translateY(-6px) scale(1.02);
-}
-.hw-neon-card-featured:hover {
-  transform: translateY(-12px) scale(1.02);
+/* Featured/popular card sits slightly proud of the row. Only once the cards
+   are actually in a row — scaling a full-width single-column card just clips
+   its own edges against the section's overflow. */
+@media (min-width: 640px) {
+  .hw-neon-card-featured {
+    transform: translateY(-6px) scale(1.02);
+  }
+  .hw-neon-card-featured:hover {
+    transform: translateY(-12px) scale(1.02);
+  }
 }
 
 /* Shimmer used on the headline price / badge. */

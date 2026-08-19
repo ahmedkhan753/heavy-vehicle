@@ -89,85 +89,85 @@ export default function DashboardHome() {
     <>
       {/* Plan banner */}
       <div
-        className="mb-5 flex flex-col gap-3 rounded-xl border bg-[var(--hw-bg-card)] p-5 sm:flex-row sm:items-center sm:justify-between"
+        className="mb-3 flex items-center justify-between gap-3 rounded-xl border bg-[var(--hw-bg-card)] p-3 sm:mb-5 sm:p-5"
         style={{
           borderColor: `color-mix(in srgb, ${planMeta.color} 55%, transparent)`,
           background: `linear-gradient(120deg, color-mix(in srgb, ${planMeta.color} 12%, var(--hw-bg-card)), var(--hw-bg-card) 60%)`,
         }}
       >
-        <div className="flex items-center gap-3">
+        <div className="flex min-w-0 items-center gap-2.5 sm:gap-3">
           <PlanBadge plan={plan} size="lg" />
-          <div>
-            <p className="text-sm text-[var(--hw-text-muted)]">{t("dash.yourPlan") || "Your plan"}</p>
-            <p className="font-black text-[var(--hw-text-primary)]">
+          <div className="min-w-0">
+            <p className="text-[11px] text-[var(--hw-text-muted)] sm:text-sm">{t("dash.yourPlan") || "Your plan"}</p>
+            <p className="truncate text-[13px] font-black text-[var(--hw-text-primary)] sm:text-base">
               {isPaidPlan(plan) ? `${planMeta.name} seller` : "Free account"}
             </p>
           </div>
         </div>
         <Link
           href={onTopTier ? "/dashboard/billing" : "/subscription-pricings"}
-          className="inline-flex h-10 shrink-0 items-center justify-center rounded-lg px-5 text-sm font-black text-[var(--hw-text-inverse)]"
+          className="inline-flex h-9 shrink-0 items-center justify-center rounded-lg px-3 text-[12px] font-black text-[var(--hw-text-inverse)] sm:h-10 sm:px-5 sm:text-sm"
           style={{ background: planMeta.color }}
         >
-          {onTopTier ? "Manage plan" : "Upgrade plan"}
+          {onTopTier ? "Manage" : "Upgrade"}
         </Link>
       </div>
 
-      {/* Stat cards */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {/* Stat cards — 2-up on phones instead of four full-width blocks */}
+      <div className="grid grid-cols-2 gap-2.5 sm:gap-4 lg:grid-cols-4">
         {stats.map((s) => (
-          <div key={s.label} className="rounded-xl border border-[var(--hw-border-default)] bg-[var(--hw-bg-card)] p-5">
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-[var(--hw-text-muted)]">{s.label}</p>
-              <span className="flex h-9 w-9 items-center justify-center rounded-lg" style={{ color: s.accent, background: "var(--hw-soft-panel)" }}>
+          <div key={s.label} className="rounded-xl border border-[var(--hw-border-default)] bg-[var(--hw-bg-card)] p-3 sm:p-5">
+            <div className="flex items-center justify-between gap-2">
+              <p className="min-w-0 truncate text-[11px] text-[var(--hw-text-muted)] sm:text-sm">{s.label}</p>
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg sm:h-9 sm:w-9" style={{ color: s.accent, background: "var(--hw-soft-panel)" }}>
                 {s.icon}
               </span>
             </div>
-            <p className="mt-3 text-3xl font-black capitalize text-[var(--hw-text-primary)]">{s.value}</p>
+            <p className="mt-1.5 truncate text-xl font-black capitalize text-[var(--hw-text-primary)] sm:mt-3 sm:text-3xl">{s.value}</p>
           </div>
         ))}
       </div>
 
-      <div className="mt-6 grid gap-5 lg:grid-cols-[1fr_320px]">
+      <div className="mt-3 grid gap-3 sm:mt-6 sm:gap-5 lg:grid-cols-[1fr_320px]">
         {/* Recent ads */}
-        <section className="min-w-0 rounded-xl border border-[var(--hw-border-default)] bg-[var(--hw-bg-card)] p-5">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-black text-[var(--hw-text-primary)]">{t("dash.recentAds")}</h2>
-            <Link href="/dashboard/my-ads" className="text-sm font-bold text-[var(--hw-orange)] hover:underline">{t("dash.manageAds")}</Link>
+        <section className="min-w-0 rounded-xl border border-[var(--hw-border-default)] bg-[var(--hw-bg-card)] p-3.5 sm:p-5">
+          <div className="flex items-center justify-between gap-3">
+            <h2 className="text-base font-black text-[var(--hw-text-primary)] sm:text-xl">{t("dash.recentAds")}</h2>
+            <Link href="/dashboard/my-ads" className="shrink-0 text-[11px] font-bold text-[var(--hw-orange)] hover:underline sm:text-sm">{t("dash.manageAds")}</Link>
           </div>
-          <div className="mt-4 grid gap-3">
+          <div className="mt-3 grid gap-2 sm:mt-4 sm:gap-3">
             {ads.length ? ads.map((ad) => (
-              <Link key={ad._id} href={`/vehicles/${ad._id}`} className="flex items-center gap-3 rounded-lg border border-[var(--hw-border-subtle)] bg-[var(--hw-bg-deep)] p-3 transition hover:border-[var(--hw-orange)]">
+              <Link key={ad._id} href={`/vehicles/${ad._id}`} className="flex items-center gap-2.5 rounded-lg border border-[var(--hw-border-subtle)] bg-[var(--hw-bg-deep)] p-2.5 transition hover:border-[var(--hw-orange)] sm:gap-3 sm:p-3">
                 <Thumb ad={ad} />
                 <div className="min-w-0 flex-1">
-                  <p className="truncate font-bold text-[var(--hw-text-primary)]">{ad.title}</p>
-                  <p className="mt-1 text-sm font-bold text-[var(--hw-text-secondary)]">{formatPrice(ad.price, ad.priceDisplay)}</p>
+                  <p className="truncate text-[13px] font-bold text-[var(--hw-text-primary)] sm:text-base">{ad.title}</p>
+                  <p className="mt-0.5 text-[12px] font-bold text-[var(--hw-text-secondary)] sm:mt-1 sm:text-sm">{formatPrice(ad.price, ad.priceDisplay)}</p>
                 </div>
-                <div className="flex flex-col items-end gap-1.5">
+                <div className="flex shrink-0 flex-col items-end gap-1">
                   <Badge variant={statusVariant(ad.status)}>{ad.status}</Badge>
-                  <span className="text-xs text-[var(--hw-text-muted)]">{ad.views || 0} {t("dash.viewsWord")}</span>
+                  <span className="whitespace-nowrap text-[10px] text-[var(--hw-text-muted)] sm:text-xs">{ad.views || 0} {t("dash.viewsWord")}</span>
                 </div>
               </Link>
             )) : (
-              <div className="rounded-lg border border-dashed border-[var(--hw-border-default)] p-8 text-center">
-                <p className="text-[var(--hw-text-secondary)]">{t("dash.noAds")}</p>
-                <Link href="/post-ad" className="mt-4 inline-flex h-10 items-center rounded-lg bg-[var(--hw-orange)] px-4 text-sm font-black text-[var(--hw-text-inverse)]">{t("dash.postNewAd")}</Link>
+              <div className="rounded-lg border border-dashed border-[var(--hw-border-default)] p-5 text-center sm:p-8">
+                <p className="text-[13px] text-[var(--hw-text-secondary)] sm:text-base">{t("dash.noAds")}</p>
+                <Link href="/post-ad" className="mt-3 inline-flex h-10 items-center rounded-lg bg-[var(--hw-orange)] px-4 text-[13px] font-black text-[var(--hw-text-inverse)] sm:mt-4 sm:text-sm">{t("dash.postNewAd")}</Link>
               </div>
             )}
           </div>
         </section>
 
         {/* Role-aware callout */}
-        <aside className="min-w-0 rounded-xl border border-[var(--hw-border-default)] bg-[var(--hw-bg-card)] p-5">
-          <h2 className="text-xl font-black text-[var(--hw-text-primary)]">
+        <aside className="min-w-0 rounded-xl border border-[var(--hw-border-default)] bg-[var(--hw-bg-card)] p-3.5 sm:p-5">
+          <h2 className="text-base font-black text-[var(--hw-text-primary)] sm:text-xl">
             {isDealer ? t("dash.dealerProfile") : t("dash.upgradeDealer")}
           </h2>
-          <p className="mt-2 text-sm text-[var(--hw-text-secondary)]">
+          <p className="mt-1.5 text-[13px] leading-6 text-[var(--hw-text-secondary)] sm:mt-2 sm:text-sm">
             {isDealer ? t("dash.dealerHint") : t("dash.upgradeHint")}
           </p>
           <Link
             href={isDealer ? "/dealers" : "/dealers/register"}
-            className="mt-4 inline-flex h-11 w-full items-center justify-center rounded-lg border border-[var(--hw-border-strong)] px-4 text-sm font-bold text-[var(--hw-text-primary)] transition hover:border-[var(--hw-orange)]"
+            className="mt-3 inline-flex h-10 w-full items-center justify-center rounded-lg border border-[var(--hw-border-strong)] px-4 text-[13px] font-bold text-[var(--hw-text-primary)] transition hover:border-[var(--hw-orange)] sm:mt-4 sm:h-11 sm:text-sm"
           >
             {isDealer ? t("dealer.title") : t("dealer.become")}
           </Link>

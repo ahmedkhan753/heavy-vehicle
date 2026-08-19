@@ -52,21 +52,20 @@ export default function HeavyWheelsAssistant() {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading, open]);
 
+  // Clearing the thread is what "New chat" is for. Closing the window is not
+  // the same intent — people minimise it to look something up on the page and
+  // expect their conversation to still be there when they reopen it.
   function resetConversation() {
     setMessages([createGreetingMessage(lang)]);
     setInput("");
+    setLoading(false);
+    if (typeof window !== "undefined") {
+      window.localStorage.removeItem(ASSISTANT_STORAGE_KEY);
+    }
   }
 
   function handleClose() {
     setOpen(false);
-    // Clear chat on close so next open starts fresh
-    setMessages([createGreetingMessage(lang)]);
-    setInput("");
-    setLoading(false);
-    // Also clear any persisted messages
-    if (typeof window !== "undefined") {
-      window.localStorage.removeItem(ASSISTANT_STORAGE_KEY);
-    }
   }
 
   async function sendPrompt(promptText) {

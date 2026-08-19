@@ -58,9 +58,9 @@ export default function DashboardSidebar() {
   return (
     <aside className="min-w-0 lg:sticky lg:top-24 lg:self-start">
       {/* Identity card */}
-      <div className="rounded-xl border border-[var(--hw-border-default)] bg-[var(--hw-bg-card)] p-4">
-        <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[var(--hw-orange)] text-lg font-black text-[var(--hw-text-inverse)]">
+      <div className="rounded-xl border border-[var(--hw-border-default)] bg-[var(--hw-bg-card)] p-3 sm:p-4">
+        <div className="flex items-center gap-2.5 sm:gap-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[var(--hw-orange)] text-base font-black text-[var(--hw-text-inverse)] sm:h-12 sm:w-12 sm:text-lg">
             {user?.avatar?.url ? (
               <Image src={user.avatar.url} alt="" width={48} height={48} className="h-full w-full object-cover" />
             ) : (
@@ -68,10 +68,10 @@ export default function DashboardSidebar() {
             )}
           </div>
           <div className="min-w-0">
-            <p className="truncate font-black text-[var(--hw-text-primary)]">
+            <p className="truncate text-[14px] font-black text-[var(--hw-text-primary)] sm:text-base">
               {isAuthenticated ? user?.name : t("dash.loginRequired")}
             </p>
-            <span className="mt-0.5 inline-flex items-center rounded-full bg-[var(--hw-soft-panel)] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[var(--hw-text-muted)]">
+            <span className="mt-0.5 inline-flex items-center rounded-full bg-[var(--hw-soft-panel)] px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-[var(--hw-text-muted)] sm:text-[10px]">
               {user?.role || "user"}
             </span>
           </div>
@@ -79,7 +79,7 @@ export default function DashboardSidebar() {
 
         <Link
           href="/post-ad"
-          className="mt-4 flex h-11 items-center justify-center gap-2 rounded-lg bg-[var(--hw-orange)] text-sm font-black text-[var(--hw-text-inverse)] transition hover:bg-[var(--hw-amber)]"
+          className="mt-3 flex h-10 items-center justify-center gap-2 rounded-lg bg-[var(--hw-orange)] text-[13px] font-black text-[var(--hw-text-inverse)] transition hover:bg-[var(--hw-amber)] sm:mt-4 sm:h-11 sm:text-sm"
         >
           {icons.post}
           {t("dash.postNewAd")}
@@ -105,18 +105,18 @@ export default function DashboardSidebar() {
       </nav>
 
       {/* Mobile nav — horizontal scrollable tabs */}
-      <nav className="mt-4 flex gap-2 overflow-x-auto pb-1 lg:hidden">
+      <nav className="hw-no-scrollbar mt-3 flex gap-1.5 overflow-x-auto pb-1 lg:hidden">
         {links.map((link) => (
           <Link
             key={link.href}
             href={link.href}
-            className={`flex shrink-0 items-center gap-2 rounded-lg border px-3 py-2 text-sm font-bold transition ${
+            className={`flex shrink-0 items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-[12px] font-bold transition ${
               isActive(link)
                 ? "border-[var(--hw-orange)] bg-[var(--hw-orange)] text-[var(--hw-text-inverse)]"
                 : "border-[var(--hw-border-default)] bg-[var(--hw-bg-card)] text-[var(--hw-text-secondary)]"
             }`}
           >
-            {link.icon}
+            <span className="[&>svg]:h-4 [&>svg]:w-4">{link.icon}</span>
             {link.label}
           </Link>
         ))}
