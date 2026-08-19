@@ -14,12 +14,15 @@
 require("dotenv").config();
 
 const mongoose = require("mongoose");
-const validator = require("validator");
 const User = require("../models/User");
 
 async function syncAdminAccountFromEnv() {
   const rawEmail = (process.env.ADMIN_EMAIL || "").trim();
-  const email = rawEmail ? validator.normalizeEmail(rawEmail) : "";
+  // Must match the plain lowercase used by the login controller and the
+  // User model's schema-level lowercase setter — NOT validator.normalizeEmail(),
+  // which strips dots from Gmail local-parts and would silently create a
+  // different email than the one the admin actually logs in with.
+  const email = rawEmail.toLowerCase();
   const password = process.env.ADMIN_PASSWORD;
   const name = process.env.ADMIN_NAME || "HeavyWheels Admin";
   const phone = (process.env.ADMIN_PHONE || "03000000000").trim();
@@ -28,20 +31,27 @@ async function syncAdminAccountFromEnv() {
     return null;
   }
 
-  const existing = await User.findOne({ email });
+  // +password: accounts created via Google sign-in have no password at all,
+  // and the built-in-admin login bypass relies on that being fixed up here
+  // so the account still works if that bypass is ever changed or removed.
+  const existing = await User.findOne({ email }).select("+password");
 
   if (existing) {
     const needsUpdate =
       existing.role !== "admin" ||
       !existing.isEmailVerified ||
       !existing.isActive ||
-      existing.isBanned;
+      existing.isBanned ||
+      !existing.password;
 
     if (needsUpdate) {
       existing.role = "admin";
       existing.isEmailVerified = true;
       existing.isActive = true;
       existing.isBanned = false;
+      if (!existing.password) {
+        existing.password = password; // pre-save hook hashes it
+      }
       await existing.save({ validateBeforeSave: false });
     }
 
@@ -64,7 +74,7 @@ async function syncAdminAccountFromEnv() {
 
 async function seedAdmin() {
   const rawEmail = (process.env.ADMIN_EMAIL || "").trim();
-  const email = rawEmail ? validator.normalizeEmail(rawEmail) : "";
+  const email = rawEmail.toLowerCase();
   const password = process.env.ADMIN_PASSWORD;
 
   if (!email || !password) {

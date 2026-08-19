@@ -64,6 +64,17 @@ module.exports = {
     PUBLIC_APP_URL: process.env.PUBLIC_APP_URL ||
       (process.env.ALLOWED_ORIGINS || "http://localhost:3000").split(",")[0],
 
+    // A "Secure" cookie is silently dropped by the browser on a plain-HTTP
+    // origin, so basing it on NODE_ENV alone breaks sessions on any
+    // production deployment that isn't (yet) behind HTTPS — e.g. a bare
+    // VPS IP. Derive it from the actual scheme of the public app URL
+    // instead, with an explicit env override for edge cases.
+    COOKIE_SECURE: process.env.COOKIE_SECURE !== undefined
+      ? process.env.COOKIE_SECURE === "true"
+      : (process.env.PUBLIC_APP_URL ||
+         (process.env.ALLOWED_ORIGINS || "http://localhost:3000").split(",")[0]
+        ).startsWith("https://"),
+
     // Safepay (card gateway) — OPTIONAL. When these are absent the card rail
     // stays dark (cardEnabled:false) and only the manual flow is offered, so
     // the server boots fine without them. Default to sandbox.

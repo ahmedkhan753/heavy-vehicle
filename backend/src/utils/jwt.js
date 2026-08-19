@@ -72,6 +72,11 @@ function verifyRefreshToken(token) {
   });
 }
 
+// The `Domain` cookie attribute must be a registrable domain name — browsers
+// reject it outright when set to a bare IP address, so on an IP-based
+// deployment we omit it entirely and let the cookie default to host-only.
+const IS_IP_ADDRESS = /^\d{1,3}(\.\d{1,3}){3}$/.test(env.COOKIE_DOMAIN);
+
 /**
  * Set refresh token as HTTP-only cookie
  * @param {Object} res      - Express response object
@@ -82,10 +87,10 @@ function setRefreshCookie(res, token) {
 
   res.cookie("hw_refresh_token", token, {
     httpOnly: true,                          // Not accessible via JS
-    secure:   env.IS_PRODUCTION,            // HTTPS only in production
-    sameSite: env.IS_PRODUCTION ? "strict" : "lax",
+    secure:   env.COOKIE_SECURE,             // HTTPS only when actually served over HTTPS
+    sameSite: env.COOKIE_SECURE ? "strict" : "lax",
     maxAge:   MS_30_DAYS,
-    domain:   env.COOKIE_DOMAIN,
+    ...(IS_IP_ADDRESS ? {} : { domain: env.COOKIE_DOMAIN }),
     path:     "/",
   });
 }
@@ -97,10 +102,10 @@ function setRefreshCookie(res, token) {
 function clearRefreshCookie(res) {
   res.cookie("hw_refresh_token", "", {
     httpOnly: true,
-    secure:   env.IS_PRODUCTION,
-    sameSite: env.IS_PRODUCTION ? "strict" : "lax",
+    secure:   env.COOKIE_SECURE,
+    sameSite: env.COOKIE_SECURE ? "strict" : "lax",
     maxAge:   0,
-    domain:   env.COOKIE_DOMAIN,
+    ...(IS_IP_ADDRESS ? {} : { domain: env.COOKIE_DOMAIN }),
     path:     "/",
   });
 }

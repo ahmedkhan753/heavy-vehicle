@@ -1,23 +1,10 @@
 services:
-  # ── MongoDB ──────────────────────────────────────────────────
-  mongo:
-    image: mongo:7
-    container_name: heavywheels-mongo
-    restart: unless-stopped
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongo_data:/data/db
-    environment:
-      MONGO_INITDB_DATABASE: heavywheels
-    healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 10s
-
   # ── Backend (Express API) ───────────────────────────────────
+  # Uses the MongoDB Atlas cluster configured via MONGODB_URI in
+  # backend/.env. A self-hosted Mongo container used to run alongside
+  # this stack, but it was publicly exposed on 27017 with no auth and
+  # got wiped by an internet ransomware bot — removed in favor of the
+  # already-provisioned Atlas cluster (authenticated, not host-exposed).
   backend:
     build:
       context: ./backend
@@ -26,14 +13,9 @@ services:
     restart: unless-stopped
     ports:
       - "5000:5000"
-    depends_on:
-      mongo:
-        condition: service_healthy
     env_file:
       - ./backend/.env
     environment:
-      # Override MongoDB URI to point to the Docker network hostname
-      MONGODB_URI: mongodb://mongo:27017/heavywheels
       NODE_ENV: production
 
   # ── Frontend (Next.js) ─────────────────────────────────────
@@ -51,6 +33,3 @@ services:
       - "3000:3000"
     depends_on:
       - backend
-
-volumes:
-  mongo_data:
