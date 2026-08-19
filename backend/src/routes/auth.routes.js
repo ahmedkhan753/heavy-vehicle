@@ -41,8 +41,7 @@ const registerValidation = [
   body("email")
     .trim()
     .notEmpty().withMessage("Email is required")
-    .isEmail().withMessage("Please enter a valid email address")
-    .normalizeEmail(),
+    .isEmail().withMessage("Please enter a valid email address"),
 
   body("phone")
     .trim()
@@ -72,11 +71,13 @@ const loginValidation = [
   body("email")
     .trim()
     .notEmpty().withMessage("Email is required")
-    .isEmail().withMessage("Please enter a valid email address")
-    // Must match register's normalization (Gmail dot/sub-address stripping),
-    // otherwise an account registered as e.g. "ab.cd@gmail.com" → stored
-    // "abcd@gmail.com" can never be found at login. See also forgot-password.
-    .normalizeEmail(),
+    .isEmail().withMessage("Please enter a valid email address"),
+    // Deliberately NOT .normalizeEmail(): that strips dots/sub-addresses from
+    // Gmail local-parts, which diverges from the plain .toLowerCase() used
+    // everywhere accounts are actually stored/looked up (User model, register,
+    // googleLogin, the built-in admin sync) — a real address containing a dot
+    // (e.g. the ADMIN_EMAIL account) would never match after being "normalized"
+    // here but not there.
 
   body("password")
     .notEmpty().withMessage("Password is required"),
@@ -86,8 +87,7 @@ const forgotPasswordValidation = [
   body("email")
     .trim()
     .notEmpty().withMessage("Email is required")
-    .isEmail().withMessage("Please enter a valid email address")
-    .normalizeEmail(),
+    .isEmail().withMessage("Please enter a valid email address"),
 ];
 
 const resetPasswordValidation = [
