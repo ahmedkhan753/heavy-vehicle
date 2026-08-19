@@ -69,7 +69,15 @@ function getSort(sortKey = "newest") {
     "price-desc": { price: -1 },
     popular: { views: -1 },
   };
-  return { ...(sortMap[sortKey] || sortMap.newest), createdAt: -1 };
+  const sortObj = sortMap[sortKey] || sortMap.newest;
+
+  // Pin featured parts to the top for the default browse sorts, same as
+  // vehicles (see APIFeatures.sort in utils/apiFeatures.js) — an explicit
+  // price/oldest sort is respected strictly instead.
+  const featuredFirst = sortKey === "newest" || sortKey === "popular";
+  const primary = featuredFirst ? { featured: -1 } : {};
+
+  return { ...primary, ...sortObj, createdAt: -1 };
 }
 
 async function list(req, res, next) {

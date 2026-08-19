@@ -1,35 +1,66 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Image from "next/image";
+
+const SWIPE_THRESHOLD_PX = 40;
 
 export default function VehicleGallery({ images, title, fallbackImage }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+  const [zoomed, setZoomed] = useState(false);
+  const touchStartX = useRef(null);
 
   // Use either the provided images array or a mock array with the fallback image
-  const displayImages = images && images.length > 0 
-    ? images 
+  const displayImages = images && images.length > 0
+    ? images
     : [{ url: fallbackImage, publicId: "fallback" }];
+
+  const goNext = () => setCurrentIndex((prev) => (prev + 1) % displayImages.length);
+  const goPrev = () => setCurrentIndex((prev) => (prev - 1 + displayImages.length) % displayImages.length);
 
   const handleNext = (e) => {
     e.stopPropagation();
-    setCurrentIndex((prev) => (prev + 1) % displayImages.length);
+    goNext();
   };
 
   const handlePrev = (e) => {
     e.stopPropagation();
-    setCurrentIndex((prev) => (prev - 1 + displayImages.length) % displayImages.length);
+    goPrev();
   };
 
-  const openLightbox = () => setIsLightboxOpen(true);
-  const closeLightbox = () => setIsLightboxOpen(false);
+  const onTouchStart = (e) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+
+  const onTouchEnd = (e) => {
+    if (touchStartX.current === null) return;
+    const delta = e.changedTouches[0].clientX - touchStartX.current;
+    touchStartX.current = null;
+    if (Math.abs(delta) < SWIPE_THRESHOLD_PX) return;
+    if (delta < 0) goNext();
+    else goPrev();
+  };
+
+  const openLightbox = () => {
+    setZoomed(false);
+    setIsLightboxOpen(true);
+  };
+  const closeLightbox = () => {
+    setIsLightboxOpen(false);
+    setZoomed(false);
+  };
 
   return (
     <>
       {/* Main Gallery Container */}
       <div className="overflow-hidden rounded-lg border border-[var(--hw-border-default)] bg-[var(--hw-bg-card)] group relative">
-        <div className="relative aspect-[16/9] w-full cursor-pointer bg-black/5" onClick={openLightbox}>
+        <div
+          className="relative aspect-[16/9] w-full cursor-pointer bg-black/5 touch-pan-y"
+          onClick={openLightbox}
+          onTouchStart={onTouchStart}
+          onTouchEnd={onTouchEnd}
+        >
           <Image
             src={displayImages[currentIndex].url || fallbackImage}
             alt={`${title} - Image ${currentIndex + 1}`}
@@ -40,26 +71,30 @@ export default function VehicleGallery({ images, title, fallbackImage }) {
           />
         </div>
 
-        {/* Navigation Arrows (only show if multiple images) */}
+        {/* Navigation Arrows (only show if multiple images) — always visible on
+            touch devices; desktop still gets the hover fade-in via group-hover. */}
         {displayImages.length > 1 && (
           <>
             <button
               onClick={handlePrev}
-              className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-black/50 p-2 text-white opacity-0 transition-opacity hover:bg-black/80 group-hover:opacity-100 flex items-center justify-center"
+              className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-black/50 p-2 text-white opacity-80 transition-opacity hover:bg-black/80 group-hover:opacity-100 flex items-center justify-center sm:opacity-0"
               aria-label="Previous image"
             >
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
             </button>
             <button
               onClick={handleNext}
-              className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-black/50 p-2 text-white opacity-0 transition-opacity hover:bg-black/80 group-hover:opacity-100 flex items-center justify-center"
+              className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-black/50 p-2 text-white opacity-80 transition-opacity hover:bg-black/80 group-hover:opacity-100 flex items-center justify-center sm:opacity-0"
               aria-label="Next image"
             >
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
             </button>
+            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 rounded-full bg-black/60 px-3 py-1 text-xs font-bold text-white/90">
+              {currentIndex + 1} / {displayImages.length}
+            </div>
           </>
         )}
-        
+
         {/* Thumbnails */}
         {displayImages.length > 1 && (
           <div className="flex gap-2 border-t border-[var(--hw-border-subtle)] p-3 overflow-x-auto scrollbar-thin scrollbar-thumb-[var(--hw-border-strong)] scrollbar-track-transparent">
@@ -97,16 +132,21 @@ export default function VehicleGallery({ images, title, fallbackImage }) {
           >
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
           </button>
-          
-          <div 
-            className="relative h-full max-h-[90vh] w-full max-w-5xl"
-            onClick={(e) => e.stopPropagation()} 
+
+          <div
+            className="relative h-full max-h-[90vh] w-full max-w-5xl overflow-hidden"
+            onClick={(e) => {
+              e.stopPropagation();
+              setZoomed((z) => !z);
+            }}
+            onTouchStart={onTouchStart}
+            onTouchEnd={onTouchEnd}
           >
             <Image
               src={displayImages[currentIndex].url || fallbackImage}
               alt={`${title} - Lightbox`}
               fill
-              className="object-contain"
+              className={`object-contain transition-transform duration-200 ${zoomed ? "scale-[2] cursor-zoom-out" : "cursor-zoom-in"}`}
             />
 
             {displayImages.length > 1 && (
@@ -126,11 +166,11 @@ export default function VehicleGallery({ images, title, fallbackImage }) {
               </>
             )}
           </div>
-          
+
           {/* Lightbox text/counter */}
           {displayImages.length > 1 && (
             <div className="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full bg-black/60 px-4 py-1 text-white/90 text-sm font-medium">
-              {currentIndex + 1} / {displayImages.length}
+              {currentIndex + 1} / {displayImages.length} · tap image to zoom
             </div>
           )}
         </div>

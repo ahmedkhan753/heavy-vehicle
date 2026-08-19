@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import VehicleCard from "@/components/vehicles/VehicleCard";
+import PartCard from "@/components/parts/PartCard";
 import BrandBrowse from "@/components/home/BrandBrowse";
 import CategoryBrowse from "@/components/home/CategoryBrowse";
 import PartCategoryBrowse from "@/components/home/PartCategoryBrowse";
@@ -11,31 +12,47 @@ import { getT, getLang } from "@/lib/i18n-server";
 
 export const revalidate = 60;
 
+// Homepage listings mix vehicles and parts together. Once paid plans are in
+// wide use, ?limit here should mostly surface premium/featured slots — free
+// ads fill whatever's left. Featured-first ordering already comes from the
+// API (vehicle.controller via APIFeatures, part.controller via getSort), so
+// merging two already-sorted lists and re-sorting by (featured, recency) is
+// enough to interleave them correctly.
+const HOME_LISTINGS_LIMIT = 24;
+
 async function getHomeData() {
   try {
-    const [featuredRes, latestRes, dealersRes] = await Promise.all([
-      fetch(`${API_BASE_URL}/vehicles/featured?limit=4`, { next: { revalidate: 60 } }),
-      fetch(`${API_BASE_URL}/vehicles?limit=6&sort=newest`, { next: { revalidate: 60 } }),
+    const [vehiclesRes, partsRes, dealersRes] = await Promise.all([
+      fetch(`${API_BASE_URL}/vehicles?limit=${HOME_LISTINGS_LIMIT}&sort=newest`, { next: { revalidate: 60 } }),
+      fetch(`${API_BASE_URL}/parts?limit=${HOME_LISTINGS_LIMIT}&sort=newest`, { next: { revalidate: 60 } }),
       fetch(`${API_BASE_URL}/dealers?limit=4&verified=true`, { next: { revalidate: 60 } }),
     ]);
 
-    const featured = featuredRes.ok ? await featuredRes.json() : { data: [] };
-    const latest = latestRes.ok ? await latestRes.json() : { data: [] };
+    const vehiclesJson = vehiclesRes.ok ? await vehiclesRes.json() : { data: [] };
+    const partsJson = partsRes.ok ? await partsRes.json() : { data: [] };
     const dealers = dealersRes.ok ? await dealersRes.json() : { data: [] };
 
+    const vehicles = (vehiclesJson.data || []).map((v) => ({ kind: "vehicle", item: v }));
+    const parts = (partsJson.data || []).map((p) => ({ kind: "part", item: p }));
+
+    const listings = [...vehicles, ...parts]
+      .sort((a, b) => {
+        if (!!a.item.featured !== !!b.item.featured) return a.item.featured ? -1 : 1;
+        return new Date(b.item.bumpedAt || b.item.createdAt) - new Date(a.item.bumpedAt || a.item.createdAt);
+      })
+      .slice(0, HOME_LISTINGS_LIMIT);
+
     return {
-      featured: featured.data || [],
-      latest: latest.data || [],
+      listings,
       dealers: dealers.data || [],
     };
   } catch {
-    return { featured: [], latest: [], dealers: [] };
+    return { listings: [], dealers: [] };
   }
 }
 
 export default async function HomePage() {
-  const { featured, latest, dealers } = await getHomeData();
-  const vehicles = featured.length ? featured : latest;
+  const { listings, dealers } = await getHomeData();
   const t = await getT();
   const lang = await getLang();
 
@@ -107,10 +124,19 @@ export default async function HomePage() {
 
         <section className="border-y border-[var(--hw-border-subtle)] bg-[var(--hw-bg-deep)]">
           <div className="hw-section hw-container">
-            <SectionHeader eyebrow={t("page.listings")} title={featured.length ? t("home.featured") : t("home.latestListings")} action={t("home.seeAllListings")} href="/vehicles" />
-            {vehicles.length ? (
-              <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
-                {vehicles.slice(0, 4).map((vehicle) => <VehicleCard key={vehicle._id} vehicle={vehicle} />)}
+            <SectionHeader
+              eyebrow={t("page.listings")}
+              title={listings.some((l) => l.item.featured) ? t("home.featured") : t("home.latestListings")}
+              action={t("home.seeAllListings")}
+              href="/vehicles"
+            />
+            {listings.length ? (
+              <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {listings.map(({ kind, item }) =>
+                  kind === "vehicle"
+                    ? <VehicleCard key={item._id} vehicle={item} />
+                    : <PartCard key={item._id} part={item} />
+                )}
               </div>
             ) : (
               <EmptyState title={t("home.noListings")} body={t("home.noListingsBody")} href="/post-ad" action={t("nav.postFreeAd")} />

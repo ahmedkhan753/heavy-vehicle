@@ -1,6 +1,6 @@
 import Link from "next/link";
-import Image from "next/image";
 import PartCard from "@/components/parts/PartCard";
+import VehicleGallery from "@/components/vehicles/VehicleGallery";
 import PlanBadge from "@/components/marketing/PlanBadge";
 import { planBorderStyle } from "@/components/marketing/PlanAdornments";
 import { API_BASE_URL } from "@/lib/api";
@@ -99,18 +99,11 @@ export default async function PartDetailPage({ params }) {
 
       <div className="grid gap-8 lg:grid-cols-[1fr_360px]">
         <section>
-          <div className="overflow-hidden rounded-lg border border-[var(--hw-border-default)] bg-[var(--hw-bg-card)]">
-            <div className="relative aspect-[16/9] w-full">
-              <Image src={partImage(part)} alt={part.title} fill priority sizes="(max-width: 1024px) 100vw, 66vw" className="object-cover" />
-            </div>
-            <div className="grid grid-cols-4 gap-2 border-t border-[var(--hw-border-subtle)] p-3">
-              {(part.images || []).slice(0, 4).map((item) => (
-                <div key={item.publicId || item.url} className="relative aspect-[16/10] overflow-hidden rounded-md">
-                  <Image src={item.url} alt="" fill sizes="(max-width: 1024px) 25vw, 180px" className="object-cover" />
-                </div>
-              ))}
-            </div>
-          </div>
+          <VehicleGallery
+            images={part.images}
+            title={title}
+            fallbackImage={partImage(part)}
+          />
 
           <div className="mt-6 rounded-lg border border-[var(--hw-border-default)] bg-[var(--hw-bg-card)] p-5">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
