@@ -76,6 +76,7 @@ export default async function VehicleDetailPage({ params }) {
   }
 
   const seller = vehicle.sellerId || vehicle.seller || {};
+  const isSold = vehicle.status === "sold";
 
   // Bilingual content: show the cookie-language version, with the other version
   // available via the TranslatedText toggle.
@@ -141,11 +142,20 @@ export default async function VehicleDetailPage({ params }) {
                 <p className="text-base font-black leading-tight text-[var(--hw-orange)] sm:text-2xl lg:text-3xl">
                   {formatPrice(vehicle.price, vehicle.priceDisplay)}
                 </p>
-                <p className="mt-0.5 text-[10px] font-bold uppercase text-[var(--hw-green)] sm:text-xs">
+                <p className={`mt-0.5 text-[10px] font-bold uppercase sm:text-xs ${isSold ? "text-[var(--hw-text-muted)]" : "text-[var(--hw-green)]"}`}>
                   {titleCase(vehicle.status || "active")}
                 </p>
               </div>
             </div>
+
+            {isSold ? (
+              <p className="mt-2.5 flex items-center gap-2 rounded-lg border border-[var(--hw-orange)] bg-[var(--hw-soft-panel)] px-3 py-2 text-[13px] font-black text-[var(--hw-orange)] sm:mt-4 sm:text-sm">
+                <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="9" /><path d="m8 12 3 3 5-6" />
+                </svg>
+                {t("listing.soldNotice")}
+              </p>
+            ) : null}
 
             <div className="mt-2.5 flex flex-wrap gap-1.5 sm:mt-4 sm:gap-2">
               <Chip icon="truck">{titleCase(vehicle.type)}</Chip>

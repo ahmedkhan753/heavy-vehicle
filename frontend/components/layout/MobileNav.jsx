@@ -3,13 +3,16 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useLanguage } from "@/Context/LanguageContext";
+import { useAuth } from "@/Context/AuthContext";
 
 const items = [
   ["nav.home", "/", "home"],
   ["common.search", "/vehicles", "search"],
   ["nav.post", "/post-ad", "post"],
   ["nav.parts", "/parts", "parts"],
-  ["nav.account", "/auth/login", "account"],
+  // Account resolves at render — signed-in users go to their dashboard, not
+  // back to a login screen they've already passed.
+  ["nav.account", null, "account"],
 ];
 
 function Icon({ type, active }) {
@@ -59,14 +62,21 @@ function Icon({ type, active }) {
 export default function MobileNav() {
   const pathname = usePathname();
   const { t } = useLanguage();
+  const { isAuthenticated } = useAuth();
 
   if (pathname.startsWith("/post-ad")) return null;
+
+  const accountHref = isAuthenticated ? "/dashboard" : "/auth/login";
 
   return (
     <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-[var(--hw-border-subtle)] bg-[var(--hw-bg-deep)] shadow-2xl lg:hidden">
       <div className="grid h-16 grid-cols-5">
-        {items.map(([key, href, type]) => {
-          const active = href === "/" ? pathname === "/" : pathname.startsWith(href);
+        {items.map(([key, rawHref, type]) => {
+          const href = rawHref ?? accountHref;
+          // The account tab should light up on either destination.
+          const active = type === "account"
+            ? pathname.startsWith("/dashboard") || pathname.startsWith("/auth")
+            : href === "/" ? pathname === "/" : pathname.startsWith(href);
           const center = type === "post";
           const label = t(key);
 

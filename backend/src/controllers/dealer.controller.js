@@ -108,8 +108,10 @@ async function register(req, res, next) {
       businessName, businessType, tagline, description,
       phone, whatsapp, email, website,
       city, address, province,
-      specializations, brands, establishedYear, workingHours,
+      specialization, establishedYear, workingHours,
     } = req.body;
+
+    const SPECIALIZATIONS = ["vehicles", "parts", "both"];
 
     const dealer = await Dealer.create({
       userId:          req.user._id,
@@ -124,8 +126,7 @@ async function register(req, res, next) {
       city:            city.toLowerCase().trim(),
       address:         address || "",
       province:        (province || "").toLowerCase(),
-      specializations: specializations || [],
-      brands:          brands || [],
+      specialization:  SPECIALIZATIONS.includes(specialization) ? specialization : "vehicles",
       establishedYear: establishedYear || null,
       workingHours:    workingHours || "Mon–Sat: 9am–6pm",
     });

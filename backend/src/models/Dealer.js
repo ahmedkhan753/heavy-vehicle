@@ -6,7 +6,6 @@
  */
 
 const mongoose = require("mongoose");
-const { VEHICLE_TYPE_SLUGS } = require("../config/taxonomy");
 
 const dealerSchema = new mongoose.Schema(
   {
@@ -165,14 +164,16 @@ const dealerSchema = new mongoose.Schema(
       count:   { type: Number, default: 0 },
     },
 
-    // ── Specializations ───────────────────────────────────────
-    // What types of vehicles they deal in
-    specializations: [
-      { type: String, enum: VEHICLE_TYPE_SLUGS },
-    ],
-
-    // Brands they deal in
-    brands: [{ type: String, lowercase: true }],
+    // ── Specialization ────────────────────────────────────────
+    // A dealer is a business registering on the site, so what matters is
+    // simply which side of the marketplace they trade on. This replaces the
+    // old per-vehicle-type checkbox list (and the free-text `brands` list),
+    // which asked a showroom to tick a dozen boxes to say "we sell trucks".
+    specialization: {
+      type: String,
+      enum: ["vehicles", "parts", "both"],
+      default: "vehicles",
+    },
 
     // Years in business
     establishedYear: { type: Number },

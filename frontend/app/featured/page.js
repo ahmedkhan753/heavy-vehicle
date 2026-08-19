@@ -46,7 +46,7 @@ export default async function FeaturedPage() {
         </Link>
       </div>
 
-      <PlanBanners plans={planData?.plans || []} free={planData?.free} />
+      <PlanBanners plans={planData?.plans || []} free={planData?.free} t={t} />
 
       {empty ? (
         <div className="rounded-xl border border-dashed border-[var(--hw-border-default)] bg-[var(--hw-bg-card)] p-12 text-center">

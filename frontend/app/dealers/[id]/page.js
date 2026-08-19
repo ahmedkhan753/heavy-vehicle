@@ -5,7 +5,6 @@ import PlanBadge from "@/components/marketing/PlanBadge";
 import { planBorderStyle } from "@/components/marketing/PlanAdornments";
 import { getPlanMeta, isPaidPlan } from "@/lib/plans";
 import { API_BASE_URL } from "@/lib/api";
-import { titleCase } from "@/lib/format";
 import { cityLabel } from "@/lib/constants";
 import { getT, getLang } from "@/lib/i18n-server";
 
@@ -104,7 +103,7 @@ export default async function DealerProfilePage({ params }) {
             <p>{dealer.description || dealer.tagline || t("dealerp.fallbackDesc")}</p>
             <p>{t("dealerp.addressLabel")}: {dealer.address || t("veh.notListed")}</p>
             <p>{t("dealerp.workingHours")}: {dealer.workingHours || t("veh.notListed")}</p>
-            <p>{t("dealerp.brandsLabel")}: {(dealer.brands || []).map(titleCase).join(", ") || t("dealerp.multipleBrands")}</p>
+            <p>{t("dealerForm.specialization")} {t(`dealerForm.spec.${dealer.specialization || "vehicles"}`)}</p>
           </div>
         </aside>
       </section>

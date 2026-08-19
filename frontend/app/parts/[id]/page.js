@@ -50,15 +50,15 @@ export default async function PartDetailPage({ params }) {
     return (
       <main className="hw-container py-16">
         <div className="rounded-lg border border-dashed border-[var(--hw-border-default)] bg-[var(--hw-bg-card)] p-10 text-center">
-          <h1 className="text-2xl font-black text-[var(--hw-text-primary)]">Part ad not found</h1>
+          <h1 className="text-2xl font-black text-[var(--hw-text-primary)]">{t("partd.notFound")}</h1>
           <p className="mt-2 text-[var(--hw-text-secondary)]">
-            This spare part may not exist yet, or the backend is not running.
+            {t("partd.notFoundBody")}
           </p>
           <Link
             href="/parts"
             className="mt-5 inline-flex h-11 items-center rounded-lg bg-[var(--hw-orange)] px-5 text-sm font-black text-[var(--hw-text-inverse)]"
           >
-            Back to Parts
+            {t("partd.backToParts")}
           </Link>
         </div>
       </main>
@@ -71,30 +71,30 @@ export default async function PartDetailPage({ params }) {
   const title = lang === "ur" ? (part.titleUr || part.title) : part.title;
   const descEn = part.description || "";
   const descUr = part.descriptionUr || "";
-  const descPrimary = (lang === "ur" ? (descUr || descEn) : descEn) || "Seller has not added a detailed description yet.";
+  const descPrimary = (lang === "ur" ? (descUr || descEn) : descEn) || t("partd.noDescription");
   const descSecondary = lang === "ur" ? descEn : descUr;
   const showLabel = lang === "ur" ? t("listing.showEnglish") : t("listing.showUrdu");
   const hideLabel = lang === "ur" ? t("listing.showUrdu") : t("listing.showEnglish");
 
   const specs = [
-    ["Category", partCategoryLabel(part.category, lang), "layers"],
-    ...(part.subcategory ? [["Part", partSubcategoryLabel(part.subcategory), "wrench"]] : []),
-    ["Condition", titleCase(part.condition), "tag"],
-    ...(part.partType ? [["Type", partTypeLabel(part.partType), "box"]] : []),
-    ...(part.warranty && part.warranty !== "none" ? [["Warranty", warrantyLabel(part.warranty), "shield"]] : []),
-    ["Make", titleCase(part.make || "not listed"), "badge"],
-    ["Model", part.model || "Not listed", "hash"],
-    ["Quantity", part.quantity || 1, "box"],
-    ["City", titleCase(part.city), "pin"],
-    ["Area", part.area || "Not listed", "pin"],
-    ["Province", titleCase(part.province || "not listed"), "pin"],
+    [t("partd.category"), partCategoryLabel(part.category, lang), "layers"],
+    ...(part.subcategory ? [[t("partd.part"), partSubcategoryLabel(part.subcategory), "wrench"]] : []),
+    [t("partd.condition"), titleCase(part.condition), "tag"],
+    ...(part.partType ? [[t("partd.type"), partTypeLabel(part.partType), "box"]] : []),
+    ...(part.warranty && part.warranty !== "none" ? [[t("partd.warranty"), warrantyLabel(part.warranty), "shield"]] : []),
+    [t("partd.make"), titleCase(part.make || "not listed"), "badge"],
+    [t("partd.model"), part.model || t("partd.notListed"), "hash"],
+    [t("partd.quantity"), part.quantity || 1, "box"],
+    [t("partd.city"), titleCase(part.city), "pin"],
+    [t("partd.area"), part.area || t("partd.notListed"), "pin"],
+    [t("partd.province"), titleCase(part.province || "not listed"), "pin"],
   ];
 
   const quickSpecs = [
-    ["Condition", titleCase(part.condition)],
-    ["Make", titleCase(part.make || "—")],
-    ["Model", part.model || "—"],
-    ["Quantity", part.quantity || 1],
+    [t("partd.condition"), titleCase(part.condition)],
+    [t("partd.make"), titleCase(part.make || "—")],
+    [t("partd.model"), part.model || "—"],
+    [t("partd.quantity"), part.quantity || 1],
   ];
 
   return (
@@ -129,10 +129,19 @@ export default async function PartDetailPage({ params }) {
                   {formatPrice(part.price, part.priceDisplay)}
                 </p>
                 {part.negotiable ? (
-                  <p className="mt-0.5 text-[10px] font-bold uppercase text-[var(--hw-text-secondary)] sm:text-xs">Negotiable</p>
+                  <p className="mt-0.5 text-[10px] font-bold uppercase text-[var(--hw-text-secondary)] sm:text-xs">{t("partd.negotiable")}</p>
                 ) : null}
               </div>
             </div>
+
+            {part.status === "sold" ? (
+              <p className="mt-2.5 flex items-center gap-2 rounded-lg border border-[var(--hw-orange)] bg-[var(--hw-soft-panel)] px-3 py-2 text-[13px] font-black text-[var(--hw-orange)] sm:mt-4 sm:text-sm">
+                <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="9" /><path d="m8 12 3 3 5-6" />
+                </svg>
+                {t("listing.soldNotice")}
+              </p>
+            ) : null}
 
             <div className="mt-2.5 flex flex-wrap gap-1.5 sm:mt-4 sm:gap-2">
               <Chip icon="layers">{partCategoryLabel(part.category, lang)}</Chip>
@@ -150,12 +159,12 @@ export default async function PartDetailPage({ params }) {
           className="order-2 h-fit min-w-0 rounded-xl border border-[var(--hw-border-default)] bg-[var(--hw-bg-card)] p-3.5 sm:p-5 lg:sticky lg:top-24 lg:col-start-2 lg:row-start-1 lg:row-span-2"
         >
           <div className="flex items-center justify-between gap-2">
-            <p className="text-[10px] font-black uppercase text-[var(--hw-orange)] sm:text-xs">Seller</p>
+            <p className="text-[10px] font-black uppercase text-[var(--hw-orange)] sm:text-xs">{t("partd.seller")}</p>
             <PlanBadge plan={part.seller?.plan} size="sm" hideFree />
           </div>
-          <h2 className="mt-1.5 text-base font-black text-[var(--hw-text-primary)] sm:mt-2 sm:text-xl">{seller.name || "Seller"}</h2>
+          <h2 className="mt-1.5 text-base font-black text-[var(--hw-text-primary)] sm:mt-2 sm:text-xl">{seller.name || t("partd.seller")}</h2>
           <p className="mt-0.5 text-[11px] text-[var(--hw-text-muted)] sm:mt-1 sm:text-sm">
-            {titleCase(seller.city || part.city)} · {seller.role ? titleCase(seller.role) : "Parts seller"}
+            {titleCase(seller.city || part.city)} · {seller.role ? titleCase(seller.role) : t("partd.partsSeller")}
           </p>
           <div className="mt-3.5 grid gap-2 sm:mt-5 sm:gap-3">
             {(seller.phone || part.seller?.phone) ? (
@@ -163,7 +172,7 @@ export default async function PartDetailPage({ params }) {
                 href={`tel:${seller.phone || part.seller.phone}`}
                 className="inline-flex h-11 items-center justify-center rounded-lg bg-[var(--hw-green)] text-[13px] font-black text-[var(--hw-text-inverse)] sm:h-12 sm:text-sm"
               >
-                Call Seller
+                {t("partd.callSeller")}
               </a>
             ) : null}
             {(part.seller?.whatsapp || seller.phone) ? (
@@ -171,12 +180,12 @@ export default async function PartDetailPage({ params }) {
                 href={`https://wa.me/${part.seller?.whatsapp || seller.phone}`}
                 className="inline-flex h-11 items-center justify-center rounded-lg border border-[var(--hw-border-strong)] text-[13px] font-bold text-[var(--hw-text-primary)] hover:border-[var(--hw-orange)] sm:h-12 sm:text-sm"
               >
-                WhatsApp
+                {t("partd.whatsapp")}
               </a>
             ) : null}
           </div>
           <div className="mt-3.5 rounded-lg bg-[var(--hw-bg-deep)] p-3 text-[11px] leading-5 text-[var(--hw-text-secondary)] sm:mt-5 sm:p-4 sm:text-sm sm:leading-6">
-            Inspect used parts carefully, verify fitment before payment, and keep proof of purchase.
+            {t("partd.safetyNote")}
           </div>
         </aside>
 
@@ -193,7 +202,7 @@ export default async function PartDetailPage({ params }) {
             />
           </Panel>
 
-          <Panel title="Part details">
+          <Panel title={t("partd.details")}>
             <SpecGrid specs={specs} />
           </Panel>
         </div>
@@ -201,7 +210,7 @@ export default async function PartDetailPage({ params }) {
 
       {related.length ? (
         <section className="mt-6 sm:mt-10">
-          <h2 className="mb-3 text-[17px] font-black text-[var(--hw-text-primary)] sm:mb-5 sm:text-2xl">Featured parts</h2>
+          <h2 className="mb-3 text-[17px] font-black text-[var(--hw-text-primary)] sm:mb-5 sm:text-2xl">{t("partd.featuredParts")}</h2>
           <div className="grid grid-cols-2 gap-2.5 sm:gap-5 md:grid-cols-3">
             {related.map((item) => (
               <PartCard key={item._id} part={item} />

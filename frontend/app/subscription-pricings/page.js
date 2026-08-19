@@ -52,7 +52,7 @@ export default async function SubscriptionPricingsPage() {
       {/* Plan banners */}
       <section className="hw-container py-6 sm:py-10 lg:py-12">
         {plans.length ? (
-          <PlanBanners plans={plans} free={planData?.free} />
+          <PlanBanners plans={plans} free={planData?.free} t={t} />
         ) : (
           <div className="rounded-2xl border border-dashed border-[var(--hw-border-default)] bg-[var(--hw-bg-card)] p-6 text-center sm:p-12">
             <h2 className="text-base font-black text-[var(--hw-text-primary)] sm:text-xl">{t("pricing.loadingTitle")}</h2>

@@ -12,16 +12,15 @@ import PlanIcon from "@/components/marketing/PlanIcon";
  */
 
 const fmt = (n) => Number(n || 0).toLocaleString("en-PK");
-const slots = (n) => (n === -1 ? "Unlimited" : n);
 const pct = (rate) => `${(Number(rate || 0) * 100).toFixed(2).replace(/\.?0+$/, "")}%`;
 
-// Per-tier presentation: neon accent + one-line pitch. Keyed by plan key.
+// Per-tier presentation: neon accent + the i18n key for its one-line pitch.
 const TIERS = {
-  free: { neon: "var(--hw-text-muted)", tag: "Get started" },
-  starter: { neon: "var(--hw-cyan)", tag: "For growing sellers" },
-  pro: { neon: "var(--hw-orange)", tag: "Most popular", featured: true },
-  elite: { neon: "var(--hw-blue)", tag: "Full-scale dealers" },
-  elitePro: { neon: "var(--hw-green)", tag: "High-volume — lowest fee", best: true },
+  free: { neon: "var(--hw-text-muted)", tagKey: "plan.tag.free" },
+  starter: { neon: "var(--hw-cyan)", tagKey: "plan.tag.starter" },
+  pro: { neon: "var(--hw-orange)", tagKey: "plan.tag.pro", featured: true },
+  elite: { neon: "var(--hw-blue)", tagKey: "plan.tag.elite" },
+  elitePro: { neon: "var(--hw-green)", tagKey: "plan.tag.elitePro", best: true },
 };
 
 function Feature({ children, neon }) {
@@ -35,8 +34,9 @@ function Feature({ children, neon }) {
   );
 }
 
-function PlanCard({ plan, neon, tag, featured, best, delay }) {
+function PlanCard({ plan, neon, tag, featured, best, delay, t }) {
   const isFree = plan.key === "free";
+  const slots = (n) => (n === -1 ? t("plan.unlimited") : n);
   return (
     <div
       className={`hw-rise-in flex h-full flex-col rounded-2xl p-4 hw-neon-card sm:p-6${featured ? " hw-neon-card-featured" : ""}`}
@@ -51,7 +51,7 @@ function PlanCard({ plan, neon, tag, featured, best, delay }) {
               className="mb-1.5 inline-flex w-fit items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-wide sm:mb-3 sm:px-3 sm:py-1 sm:text-[10px]"
               style={{ background: `color-mix(in srgb, ${neon} 18%, transparent)`, color: neon }}
             >
-              {best ? "★ Best value" : "★ " + tag}
+              {best ? `★ ${t("plan.bestValue")}` : `★ ${tag}`}
             </span>
           ) : (
             <span className="mb-1.5 block text-[9px] font-black uppercase tracking-wide sm:mb-3 sm:text-[10px]" style={{ color: neon }}>
@@ -75,14 +75,14 @@ function PlanCard({ plan, neon, tag, featured, best, delay }) {
 
         <p className="flex shrink-0 items-baseline gap-1 sm:hidden">
           {isFree ? (
-            <span className="text-xl font-black text-[var(--hw-text-primary)]">Free</span>
+            <span className="text-xl font-black text-[var(--hw-text-primary)]">{t("plan.free")}</span>
           ) : (
             <>
               <span className="text-[10px] font-bold text-[var(--hw-text-muted)]">Rs</span>
               <span className={`text-xl font-black ${featured || best ? "hw-shimmer" : "hw-neon-text"}`} style={{ "--neon": neon }}>
                 {fmt(plan.monthly)}
               </span>
-              <span className="text-[10px] font-bold text-[var(--hw-text-muted)]">/mo</span>
+              <span className="text-[10px] font-bold text-[var(--hw-text-muted)]">{t("plan.perMonth")}</span>
             </>
           )}
         </p>
@@ -91,14 +91,14 @@ function PlanCard({ plan, neon, tag, featured, best, delay }) {
       {/* Price — full size from sm up */}
       <p className="mt-2 hidden items-baseline gap-1 sm:flex">
         {isFree ? (
-          <span className="text-3xl font-black text-[var(--hw-text-primary)]">Free</span>
+          <span className="text-3xl font-black text-[var(--hw-text-primary)]">{t("plan.free")}</span>
         ) : (
           <>
             <span className="text-sm font-bold text-[var(--hw-text-muted)]">Rs</span>
             <span className={`text-4xl font-black ${featured || best ? "hw-shimmer" : "hw-neon-text"}`} style={{ "--neon": neon }}>
               {fmt(plan.monthly)}
             </span>
-            <span className="text-sm font-bold text-[var(--hw-text-muted)]">/mo</span>
+            <span className="text-sm font-bold text-[var(--hw-text-muted)]">{t("plan.perMonth")}</span>
           </>
         )}
       </p>
@@ -106,25 +106,25 @@ function PlanCard({ plan, neon, tag, featured, best, delay }) {
       {/* Features */}
       <ul className="mt-3 grid flex-1 gap-1.5 text-[12px] leading-5 text-[var(--hw-text-secondary)] sm:mt-5 sm:gap-2.5 sm:text-sm sm:leading-6">
         <Feature neon={neon}>
-          {isFree ? "No featured slots" : `${slots(plan.featuredSlots)} featured slots`}
+          {isFree ? t("plan.noFeaturedSlots") : `${slots(plan.featuredSlots)} ${t("plan.featuredSlots")}`}
         </Feature>
         {!isFree && plan.premiumSlots ? (
-          <Feature neon={neon}>{plan.premiumSlots} premium (homepage) slots</Feature>
+          <Feature neon={neon}>{plan.premiumSlots} {t("plan.premiumSlots")}</Feature>
         ) : null}
-        <Feature neon={neon}>{slots(plan.maxActiveAds)} active ads</Feature>
-        <Feature neon={neon}>{plan.graceDays} days to settle commission</Feature>
+        <Feature neon={neon}>{slots(plan.maxActiveAds)} {t("plan.activeAds")}</Feature>
+        <Feature neon={neon}>{plan.graceDays} {t("plan.graceDays")}</Feature>
         <Feature neon={neon}>
           {plan.keepListings
-            ? "Listings never auto-expire"
-            : "Listings auto-expire after 30 days"}
+            ? t("plan.keepListings")
+            : t("plan.expireListings")}
         </Feature>
         <Feature neon={neon}>
           {plan.commissionRate < 0.002 ? (
             <span className="font-bold text-[var(--hw-text-primary)]">
-              {pct(plan.commissionRate)} success fee · lowest on HeavyWheels
+              {pct(plan.commissionRate)} {t("plan.lowestFee")}
             </span>
           ) : (
-            `${pct(plan.commissionRate)} success fee on a sale`
+            `${pct(plan.commissionRate)} ${t("plan.successFee")}`
           )}
         </Feature>
       </ul>
@@ -139,20 +139,20 @@ function PlanCard({ plan, neon, tag, featured, best, delay }) {
             : { border: `1px solid color-mix(in srgb, ${neon} 55%, transparent)`, color: "var(--hw-text-primary)" }
         }
       >
-        {isFree ? "Post a free ad" : `Choose ${plan.name}`}
+        {isFree ? t("plan.postFreeAd") : `${t("plan.choose")} ${plan.name}`}
       </Link>
     </div>
   );
 }
 
-export default function PlanBanners({ plans = [], free }) {
+export default function PlanBanners({ plans = [], free, t }) {
   if (!plans.length) return null;
 
   // Build the Free tier as a card so the whole ladder is visible.
   const freeCard = free
     ? {
         key: "free",
-        name: "Free",
+        name: t("plan.free"),
         monthly: 0,
         featuredSlots: 0,
         premiumSlots: 0,
@@ -168,12 +168,12 @@ export default function PlanBanners({ plans = [], free }) {
   return (
     <section className="mb-6 overflow-hidden rounded-2xl border border-[var(--hw-border-subtle)] bg-[var(--hw-bg-deep)] p-3.5 hw-subtle-grid sm:mb-12 sm:rounded-3xl sm:p-8">
       <div className="mb-4 max-w-2xl sm:mb-7">
-        <p className="text-[10px] font-black uppercase tracking-wide text-[var(--hw-orange)] sm:text-xs">Sell like a pro</p>
+        <p className="text-[10px] font-black uppercase tracking-wide text-[var(--hw-orange)] sm:text-xs">{t("plan.eyebrow")}</p>
         <h2 className="mt-1.5 text-[17px] font-black leading-tight text-[var(--hw-text-primary)] sm:mt-2 sm:text-2xl md:text-3xl">
-          Plans that put your ads up here
+          {t("plan.title")}
         </h2>
         <p className="mt-1.5 text-[13px] leading-6 text-[var(--hw-text-secondary)] sm:mt-2 sm:text-base sm:leading-7">
-          Featured slots, longer listings, and lower fees as you scale. Upgrade any time — pay once a month, cancel whenever.
+          {t("plan.subtitle")}
         </p>
       </div>
 
@@ -185,19 +185,20 @@ export default function PlanBanners({ plans = [], free }) {
               key={plan.key}
               plan={plan}
               neon={tier.neon}
-              tag={tier.tag}
+              tag={t(tier.tagKey)}
               featured={tier.featured}
               best={tier.best}
               delay={i * 90}
+              t={t}
             />
           );
         })}
       </div>
 
       <p className="mt-4 text-[11px] text-[var(--hw-text-muted)] sm:mt-6 sm:text-sm">
-        Annual billing available — pay for 10 months, get 12.{" "}
+        {t("plan.annualNote")}{" "}
         <Link href="/promote" className="font-bold text-[var(--hw-orange)] hover:underline">
-          Compare all plans →
+          {t("plan.compareAll")} →
         </Link>
       </p>
     </section>

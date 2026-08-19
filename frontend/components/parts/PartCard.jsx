@@ -28,6 +28,13 @@ export default function PartCard({ part }) {
           className="object-cover transition duration-300 group-hover:scale-105"
         />
         <PlanAdornments plan={plan} />
+        {part.status === "sold" ? (
+          <span className="absolute inset-0 flex items-center justify-center bg-black/55">
+            <span className="rounded-md bg-[var(--hw-orange)] px-2.5 py-1 text-[11px] font-black uppercase tracking-wide text-[var(--hw-text-inverse)] sm:text-sm">
+              Sold
+            </span>
+          </span>
+        ) : null}
         {part.featured ? (
           <span className="absolute left-1.5 top-1.5 rounded bg-[var(--hw-orange)] px-1.5 py-0.5 text-[9px] font-black uppercase text-[var(--hw-text-inverse)] sm:left-3 sm:top-3 sm:rounded-md sm:px-2 sm:py-1 sm:text-xs">
             Featured
