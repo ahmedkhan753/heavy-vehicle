@@ -78,7 +78,7 @@ export default async function DealerProfilePage({ params }) {
       </section>
 
       <section className="mt-6 grid gap-5 lg:grid-cols-[1fr_320px]">
-        <div className="rounded-lg border border-[var(--hw-border-default)] bg-[var(--hw-bg-card)] p-5">
+        <div className="min-w-0 rounded-lg border border-[var(--hw-border-default)] bg-[var(--hw-bg-card)] p-5">
           <h2 className="text-xl font-black text-[var(--hw-text-primary)]">{t("dealer.inventory")}</h2>
           {listings.length ? (
             <div className="mt-5 grid gap-4 md:grid-cols-2">
@@ -89,7 +89,7 @@ export default async function DealerProfilePage({ params }) {
           )}
         </div>
 
-        <aside className="h-fit rounded-lg border border-[var(--hw-border-default)] bg-[var(--hw-bg-card)] p-5">
+        <aside className="h-fit min-w-0 rounded-lg border border-[var(--hw-border-default)] bg-[var(--hw-bg-card)] p-5">
           {dealer.warranty?.status === "approved" ? (
             <div className="mb-5 rounded-lg border border-[var(--hw-green)] bg-[var(--hw-soft-panel)] p-4">
               <p className="flex items-center gap-2 text-sm font-black text-[var(--hw-green)]">{t("dealerp.verifiedWarranty")}</p>

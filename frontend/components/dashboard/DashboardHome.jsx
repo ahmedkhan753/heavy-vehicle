@@ -130,7 +130,7 @@ export default function DashboardHome() {
 
       <div className="mt-6 grid gap-5 lg:grid-cols-[1fr_320px]">
         {/* Recent ads */}
-        <section className="rounded-xl border border-[var(--hw-border-default)] bg-[var(--hw-bg-card)] p-5">
+        <section className="min-w-0 rounded-xl border border-[var(--hw-border-default)] bg-[var(--hw-bg-card)] p-5">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-black text-[var(--hw-text-primary)]">{t("dash.recentAds")}</h2>
             <Link href="/dashboard/my-ads" className="text-sm font-bold text-[var(--hw-orange)] hover:underline">{t("dash.manageAds")}</Link>
@@ -158,7 +158,7 @@ export default function DashboardHome() {
         </section>
 
         {/* Role-aware callout */}
-        <aside className="rounded-xl border border-[var(--hw-border-default)] bg-[var(--hw-bg-card)] p-5">
+        <aside className="min-w-0 rounded-xl border border-[var(--hw-border-default)] bg-[var(--hw-bg-card)] p-5">
           <h2 className="text-xl font-black text-[var(--hw-text-primary)]">
             {isDealer ? t("dash.dealerProfile") : t("dash.upgradeDealer")}
           </h2>

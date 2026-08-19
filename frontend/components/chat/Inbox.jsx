@@ -120,7 +120,7 @@ export default function Inbox({ initialConversationId }) {
   return (
     <div className="grid gap-4 lg:grid-cols-[300px_1fr]">
       {/* Conversation list */}
-      <aside className={`rounded-xl border border-[var(--hw-border-default)] bg-[var(--hw-bg-card)] ${activeId ? "hidden lg:block" : ""}`}>
+      <aside className={`min-w-0 rounded-xl border border-[var(--hw-border-default)] bg-[var(--hw-bg-card)] ${activeId ? "hidden lg:block" : ""}`}>
         <div className="max-h-[70vh] overflow-y-auto">
           {convos.map((c) => (
             <button
@@ -143,7 +143,7 @@ export default function Inbox({ initialConversationId }) {
       </aside>
 
       {/* Thread */}
-      <section className={`flex min-h-[60vh] flex-col rounded-xl border border-[var(--hw-border-default)] bg-[var(--hw-bg-card)] ${activeId ? "" : "hidden lg:flex"}`}>
+      <section className={`flex min-h-[60vh] min-w-0 flex-col rounded-xl border border-[var(--hw-border-default)] bg-[var(--hw-bg-card)] ${activeId ? "" : "hidden lg:flex"}`}>
         {thread ? (
           <>
             <header className="flex items-center gap-3 border-b border-[var(--hw-border-subtle)] p-3">

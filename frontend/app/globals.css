@@ -84,12 +84,39 @@ textarea {
 }
 
 .hw-container {
-  width: min(1180px, calc(100% - 32px));
+  width: min(1180px, calc(100% - 24px));
   margin-inline: auto;
+  /* hw-container is often a flex/grid item (e.g. <main> is a direct flex
+     child of <body>'s flex-col). Flex/grid items default to min-width:auto,
+     which lets a wide-content descendant (a horizontally-scrolling row,
+     an unbreakable string) force this box — and the whole page — wider
+     than the viewport instead of scrolling/clipping inside it. */
+  min-width: 0;
+}
+
+/* Phones get a tighter gutter and much less vertical air between sections —
+   the desktop rhythm (16px gutter / 52px blocks) reads as wasted space on a
+   ~360px screen and pushes real content below the fold. */
+@media (min-width: 640px) {
+  .hw-container {
+    width: min(1180px, calc(100% - 32px));
+  }
 }
 
 .hw-section {
-  padding-block: 52px;
+  padding-block: 28px;
+}
+
+@media (min-width: 640px) {
+  .hw-section {
+    padding-block: 40px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .hw-section {
+    padding-block: 52px;
+  }
 }
 
 .hw-subtle-grid {

@@ -18,7 +18,7 @@ export default async function PostAdPage() {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[300px_1fr]">
-        <aside className="h-fit rounded-lg border border-[var(--hw-border-default)] bg-[var(--hw-bg-card)] p-4 lg:sticky lg:top-24">
+        <aside className="h-fit min-w-0 rounded-lg border border-[var(--hw-border-default)] bg-[var(--hw-bg-card)] p-4 lg:sticky lg:top-24">
           <div className="grid gap-3">
             {steps.map(([num, title, desc]) => (
               <div key={title} className="rounded-lg border border-[var(--hw-border-subtle)] bg-[var(--hw-bg-deep)] p-4">
@@ -34,7 +34,9 @@ export default async function PostAdPage() {
           </div>
         </aside>
 
-        <PostAdForm />
+        <div className="min-w-0">
+          <PostAdForm />
+        </div>
       </div>
     </main>
   );

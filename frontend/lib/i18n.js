@@ -172,6 +172,9 @@ export const translations = {
     "listing.autoTranslated": "Auto-translated",
     "listing.similar": "Similar vehicles",
     "listing.notFound": "Listing not found",
+    "listing.linkCopied": "Link copied",
+    "listing.overview": "Overview",
+    "listing.viewAll": "View all",
 
     // ── Footer ────────────────────────────────────
     "footer.tagline": "Pakistan's trusted marketplace for heavy vehicles, machinery and spare parts.",
@@ -361,6 +364,8 @@ export const translations = {
     "filter.anyTransmission": "Any transmission",
     "filter.anyFuel": "Any fuel",
     "filter.newest": "Newest first",
+    "filter.filters": "Filters",
+    "filter.clearAll": "Clear all",
 
     // ── Forms (post ad / part / dealer / profile) ─
     "form.basicDetails": "Basic details",
@@ -946,6 +951,9 @@ export const translations = {
     "listing.autoTranslated": "خودکار ترجمہ",
     "listing.similar": "ملتی جلتی گاڑیاں",
     "listing.notFound": "اشتہار نہیں ملا",
+    "listing.linkCopied": "لنک کاپی ہو گیا",
+    "listing.overview": "جائزہ",
+    "listing.viewAll": "سب دیکھیں",
 
     // ── Footer ────────────────────────────────────
     "footer.tagline": "بھاری گاڑیوں، مشینری اور پارٹس کے لیے پاکستان کا قابلِ اعتماد مارکیٹ پلیس۔",
@@ -1135,6 +1143,8 @@ export const translations = {
     "filter.anyTransmission": "کوئی بھی ٹرانسمیشن",
     "filter.anyFuel": "کوئی بھی ایندھن",
     "filter.newest": "نئے پہلے",
+    "filter.filters": "فلٹرز",
+    "filter.clearAll": "سب ہٹائیں",
 
     // ── Forms ─────────────────────────────────────
     "form.basicDetails": "بنیادی تفصیلات",

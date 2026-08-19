@@ -63,38 +63,38 @@ export default async function HomePage() {
         <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(7,10,15,0.96),rgba(7,10,15,0.82)_48%,rgba(7,10,15,0.35))]" />
         <div className="absolute inset-0 hw-subtle-grid opacity-40" />
 
-        <div className="hw-container relative grid min-h-[650px] items-center gap-10 py-12 lg:grid-cols-[1.05fr_0.95fr]">
+        <div className="hw-container relative grid items-center gap-6 py-7 sm:py-10 lg:min-h-[650px] lg:grid-cols-[1.05fr_0.95fr] lg:gap-10 lg:py-12">
           <div className="max-w-3xl">
-            <div className="mb-5 inline-flex flex-wrap items-center gap-2 rounded-lg border border-[var(--hw-border-default)] bg-black/30 px-3 py-2 text-xs font-bold text-[var(--hw-text-secondary)]">
+            <div className="mb-3 inline-flex flex-wrap items-center gap-2 rounded-lg border border-[var(--hw-border-default)] bg-black/30 px-2.5 py-1.5 text-[11px] font-bold text-[var(--hw-text-secondary)] sm:mb-5 sm:px-3 sm:py-2 sm:text-xs">
               {t("home.heroBadge")}
               <span className="h-1 w-1 rounded-full bg-[var(--hw-green)]" />
             </div>
-            <h1 className="text-4xl font-black leading-tight text-white md:text-6xl">
+            <h1 className="text-[26px] font-black leading-[1.15] text-white sm:text-4xl md:text-6xl">
               {t("home.heroTitle2")}
             </h1>
-            <p className="mt-4 max-w-2xl text-lg leading-8 text-white/80">
+            <p className="mt-2.5 max-w-2xl text-[13px] leading-6 text-white/80 sm:mt-4 sm:text-lg sm:leading-8">
               {t("home.heroSubtitle2")}
             </p>
 
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link href="/vehicles" className="inline-flex h-12 items-center justify-center rounded-lg bg-[var(--hw-orange)] px-6 text-sm font-black text-[var(--hw-text-inverse)] hover:bg-[var(--hw-amber)]">
+            <div className="mt-4 flex flex-wrap gap-2 sm:mt-8 sm:gap-3">
+              <Link href="/vehicles" className="inline-flex h-10 items-center justify-center rounded-lg bg-[var(--hw-orange)] px-4 text-[13px] font-black text-[var(--hw-text-inverse)] hover:bg-[var(--hw-amber)] sm:h-12 sm:px-6 sm:text-sm">
                 {t("home.browseVehicles")}
               </Link>
-              <Link href="/post-ad" className="inline-flex h-12 items-center justify-center rounded-lg border border-white/25 bg-white/10 px-6 text-sm font-bold text-white hover:bg-white/15">
+              <Link href="/post-ad" className="inline-flex h-10 items-center justify-center rounded-lg border border-white/25 bg-white/10 px-4 text-[13px] font-bold text-white hover:bg-white/15 sm:h-12 sm:px-6 sm:text-sm">
                 {t("nav.postFreeAd")}
               </Link>
             </div>
           </div>
 
-          <form action="/vehicles" className="rounded-lg border border-[var(--hw-border-default)] bg-[var(--hw-bg-card)] p-4 shadow-2xl">
-            <h2 className="mb-4 text-xl font-black text-[var(--hw-text-primary)]">{t("home.findVehicles")}</h2>
-            <div className="grid gap-3">
-              <input name="q" className="h-12 rounded-lg border border-[var(--hw-border-default)] bg-[var(--hw-bg-input)] px-4 text-sm text-[var(--hw-text-primary)] outline-none focus:border-[var(--hw-orange)]" placeholder={t("home.searchPlaceholder")} />
-              <div className="grid gap-3 sm:grid-cols-2">
+          <form action="/vehicles" className="rounded-xl border border-[var(--hw-border-default)] bg-[var(--hw-bg-card)] p-3 shadow-2xl sm:p-4">
+            <h2 className="mb-3 text-base font-black text-[var(--hw-text-primary)] sm:mb-4 sm:text-xl">{t("home.findVehicles")}</h2>
+            <div className="grid gap-2.5 sm:gap-3">
+              <input name="q" className="h-11 rounded-lg border border-[var(--hw-border-default)] bg-[var(--hw-bg-input)] px-3.5 text-sm text-[var(--hw-text-primary)] outline-none focus:border-[var(--hw-orange)] sm:h-12 sm:px-4" placeholder={t("home.searchPlaceholder")} />
+              <div className="grid gap-2.5 sm:grid-cols-2 sm:gap-3">
                 <Select name="type" label={t("filter.type")} allText={t("filter.allTypes")} options={VEHICLE_TYPES} lang={lang} />
                 <Select name="city" label={t("filter.city")} allText={t("filter.allCities")} options={CITIES} lang={lang} />
               </div>
-              <button className="mt-1 h-12 rounded-lg bg-[var(--hw-green)] px-5 text-sm font-black text-[var(--hw-text-inverse)]">
+              <button className="mt-0.5 h-11 rounded-lg bg-[var(--hw-green)] px-5 text-sm font-black text-[var(--hw-text-inverse)] sm:mt-1 sm:h-12">
                 {t("home.searchBtn")}
               </button>
             </div>
@@ -131,7 +131,7 @@ export default async function HomePage() {
               href="/vehicles"
             />
             {listings.length ? (
-              <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              <div className="grid grid-cols-2 gap-2.5 sm:gap-5 lg:grid-cols-3 xl:grid-cols-4">
                 {listings.map(({ kind, item }) =>
                   kind === "vehicle"
                     ? <VehicleCard key={item._id} vehicle={item} />
@@ -183,9 +183,9 @@ export default async function HomePage() {
 
 function Select({ name, label, allText, options, lang }) {
   return (
-    <label className="text-xs font-bold uppercase text-[var(--hw-text-muted)]">
+    <label className="text-[10px] font-bold uppercase text-[var(--hw-text-muted)] sm:text-xs">
       {label}
-      <select name={name} className="mt-2 h-12 w-full rounded-lg border border-[var(--hw-border-default)] bg-[var(--hw-bg-input)] px-3 text-sm font-medium text-[var(--hw-text-secondary)] outline-none focus:border-[var(--hw-orange)]">
+      <select name={name} className="mt-1.5 h-11 w-full rounded-lg border border-[var(--hw-border-default)] bg-[var(--hw-bg-input)] px-3 text-sm font-medium text-[var(--hw-text-secondary)] outline-none focus:border-[var(--hw-orange)] sm:mt-2 sm:h-12">
         <option value="">{allText || label}</option>
         {options.map((option) => {
           const value = typeof option === "string" ? option : option.value;
@@ -197,24 +197,31 @@ function Select({ name, label, allText, options, lang }) {
   );
 }
 
+// Eyebrow + title on the left, "View all →" pinned to the right on the same
+// row at every width — on a phone the old stacked variant burned three lines
+// before any listing showed up.
 function SectionHeader({ eyebrow, title, action, href }) {
   return (
-    <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-      <div>
-        <p className="mb-2 text-xs font-bold uppercase text-[var(--hw-orange)]">{eyebrow}</p>
-        <h2 className="text-2xl font-black text-[var(--hw-text-primary)] md:text-3xl">{title}</h2>
+    <div className="mb-3.5 flex items-end justify-between gap-3 sm:mb-6">
+      <div className="min-w-0">
+        <p className="mb-1 text-[10px] font-bold uppercase tracking-wide text-[var(--hw-orange)] sm:mb-2 sm:text-xs">{eyebrow}</p>
+        <h2 className="text-[17px] font-black leading-tight text-[var(--hw-text-primary)] sm:text-2xl md:text-3xl">{title}</h2>
       </div>
-      {action ? <Link href={href} className="text-sm font-bold text-[var(--hw-orange)] hover:text-[var(--hw-amber)]">{action}</Link> : null}
+      {action ? (
+        <Link href={href} className="shrink-0 whitespace-nowrap text-[11px] font-bold text-[var(--hw-orange)] hover:text-[var(--hw-amber)] sm:text-sm">
+          {action} <span aria-hidden="true">→</span>
+        </Link>
+      ) : null}
     </div>
   );
 }
 
 function EmptyState({ title, body, href, action }) {
   return (
-    <div className="rounded-lg border border-dashed border-[var(--hw-border-default)] bg-[var(--hw-bg-card)] p-10 text-center">
-      <h3 className="text-xl font-black text-[var(--hw-text-primary)]">{title}</h3>
-      <p className="mt-2 text-[var(--hw-text-secondary)]">{body}</p>
-      <Link href={href} className="mt-5 inline-flex h-11 items-center rounded-lg bg-[var(--hw-orange)] px-5 text-sm font-black text-[var(--hw-text-inverse)]">{action}</Link>
+    <div className="rounded-xl border border-dashed border-[var(--hw-border-default)] bg-[var(--hw-bg-card)] p-6 text-center sm:p-10">
+      <h3 className="text-base font-black text-[var(--hw-text-primary)] sm:text-xl">{title}</h3>
+      <p className="mt-2 text-sm text-[var(--hw-text-secondary)] sm:text-base">{body}</p>
+      <Link href={href} className="mt-4 inline-flex h-10 items-center rounded-lg bg-[var(--hw-orange)] px-4 text-[13px] font-black text-[var(--hw-text-inverse)] sm:mt-5 sm:h-11 sm:px-5 sm:text-sm">{action}</Link>
     </div>
   );
 }

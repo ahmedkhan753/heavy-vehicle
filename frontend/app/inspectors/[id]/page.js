@@ -44,7 +44,7 @@ export default async function InspectorDetailPage({ params }) {
       </div>
 
       <div className="grid gap-8 lg:grid-cols-[1fr_320px]">
-        <section className="rounded-xl border border-[var(--hw-border-default)] bg-[var(--hw-bg-card)] p-6">
+        <section className="min-w-0 rounded-xl border border-[var(--hw-border-default)] bg-[var(--hw-bg-card)] p-6">
           <div className="flex items-center gap-2">
             <h1 className="text-3xl font-black text-[var(--hw-text-primary)]">{ins.displayName}</h1>
             {ins.isVerified ? <span className="rounded-full bg-[var(--hw-green)] px-2.5 py-0.5 text-[10px] font-black uppercase text-white">Verified</span> : null}
@@ -82,7 +82,7 @@ export default async function InspectorDetailPage({ params }) {
           ) : null}
         </section>
 
-        <aside className="h-fit rounded-xl border border-[var(--hw-border-default)] bg-[var(--hw-bg-card)] p-5 lg:sticky lg:top-24">
+        <aside className="h-fit min-w-0 rounded-xl border border-[var(--hw-border-default)] bg-[var(--hw-bg-card)] p-5 lg:sticky lg:top-24">
           <p className="text-xs font-black uppercase text-[var(--hw-orange)]">{t("insp.feeLabel")}</p>
           <p className="mt-1 text-3xl font-black text-[var(--hw-orange)]">{formatPrice(ins.inspectionFee)}</p>
           {ins.feeNote ? <p className="text-xs text-[var(--hw-text-muted)]">{ins.feeNote}</p> : null}

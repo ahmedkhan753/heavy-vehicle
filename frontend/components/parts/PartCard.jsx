@@ -17,55 +17,49 @@ export default function PartCard({ part }) {
     <Link
       href={href}
       style={planBorderStyle(plan)}
-      className="group overflow-hidden rounded-lg border border-[var(--hw-border-default)] bg-[var(--hw-bg-card)] transition hover:-translate-y-1 hover:border-[var(--hw-orange)]"
+      className="group flex flex-col overflow-hidden rounded-xl border border-[var(--hw-border-default)] bg-[var(--hw-bg-card)] transition hover:border-[var(--hw-orange)] sm:hover:-translate-y-1"
     >
-      <div className="relative aspect-[16/10] overflow-hidden bg-[var(--hw-bg-elevated)]">
+      <div className="relative aspect-[4/3] overflow-hidden bg-[var(--hw-bg-elevated)] sm:aspect-[16/10]">
         <Image
           src={partImage(part)}
           alt={part.title || "Heavy vehicle spare part"}
           fill
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
           className="object-cover transition duration-300 group-hover:scale-105"
         />
         <PlanAdornments plan={plan} />
         {part.featured ? (
-          <span className="absolute left-3 top-3 rounded-md bg-[var(--hw-orange)] px-2 py-1 text-xs font-black text-[var(--hw-text-inverse)]">
-            FEATURED
+          <span className="absolute left-1.5 top-1.5 rounded bg-[var(--hw-orange)] px-1.5 py-0.5 text-[9px] font-black uppercase text-[var(--hw-text-inverse)] sm:left-3 sm:top-3 sm:rounded-md sm:px-2 sm:py-1 sm:text-xs">
+            Featured
           </span>
         ) : null}
-        <span className="absolute bottom-3 right-3 rounded-md bg-[var(--hw-bg-card)] px-2 py-1 text-xs font-black text-[var(--hw-green)]">
+        <span className="absolute bottom-1.5 right-1.5 rounded bg-[var(--hw-bg-card)] px-1.5 py-0.5 text-[9px] font-black uppercase text-[var(--hw-green)] sm:bottom-3 sm:right-3 sm:rounded-md sm:px-2 sm:py-1 sm:text-xs">
           {titleCase(part.condition || "used")}
         </span>
       </div>
 
-      <div className="p-4">
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <h3 className="line-clamp-2 font-black text-[var(--hw-text-primary)] group-hover:text-[var(--hw-orange)]">
-              <LocalizedText en={part.title} ur={part.titleUr || part.title} />
-            </h3>
-            <p className="mt-1 text-sm text-[var(--hw-text-muted)]">
-              {titleCase(part.category || "parts")} {part.make ? `| ${titleCase(part.make)}` : ""}
-            </p>
-          </div>
-          <span className="shrink-0 rounded-md bg-[var(--hw-bg-elevated)] px-2 py-1 text-xs font-bold text-[var(--hw-cyan)]">
-            {titleCase(part.city)}
-          </span>
-        </div>
+      <div className="flex min-w-0 flex-1 flex-col p-2.5 sm:p-4">
+        <h3 className="line-clamp-2 text-[13px] font-black leading-snug text-[var(--hw-text-primary)] group-hover:text-[var(--hw-orange)] sm:text-base">
+          <LocalizedText en={part.title} ur={part.titleUr || part.title} />
+        </h3>
 
-        <p className="mt-4 text-xl font-black text-[var(--hw-orange)]">
+        <p className="mt-0.5 truncate text-[11px] text-[var(--hw-text-muted)] sm:mt-1 sm:text-sm">
+          {titleCase(part.category || "parts")}
+          {part.make ? ` · ${titleCase(part.make)}` : ""}
+        </p>
+
+        <p className="mt-1.5 text-sm font-black text-[var(--hw-orange)] sm:mt-3 sm:text-xl">
           {formatPrice(part.price, part.priceDisplay)}
         </p>
 
-        <div className="mt-3 flex flex-wrap gap-2 text-xs font-bold text-[var(--hw-text-secondary)]">
-          <span className="rounded-md bg-[var(--hw-bg-deep)] px-2 py-1">{titleCase(part.status || "active")}</span>
-          <span className="rounded-md bg-[var(--hw-bg-deep)] px-2 py-1">
-            Qty {part.quantity || 1}
-          </span>
-          {part.negotiable ? (
-            <span className="rounded-md bg-[var(--hw-bg-deep)] px-2 py-1">Negotiable</span>
-          ) : null}
-        </div>
+        {/* Two facts only — a third (Negotiable) shrank all three into
+            unreadable stubs on a ~165px-wide phone card. It still shows on
+            the detail page next to the price. */}
+        <p className="mt-1.5 flex items-center gap-1.5 truncate text-[10px] font-bold text-[var(--hw-text-secondary)] sm:mt-3 sm:gap-2 sm:text-xs">
+          <span className="truncate">{titleCase(part.city)}</span>
+          <span className="shrink-0 text-[var(--hw-border-strong)]">·</span>
+          <span className="shrink-0">Qty {part.quantity || 1}</span>
+        </p>
       </div>
     </Link>
   );

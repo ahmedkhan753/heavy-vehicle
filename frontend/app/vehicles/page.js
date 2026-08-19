@@ -31,34 +31,34 @@ export default async function VehiclesPage({ searchParams }) {
   const t = await getT();
 
   return (
-    <main className="hw-container py-10">
-      <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+    <main className="hw-container py-4 sm:py-8 lg:py-10">
+      <div className="mb-4 flex flex-col gap-3 sm:mb-8 sm:gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <p className="text-xs font-black uppercase text-[var(--hw-orange)]">{t("page.marketplace")}</p>
-          <h1 className="mt-2 text-3xl font-black text-[var(--hw-text-primary)] md:text-4xl">{t("veh.title")}</h1>
+          <p className="text-[10px] font-black uppercase text-[var(--hw-orange)] sm:text-xs">{t("page.marketplace")}</p>
+          <h1 className="mt-1 text-[22px] font-black leading-tight text-[var(--hw-text-primary)] sm:mt-2 sm:text-3xl md:text-4xl">{t("veh.title")}</h1>
         </div>
         <Link
           href="/post-ad"
-          className="inline-flex h-11 items-center justify-center rounded-lg bg-[var(--hw-orange)] px-5 text-sm font-black text-[var(--hw-text-inverse)]"
+          className="inline-flex h-10 items-center justify-center rounded-lg bg-[var(--hw-orange)] px-5 text-[13px] font-black text-[var(--hw-text-inverse)] sm:h-11 sm:text-sm"
         >
           {t("nav.postFreeAd")}
         </Link>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
-        <Suspense fallback={<div className="rounded-lg border border-[var(--hw-border-default)] bg-[var(--hw-bg-card)] p-4 text-[var(--hw-text-secondary)]">{t("veh.loadingFilters")}</div>}>
-          <VehicleFilters />
-        </Suspense>
+      <div className="grid gap-3 sm:gap-6 lg:grid-cols-[280px_1fr]">
+        <div className="min-w-0">
+          <Suspense fallback={<div className="rounded-lg border border-[var(--hw-border-default)] bg-[var(--hw-bg-card)] p-4 text-[var(--hw-text-secondary)]">{t("veh.loadingFilters")}</div>}>
+            <VehicleFilters />
+          </Suspense>
+        </div>
 
-        <section>
-          <div className="mb-4 flex flex-col gap-3 rounded-lg border border-[var(--hw-border-default)] bg-[var(--hw-bg-card)] p-4 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-sm text-[var(--hw-text-secondary)]">
-              <span className="font-black text-[var(--hw-text-primary)]">{pagination.total || vehicles.length}</span> {t("veh.listingsFound")}
-            </p>
-          </div>
+        <section className="min-w-0">
+          <p className="mb-3 text-[13px] text-[var(--hw-text-secondary)] sm:mb-4 sm:rounded-lg sm:border sm:border-[var(--hw-border-default)] sm:bg-[var(--hw-bg-card)] sm:p-4 sm:text-sm">
+            <span className="font-black text-[var(--hw-text-primary)]">{pagination.total || vehicles.length}</span> {t("veh.listingsFound")}
+          </p>
 
           {vehicles.length ? (
-            <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+            <div className="grid grid-cols-2 gap-2.5 sm:gap-5 xl:grid-cols-3">
               {vehicles.map((vehicle) => (
                 <VehicleCard key={vehicle._id} vehicle={vehicle} />
               ))}
