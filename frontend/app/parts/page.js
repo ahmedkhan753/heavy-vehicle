@@ -1,9 +1,7 @@
 import Link from "next/link";
 import PartCard from "@/components/parts/PartCard";
+import PartFilters from "@/components/parts/PartFilters";
 import { API_BASE_URL, buildQuery } from "@/lib/api";
-import { CITIES, CONDITIONS } from "@/lib/constants";
-import { PART_CATEGORIES, PART_SUBCATEGORY_GROUPS, PART_TYPES, WARRANTY_OPTIONS } from "@/lib/parts";
-import { titleCase } from "@/lib/format";
 import { getT } from "@/lib/i18n-server";
 
 export const revalidate = 60;
@@ -48,87 +46,7 @@ export default async function PartsPage({ searchParams }) {
         </Link>
       </div>
 
-      <form className="mb-4 grid gap-2.5 rounded-xl border border-[var(--hw-border-default)] bg-[var(--hw-bg-card)] p-3 sm:mb-5 sm:grid-cols-2 sm:gap-3 sm:p-4 lg:grid-cols-4">
-        <input
-          name="q"
-          defaultValue={params.q || ""}
-          className="h-11 rounded-lg border border-[var(--hw-border-default)] bg-[var(--hw-bg-input)] px-4 text-sm text-[var(--hw-text-primary)] outline-none focus:border-[var(--hw-orange)] sm:col-span-2 lg:col-span-4"
-          placeholder={t("part.searchPlaceholder")}
-        />
-        <select
-          name="category"
-          defaultValue={params.category || ""}
-          className="h-11 rounded-lg border border-[var(--hw-border-default)] bg-[var(--hw-bg-input)] px-3 text-sm text-[var(--hw-text-secondary)]"
-        >
-          <option value="">{t("part.allCategories")}</option>
-          {PART_CATEGORIES.map((category) => (
-            <option key={category.value} value={category.value}>
-              {category.label}
-            </option>
-          ))}
-        </select>
-        <select
-          name="subcategory"
-          defaultValue={params.subcategory || ""}
-          className="h-11 rounded-lg border border-[var(--hw-border-default)] bg-[var(--hw-bg-input)] px-3 text-sm text-[var(--hw-text-secondary)]"
-        >
-          <option value="">All parts</option>
-          {PART_SUBCATEGORY_GROUPS.map((group) => (
-            <optgroup key={group.category.value} label={group.category.label}>
-              {group.subs.map((sub) => (
-                <option key={sub.value} value={sub.value}>
-                  {sub.label}
-                </option>
-              ))}
-            </optgroup>
-          ))}
-        </select>
-        <select
-          name="condition"
-          defaultValue={params.condition || ""}
-          className="h-11 rounded-lg border border-[var(--hw-border-default)] bg-[var(--hw-bg-input)] px-3 text-sm text-[var(--hw-text-secondary)]"
-        >
-          <option value="">Any condition</option>
-          {CONDITIONS.map((c) => (
-            <option key={c.value} value={c.value}>{c.label}</option>
-          ))}
-        </select>
-        <select
-          name="partType"
-          defaultValue={params.partType || ""}
-          className="h-11 rounded-lg border border-[var(--hw-border-default)] bg-[var(--hw-bg-input)] px-3 text-sm text-[var(--hw-text-secondary)]"
-        >
-          <option value="">OEM / Aftermarket</option>
-          {PART_TYPES.map((p) => (
-            <option key={p.value} value={p.value}>{p.label}</option>
-          ))}
-        </select>
-        <select
-          name="warranty"
-          defaultValue={params.warranty || ""}
-          className="h-11 rounded-lg border border-[var(--hw-border-default)] bg-[var(--hw-bg-input)] px-3 text-sm text-[var(--hw-text-secondary)]"
-        >
-          <option value="">Any warranty</option>
-          {WARRANTY_OPTIONS.map((w) => (
-            <option key={w.value} value={w.value}>{w.label}</option>
-          ))}
-        </select>
-        <select
-          name="city"
-          defaultValue={params.city || ""}
-          className="h-11 rounded-lg border border-[var(--hw-border-default)] bg-[var(--hw-bg-input)] px-3 text-sm text-[var(--hw-text-secondary)]"
-        >
-          <option value="">{t("part.allCities")}</option>
-          {CITIES.map((city) => (
-            <option key={city} value={city}>
-              {titleCase(city)}
-            </option>
-          ))}
-        </select>
-        <button className="h-11 rounded-lg bg-[var(--hw-orange)] px-4 text-sm font-black text-[var(--hw-text-inverse)]">
-          {t("common.search")}
-        </button>
-      </form>
+      <PartFilters params={params} />
 
       <p className="mb-3 text-[13px] text-[var(--hw-text-secondary)] sm:mb-4 sm:rounded-lg sm:border sm:border-[var(--hw-border-default)] sm:bg-[var(--hw-bg-card)] sm:p-4 sm:text-sm">
         <span className="font-black text-[var(--hw-text-primary)]">{pagination.total || parts.length}</span> {t("part.found")}
