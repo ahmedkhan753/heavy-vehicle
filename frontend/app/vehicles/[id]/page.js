@@ -7,7 +7,7 @@ import PlanBadge from "@/components/marketing/PlanBadge";
 import { planBorderStyle } from "@/components/marketing/PlanAdornments";
 import { SERVER_API_BASE_URL, buildQuery } from "@/lib/api";
 import { fallbackImage } from "@/lib/constants";
-import { formatMileage, formatPrice, titleCase } from "@/lib/format";
+import { formatMileage, formatPrice, titleCase, vehicleImage } from "@/lib/format";
 import { getT, getLang } from "@/lib/i18n-server";
 import TranslatedText from "@/components/ui/TranslatedText";
 import VehicleGallery from "@/components/vehicles/VehicleGallery";
@@ -16,6 +16,34 @@ import ShareMenu from "@/components/listing/ShareMenu";
 import { Chip, QuickSpecs, SpecGrid, Panel } from "@/components/listing/ListingBits";
 
 export const revalidate = 60;
+
+// Same fetch signature as the vehicle fetch inside getDetail() below — Next
+// dedupes identical fetches within one render, so this doesn't cost a
+// second request and (importantly) doesn't touch the separate, non-cached
+// view-count fetch that only getDetail makes.
+export async function generateMetadata({ params }) {
+  const { id } = await params;
+  try {
+    const res = await fetch(`${SERVER_API_BASE_URL}/vehicles/${id}`, { next: { revalidate: 60 } });
+    if (!res.ok) return {};
+    const { data: vehicle } = await res.json();
+    if (!vehicle) return {};
+
+    const lang = await getLang();
+    const title = lang === "ur" ? (vehicle.titleUr || vehicle.title) : vehicle.title;
+    const image = vehicleImage(vehicle) || fallbackImage;
+    const description = `${formatPrice(vehicle.price, vehicle.priceDisplay)} — ${titleCase(vehicle.condition)} ${titleCase(vehicle.type)} in ${titleCase(vehicle.city)}`;
+
+    return {
+      title: `${title} | HeavyWheels`,
+      description,
+      openGraph: { title, description, images: [{ url: image }], type: "website" },
+      twitter: { card: "summary_large_image", title, description, images: [image] },
+    };
+  } catch {
+    return {};
+  }
+}
 
 async function getDetail(id) {
   try {

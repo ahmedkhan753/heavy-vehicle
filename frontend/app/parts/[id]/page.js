@@ -21,6 +21,34 @@ function partImage(part) {
   return part?.coverImage || part?.images?.[0]?.url || fallbackImage;
 }
 
+// Same fetch signature as the part fetch inside getPartDetail() below — Next
+// dedupes identical fetches within one render, so this doesn't cost a
+// second request and (importantly) doesn't touch the separate, non-cached
+// view-count fetch that only getPartDetail makes.
+export async function generateMetadata({ params }) {
+  const { id } = await params;
+  try {
+    const res = await fetch(`${SERVER_API_BASE_URL}/parts/${id}`, { next: { revalidate: 60 } });
+    if (!res.ok) return {};
+    const { data: part } = await res.json();
+    if (!part) return {};
+
+    const lang = await getLang();
+    const title = lang === "ur" ? (part.titleUr || part.title) : part.title;
+    const image = partImage(part);
+    const description = `${formatPrice(part.price, part.priceDisplay)} — ${partCategoryLabel(part.category, lang)}, ${titleCase(part.condition)} in ${titleCase(part.city)}`;
+
+    return {
+      title: `${title} | HeavyWheels`,
+      description,
+      openGraph: { title, description, images: [{ url: image }], type: "website" },
+      twitter: { card: "summary_large_image", title, description, images: [image] },
+    };
+  } catch {
+    return {};
+  }
+}
+
 async function getPartDetail(id) {
   try {
     const [partRes, featuredRes] = await Promise.all([

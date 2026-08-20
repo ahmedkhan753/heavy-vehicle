@@ -9,11 +9,32 @@ import MobileNav from "@/components/layout/MobileNav";
 import HeavyWheelsAssistant from "@/components/assistant/HeavyWheelsAssistant";
 import AdBanner from "@/components/ads/AdBanner";
 import { getLang } from "@/lib/i18n-server";
+import { fallbackImage } from "@/lib/constants";
+
+const SITE_NAME = "HeavyWheels Pakistan";
+const SITE_DESCRIPTION =
+  "Buy and sell dumpers, trollers, tankers, construction vehicles, trucks, dealers and spare parts across Pakistan in English and Urdu.";
 
 export const metadata = {
-  title: "HeavyWheels Pakistan - Heavy Vehicles, Machinery and Parts",
-  description:
-    "Buy and sell dumpers, trollers, tankers, construction vehicles, trucks, dealers and spare parts across Pakistan in English and Urdu.",
+  // Lets relative/og:url resolution work correctly; individual listing pages
+  // override title/description/openGraph with their own via generateMetadata
+  // so a shared ad link shows its own photo and price, not this default.
+  metadataBase: new URL("https://heavywheelspk.com"),
+  title: `${SITE_NAME} - Heavy Vehicles, Machinery and Parts`,
+  description: SITE_DESCRIPTION,
+  openGraph: {
+    siteName: SITE_NAME,
+    title: SITE_NAME,
+    description: SITE_DESCRIPTION,
+    images: [{ url: fallbackImage }],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: SITE_NAME,
+    description: SITE_DESCRIPTION,
+    images: [fallbackImage],
+  },
 };
 
 export default async function RootLayout({ children }) {
