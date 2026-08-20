@@ -8,6 +8,14 @@ import { useCallback, useEffect, useRef, useState } from "react";
  * Safari don't, so callers must check `supported` and skip rendering a mic
  * button entirely rather than showing one that silently fails.
  *
+ * Also requires a secure context (https, or localhost in dev): browsers
+ * refuse microphone access on plain http origins outright, with no site
+ * setting that fixes it — the constructor still exists there, so checking
+ * only for its presence would let the button render and then fail every
+ * time with a "blocked" error that has no real fix on the user's end. Once
+ * this site has HTTPS, `isSecureContext` flips true and the button appears
+ * on its own with no code change needed here.
+ *
  * One-shot by design (continuous: false): a search box wants a phrase, not
  * an open mic. A fresh SpeechRecognition instance is created per `start()`
  * call instead of being reused, which sidesteps "recognition already
@@ -19,7 +27,8 @@ export default function useSpeechToText({ lang, onResult, onError } = {}) {
   const recognitionRef = useRef(null);
 
   useEffect(() => {
-    setSupported(typeof window !== "undefined" && Boolean(window.SpeechRecognition || window.webkitSpeechRecognition));
+    const hasApi = typeof window !== "undefined" && Boolean(window.SpeechRecognition || window.webkitSpeechRecognition);
+    setSupported(hasApi && window.isSecureContext);
   }, []);
 
   const stop = useCallback(() => {
@@ -29,7 +38,7 @@ export default function useSpeechToText({ lang, onResult, onError } = {}) {
   const start = useCallback(() => {
     if (listening) return;
     const SpeechRecognition = typeof window !== "undefined" && (window.SpeechRecognition || window.webkitSpeechRecognition);
-    if (!SpeechRecognition) return;
+    if (!SpeechRecognition || !window.isSecureContext) return;
 
     const recognition = new SpeechRecognition();
     recognition.lang = lang === "ur" ? "ur-PK" : "en-US";
