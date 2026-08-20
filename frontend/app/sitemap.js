@@ -1,5 +1,15 @@
 import { SERVER_API_BASE_URL } from "@/lib/api";
 
+// Force this to render at request time, never prerendered at build time.
+// At build time the only reachable backend is the public HTTPS URL (the
+// internal Docker network / API_INTERNAL_URL doesn't exist yet — the
+// backend container isn't even running as part of that build), and on this
+// VPS a container reaching its own public IP is exactly the hairpin-NAT
+// situation documented elsewhere in this project — unreliable at best. At
+// request time the container's already up and SERVER_API_BASE_URL resolves
+// to the internal backend:5000 address, which just works.
+export const dynamic = "force-dynamic";
+
 const SITE_URL = "https://heavywheelspk.com";
 
 // Static, always-worth-indexing routes. Dashboard/admin/auth/payment are
