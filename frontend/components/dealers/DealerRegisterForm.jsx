@@ -116,7 +116,7 @@ export default function DealerRegisterForm() {
         <p className="text-3xl">✅</p>
         <h2 className="mt-2 text-lg font-black text-[var(--hw-text-primary)] sm:text-2xl">{existing.businessName}</h2>
         <Link href={`/dealers/${existing._id}`} className="mt-4 inline-flex h-11 items-center rounded-lg bg-[var(--hw-orange)] px-5 text-[13px] font-black text-[var(--hw-text-inverse)] sm:text-sm">
-          {t("dealer.title")}
+          {t("dealerForm.viewStorefront")}
         </Link>
       </div>
     );

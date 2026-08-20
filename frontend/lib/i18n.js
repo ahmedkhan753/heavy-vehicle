@@ -326,6 +326,8 @@ export const translations = {
     "dealerForm.rejectedTitle": "Application not approved",
     "dealerForm.rejectedBody": "Your previous application wasn't approved. You can update your details and apply again.",
     "dealerForm.applyAgain": "Apply again",
+    "dash.manageDealerProfile": "Manage dealer profile",
+    "dealerForm.viewStorefront": "View my storefront",
 
     // ── Post ad / part pages ──────────────────────
     "postad.title": "Post a heavy vehicle ad",
@@ -1220,6 +1222,8 @@ export const translations = {
     "dealerForm.rejectedTitle": "درخواست منظور نہیں ہوئی",
     "dealerForm.rejectedBody": "آپ کی پچھلی درخواست منظور نہیں ہوئی۔ تفصیلات درست کر کے دوبارہ درخواست دیں۔",
     "dealerForm.applyAgain": "دوبارہ درخواست دیں",
+    "dash.manageDealerProfile": "ڈیلر پروفائل کا نظم کریں",
+    "dealerForm.viewStorefront": "میرا اسٹور فرنٹ دیکھیں",
 
     // ── Post ad / part pages ──────────────────────
     "postad.title": "بھاری گاڑی کا اشتہار دیں",

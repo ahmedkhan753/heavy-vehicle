@@ -182,7 +182,7 @@ export default function DashboardHome() {
               <h2 className="text-base font-black text-[var(--hw-text-primary)] sm:text-xl">{t("dash.dealerProfile")}</h2>
               <p className="mt-1.5 text-[13px] leading-6 text-[var(--hw-text-secondary)] sm:mt-2 sm:text-sm">{t("dash.dealerHint")}</p>
               <Link href="/dashboard/dealer" className="mt-3 inline-flex h-10 w-full items-center justify-center rounded-lg border border-[var(--hw-border-strong)] px-4 text-[13px] font-bold text-[var(--hw-text-primary)] transition hover:border-[var(--hw-orange)] sm:mt-4 sm:h-11 sm:text-sm">
-                {t("dealer.title")}
+                {t("dash.manageDealerProfile")}
               </Link>
             </>
           ) : dealerStatus === "pending" ? (
