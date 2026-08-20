@@ -6,7 +6,7 @@ import { getT } from "@/lib/i18n-server";
 export const revalidate = 3600;
 
 export const metadata = {
-  title: "Subscription pricing — HeavyWheels",
+  title: "Subscription Pricing",
   description:
     "Compare HeavyWheels dealer plans and one-time ad boosts. Free, Starter, Pro, Elite and Elite Pro — featured slots, longer listings, and lower fees as you scale.",
 };

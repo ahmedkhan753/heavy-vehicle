@@ -14,6 +14,7 @@ import SellerContact from "@/components/listing/SellerContact";
 import Comments from "@/components/listing/Comments";
 import ShareMenu from "@/components/listing/ShareMenu";
 import { Chip, QuickSpecs, SpecGrid, Panel } from "@/components/listing/ListingBits";
+import { productJsonLd, breadcrumbJsonLd } from "@/lib/seo";
 
 export const revalidate = 60;
 
@@ -39,8 +40,9 @@ export async function generateMetadata({ params }) {
     const description = `${formatPrice(part.price, part.priceDisplay)} — ${partCategoryLabel(part.category, lang)}, ${titleCase(part.condition)} in ${titleCase(part.city)}`;
 
     return {
-      title: `${title} | HeavyWheels`,
+      title, // root layout's title.template appends "| HeavyWheels"
       description,
+      alternates: { canonical: `/parts/${id}` },
       openGraph: { title, description, images: [{ url: image }], type: "website" },
       twitter: { card: "summary_large_image", title, description, images: [image] },
     };
@@ -128,15 +130,46 @@ export default async function PartDetailPage({ params }) {
     [t("partd.quantity"), part.quantity || 1],
   ];
 
+  const breadcrumbItems = [
+    { name: "HeavyWheels", path: "" },
+    { name: t("nav.parts"), path: "/parts" },
+    { name: partCategoryLabel(part.category, lang), path: `/parts?category=${part.category}` },
+    { name: title, path: `/parts/${part._id}` },
+  ];
+
   return (
     <main className="hw-container py-3 sm:py-6 lg:py-10">
+      {/* Product + BreadcrumbList JSON-LD — the visible breadcrumb below
+          mirrors this, so a reader and a crawler get the same hierarchy. */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify([
+            productJsonLd({
+              name: title,
+              description: descPrimary,
+              image: partImage(part),
+              path: `/parts/${part._id}`,
+              price: part.price,
+              condition: part.condition,
+              brand: titleCase(part.make),
+              status: part.status,
+            }),
+            breadcrumbJsonLd(breadcrumbItems),
+          ]),
+        }}
+      />
+
       <ListingTopBar title={title} />
 
-      <div className="mb-6 hidden text-sm text-[var(--hw-text-muted)] lg:block">
-        <Link href="/parts" className="hover:text-[var(--hw-orange)]">
-          Parts
-        </Link>
-        <span> / {title}</span>
+      <div className="mb-6 hidden items-center gap-1.5 text-sm text-[var(--hw-text-muted)] lg:flex">
+        <Link href="/" className="hover:text-[var(--hw-orange)]">{t("nav.home")}</Link>
+        <span aria-hidden>/</span>
+        <Link href="/parts" className="hover:text-[var(--hw-orange)]">{t("nav.parts")}</Link>
+        <span aria-hidden>/</span>
+        <Link href={`/parts?category=${part.category}`} className="hover:text-[var(--hw-orange)]">{partCategoryLabel(part.category, lang)}</Link>
+        <span aria-hidden>/</span>
+        <span className="truncate text-[var(--hw-text-secondary)]">{title}</span>
       </div>
 
       <div className="grid gap-3 sm:gap-4 lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-8">

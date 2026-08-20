@@ -22,6 +22,26 @@ async function getDealer(id) {
   }
 }
 
+// Same fetch signature as getDealer() below — Next dedupes it.
+export async function generateMetadata({ params }) {
+  const { id } = await params;
+  const result = await getDealer(id);
+  const dealer = result.data?.dealer;
+  if (!dealer) return {};
+
+  const city = dealer.city ? dealer.city.charAt(0).toUpperCase() + dealer.city.slice(1) : "";
+  const title = city ? `${dealer.businessName} — Heavy Vehicle Dealer in ${city}` : dealer.businessName;
+  const description = dealer.tagline || dealer.description ||
+    `${dealer.businessName} is a heavy vehicle dealer${city ? ` based in ${city}` : ""} on HeavyWheels.`;
+
+  return {
+    title,
+    description,
+    alternates: { canonical: `/dealers/${id}` },
+    openGraph: { title, description, images: dealer.logo?.url ? [{ url: dealer.logo.url }] : undefined, type: "website" },
+  };
+}
+
 export default async function DealerProfilePage({ params }) {
   const { id } = await params;
   const result = await getDealer(id);

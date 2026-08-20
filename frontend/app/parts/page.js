@@ -2,9 +2,50 @@ import Link from "next/link";
 import PartCard from "@/components/parts/PartCard";
 import PartFilters from "@/components/parts/PartFilters";
 import { SERVER_API_BASE_URL, buildQuery } from "@/lib/api";
-import { getT } from "@/lib/i18n-server";
+import { getT, getLang } from "@/lib/i18n-server";
+import { titleCase } from "@/lib/format";
+import { partCategoryLabel } from "@/lib/parts";
 
 export const revalidate = 60;
+
+// Same reasoning as /vehicles' generateMetadata: one facet gets its own
+// indexable landing-page metadata, stacked facets/search/pagination stay
+// crawlable but out of the index to avoid near-duplicate pages.
+export async function generateMetadata({ searchParams }) {
+  const params = await searchParams;
+  const facets = ["category", "city", "make", "condition"].filter((k) => params[k]);
+  const hasSearch = Boolean(params.q);
+  const isPaged = Number(params.page) > 1;
+
+  if (!facets.length && !hasSearch && !isPaged) {
+    return {
+      title: "Heavy Vehicle Spare Parts for Sale in Pakistan",
+      description: "Browse engine, transmission, brake, hydraulic and other heavy vehicle spare parts for sale across Pakistan on HeavyWheels.",
+      alternates: { canonical: "/parts" },
+    };
+  }
+
+  if (facets.length === 1 && !hasSearch && !isPaged) {
+    const [key] = facets;
+    const lang = await getLang();
+    const value = key === "category" ? partCategoryLabel(params[key], lang) : titleCase(params[key]);
+    const title =
+      key === "city" ? `Spare Parts for Sale in ${value}` :
+      key === "make" ? `${value} Spare Parts for Sale in Pakistan` :
+      key === "condition" ? `${value} Spare Parts for Sale in Pakistan` :
+      `${value} for Sale in Pakistan`;
+    return {
+      title,
+      description: `${title} — compare price, condition and specifications on HeavyWheels.`,
+      alternates: { canonical: `/parts?${key}=${params[key]}` },
+    };
+  }
+
+  return {
+    title: "Heavy Vehicle Spare Parts for Sale in Pakistan",
+    robots: { index: false, follow: true },
+  };
+}
 
 async function getParts(searchParams) {
   const query = buildQuery({ ...(await searchParams), limit: 12 });

@@ -1,7 +1,7 @@
 import ServiceRequestsPanel from "@/components/admin/ServiceRequestsPanel";
 
 export const metadata = {
-  title: "Service Requests — HeavyWheels Admin",
+  title: "Service Requests",
 };
 
 export default function AdminRequestsPage() {

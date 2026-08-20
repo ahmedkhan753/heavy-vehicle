@@ -1,7 +1,7 @@
 import UsersPanel from "@/components/admin/UsersPanel";
 
 export const metadata = {
-  title: "Users — HeavyWheels Admin",
+  title: "Users",
 };
 
 export default function AdminUsersPage() {

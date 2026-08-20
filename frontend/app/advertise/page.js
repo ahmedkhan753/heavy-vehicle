@@ -2,7 +2,7 @@ import AdvertiseForm from "@/components/ads/AdvertiseForm";
 import { getT } from "@/lib/i18n-server";
 
 export const metadata = {
-  title: "Advertise on HeavyWheels",
+  title: "Advertise",
   description:
     "Banner advertising on Pakistan's heavy vehicle marketplace. Reach truck owners, dealers and fleet buyers on the homepage and listing pages.",
 };

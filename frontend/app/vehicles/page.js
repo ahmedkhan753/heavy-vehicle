@@ -4,8 +4,52 @@ import VehicleCard from "@/components/vehicles/VehicleCard";
 import VehicleFilters from "@/components/vehicles/VehicleFilters";
 import { SERVER_API_BASE_URL, buildQuery } from "@/lib/api";
 import { getT } from "@/lib/i18n-server";
+import { titleCase } from "@/lib/format";
 
 export const revalidate = 60;
+
+// Query-param filter pages ("?type=excavator") get their own indexable
+// title/description — effectively a category landing page without a
+// separate route. A single facet is worth indexing on its own; stacking
+// several at once (or a free-text search, or page 2+) produces a near-
+// duplicate of some other combination, so those stay crawlable (links to
+// individual listings still get followed) but out of the index — Google
+// specifically warns that uncontrolled faceted navigation wastes crawl
+// budget on thin, near-identical pages.
+export async function generateMetadata({ searchParams }) {
+  const params = await searchParams;
+  const facets = ["type", "city", "make", "condition"].filter((k) => params[k]);
+  const hasSearch = Boolean(params.q);
+  const isPaged = Number(params.page) > 1;
+
+  if (!facets.length && !hasSearch && !isPaged) {
+    return {
+      title: "Heavy Vehicles for Sale in Pakistan",
+      description: "Browse trucks, excavators, tippers, tankers, prime movers and other heavy vehicles for sale across Pakistan on HeavyWheels.",
+      alternates: { canonical: "/vehicles" },
+    };
+  }
+
+  if (facets.length === 1 && !hasSearch && !isPaged) {
+    const [key] = facets;
+    const value = titleCase(params[key]);
+    const title =
+      key === "city" ? `Heavy Vehicles for Sale in ${value}` :
+      key === "make" ? `${value} Vehicles for Sale in Pakistan` :
+      key === "condition" ? `${value} Heavy Vehicles for Sale in Pakistan` :
+      `${value}s for Sale in Pakistan`;
+    return {
+      title,
+      description: `${title} — compare price, year, condition and specifications on HeavyWheels.`,
+      alternates: { canonical: `/vehicles?${key}=${params[key]}` },
+    };
+  }
+
+  return {
+    title: "Heavy Vehicles for Sale in Pakistan",
+    robots: { index: false, follow: true },
+  };
+}
 
 async function getVehicles(searchParams) {
   const query = buildQuery({ ...(await searchParams), limit: 12 });

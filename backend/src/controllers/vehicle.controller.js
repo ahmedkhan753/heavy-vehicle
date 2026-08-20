@@ -67,6 +67,27 @@ async function list(req, res, next) {
 }
 
 // ─────────────────────────────────────────────────────────────
+// SITEMAP DATA — id + last-modified for every active listing, uncapped
+// (list()/APIFeatures caps at 100 per page, fine for browsing, useless for
+// a sitemap that needs every URL at once). No listing details here, just
+// what the sitemap needs — same information a crawler would find anyway by
+// visiting each listing page.
+// GET /api/vehicles/sitemap
+// ─────────────────────────────────────────────────────────────
+async function getSitemapIds(req, res, next) {
+  try {
+    const vehicles = await Vehicle.find({ status: "active", expiresAt: { $gt: new Date() } })
+      .select("_id updatedAt")
+      .sort({ _id: 1 })
+      .limit(20000)
+      .lean();
+    respond(res, 200, vehicles);
+  } catch (err) {
+    next(err);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
 // GET SINGLE VEHICLE
 // GET /api/vehicles/:id
 // ─────────────────────────────────────────────────────────────
@@ -471,6 +492,7 @@ async function incrementView(req, res, next) {
 module.exports = {
   list,
   getById,
+  getSitemapIds,
   getFeatured,
   getSimilar,
   getMyAds,

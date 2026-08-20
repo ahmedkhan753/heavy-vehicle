@@ -1,7 +1,7 @@
 import PaymentsPanel from "@/components/admin/PaymentsPanel";
 
 export const metadata = {
-  title: "Payment verification — HeavyWheels Admin",
+  title: "Payment Verification",
 };
 
 export default function AdminPaymentsPage() {

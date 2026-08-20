@@ -1,7 +1,7 @@
 import InspectorsPanel from "@/components/admin/InspectorsPanel";
 
 export const metadata = {
-  title: "Inspectors — HeavyWheels Admin",
+  title: "Inspectors",
 };
 
 export default function AdminInspectorsPage() {

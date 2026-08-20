@@ -15,7 +15,7 @@ const express = require("express");
 const { body } = require("express-validator");
 const { PART_CATEGORY_SLUGS, PART_TYPE_VALUES, WARRANTY_VALUES } = require("../config/partTaxonomy");
 const {
-  list, getFeatured, getById, getMyParts,
+  list, getSitemapIds, getFeatured, getById, getMyParts,
   create, update, deletePart, markAsSold, incrementView,
 } = require("../controllers/part.controller");
 const { protect, optionalAuth } = require("../middleware/auth.middleware");
@@ -91,6 +91,7 @@ const updateValidation = [
 ];
 
 router.get("/", optionalAuth, list);
+router.get("/sitemap", getSitemapIds);
 router.get("/featured", getFeatured);
 router.get("/my-parts", protect, getMyParts);
 router.post("/", protect, createValidation, create);

@@ -3,7 +3,7 @@ import Inbox from "@/components/chat/Inbox";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "Messages — HeavyWheels",
+  title: "Messages",
 };
 
 export default async function MessagesPage({ searchParams }) {

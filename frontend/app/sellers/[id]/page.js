@@ -20,6 +20,24 @@ async function getSeller(id) {
   }
 }
 
+// Sellers here are often private individuals, not businesses — unlike
+// dealer/business profiles this stays out of the index by default (a
+// person selling one truck shouldn't have their name searchable via
+// Google), while staying crawlable so links to their actual listings (the
+// pages that should rank) still get followed.
+export async function generateMetadata({ params }) {
+  const { id } = await params;
+  const result = await getSeller(id);
+  const user = result.data?.user;
+  if (!user) return {};
+
+  return {
+    title: `${user.name} on HeavyWheels`,
+    alternates: { canonical: `/sellers/${id}` },
+    robots: { index: false, follow: true },
+  };
+}
+
 export default async function SellerProfilePage({ params }) {
   const { id } = await params;
   const result = await getSeller(id);

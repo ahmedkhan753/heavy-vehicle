@@ -2,6 +2,10 @@ import { Suspense } from "react";
 import PaymentCallback from "@/components/payment/PaymentCallback";
 import { getT } from "@/lib/i18n-server";
 
+export const metadata = {
+  robots: { index: false, follow: false },
+};
+
 // Safepay redirects the buyer here after checkout. This page only REFLECTS the
 // payment status (the signed webhook is what actually activates the plan/boost).
 export default async function PaymentCallbackPage() {

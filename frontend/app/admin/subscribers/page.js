@@ -1,7 +1,7 @@
 import SubscribersPanel from "@/components/admin/SubscribersPanel";
 
 export const metadata = {
-  title: "Subscribers — HeavyWheels Admin",
+  title: "Subscribers",
 };
 
 export default function AdminSubscribersPage() {

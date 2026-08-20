@@ -4,7 +4,7 @@ import DealerWarrantyRequest from "@/components/services/DealerWarrantyRequest";
 import { getT } from "@/lib/i18n-server";
 
 export const metadata = {
-  title: "Warranty Program — HeavyWheels",
+  title: "Warranty Program",
   description: "Dealer-provided warranty on heavy vehicles. Look for the Verified Warranty badge, or — if you're a dealer — get your own warranty badge.",
 };
 

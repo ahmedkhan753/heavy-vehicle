@@ -14,6 +14,7 @@ import VehicleGallery from "@/components/vehicles/VehicleGallery";
 import ListingTopBar from "@/components/listing/ListingTopBar";
 import ShareMenu from "@/components/listing/ShareMenu";
 import { Chip, QuickSpecs, SpecGrid, Panel } from "@/components/listing/ListingBits";
+import { productJsonLd, breadcrumbJsonLd } from "@/lib/seo";
 
 export const revalidate = 60;
 
@@ -35,8 +36,9 @@ export async function generateMetadata({ params }) {
     const description = `${formatPrice(vehicle.price, vehicle.priceDisplay)} — ${titleCase(vehicle.condition)} ${titleCase(vehicle.type)} in ${titleCase(vehicle.city)}`;
 
     return {
-      title: `${title} | HeavyWheels`,
+      title, // root layout's title.template appends "| HeavyWheels"
       description,
+      alternates: { canonical: `/vehicles/${id}` },
       openGraph: { title, description, images: [{ url: image }], type: "website" },
       twitter: { card: "summary_large_image", title, description, images: [image] },
     };
@@ -138,13 +140,46 @@ export default async function VehicleDetailPage({ params }) {
     [t("veh.spec.mileage"), formatMileage(vehicle)],
   ];
 
+  const breadcrumbItems = [
+    { name: "HeavyWheels", path: "" },
+    { name: t("nav.vehicles"), path: "/vehicles" },
+    { name: titleCase(vehicle.type), path: `/vehicles?type=${vehicle.type}` },
+    { name: title, path: `/vehicles/${vehicle._id}` },
+  ];
+
   return (
     <main className="hw-container py-3 sm:py-6 lg:py-10">
+      {/* Product + BreadcrumbList JSON-LD — the visible breadcrumb below
+          mirrors this, so a reader and a crawler get the same hierarchy. */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify([
+            productJsonLd({
+              name: title,
+              description: descPrimary,
+              image: vehicle.images?.[0]?.url || fallbackImage,
+              path: `/vehicles/${vehicle._id}`,
+              price: vehicle.price,
+              condition: vehicle.condition,
+              brand: titleCase(vehicle.make),
+              status: vehicle.status,
+            }),
+            breadcrumbJsonLd(breadcrumbItems),
+          ]),
+        }}
+      />
+
       <ListingTopBar saveId={vehicle._id} title={title} />
 
-      <div className="mb-6 hidden text-sm text-[var(--hw-text-muted)] lg:block">
+      <div className="mb-6 hidden items-center gap-1.5 text-sm text-[var(--hw-text-muted)] lg:flex">
+        <Link href="/" className="hover:text-[var(--hw-orange)]">{t("nav.home")}</Link>
+        <span aria-hidden>/</span>
         <Link href="/vehicles" className="hover:text-[var(--hw-orange)]">{t("nav.vehicles")}</Link>
-        <span> / {title}</span>
+        <span aria-hidden>/</span>
+        <Link href={`/vehicles?type=${vehicle.type}`} className="hover:text-[var(--hw-orange)]">{titleCase(vehicle.type)}</Link>
+        <span aria-hidden>/</span>
+        <span className="truncate text-[var(--hw-text-secondary)]">{title}</span>
       </div>
 
       {/* Explicit row/column placement at lg keeps the desktop two-column

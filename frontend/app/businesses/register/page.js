@@ -2,7 +2,7 @@ import BusinessForm from "@/components/businesses/BusinessForm";
 import { getT } from "@/lib/i18n-server";
 
 export const metadata = {
-  title: "List your business — HeavyWheels",
+  title: "List Your Business",
   description: "Advertise your workshop, parts shop, crane rental or transport service to heavy vehicle owners across Pakistan.",
 };
 

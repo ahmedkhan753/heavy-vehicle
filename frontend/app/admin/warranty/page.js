@@ -1,7 +1,7 @@
 import WarrantyPanel from "@/components/admin/WarrantyPanel";
 
 export const metadata = {
-  title: "Warranty — HeavyWheels Admin",
+  title: "Warranty",
 };
 
 export default function AdminWarrantyPage() {

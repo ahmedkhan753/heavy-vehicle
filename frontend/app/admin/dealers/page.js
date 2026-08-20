@@ -1,7 +1,7 @@
 import DealersPanel from "@/components/admin/DealersPanel";
 
 export const metadata = {
-  title: "Dealers — HeavyWheels Admin",
+  title: "Dealers",
 };
 
 export default function AdminDealersPage() {

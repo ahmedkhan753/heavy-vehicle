@@ -1,6 +1,11 @@
 import PostAdForm from "@/components/post-ad/PostAdForm";
 import { getT } from "@/lib/i18n-server";
 
+export const metadata = {
+  title: "Post a Free Vehicle Ad",
+  description: "Sell your truck, excavator, trailer or heavy machinery for free on HeavyWheels — Pakistan's heavy vehicle marketplace.",
+};
+
 export default async function PostAdPage() {
   const t = await getT();
   const steps = [

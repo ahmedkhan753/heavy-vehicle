@@ -1,7 +1,7 @@
 import BusinessesPanel from "@/components/admin/BusinessesPanel";
 
 export const metadata = {
-  title: "Businesses — HeavyWheels Admin",
+  title: "Businesses",
 };
 
 export default function AdminBusinessesPage() {

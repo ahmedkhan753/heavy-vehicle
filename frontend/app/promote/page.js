@@ -5,7 +5,7 @@ import { getT } from "@/lib/i18n-server";
 export const revalidate = 3600;
 
 export const metadata = {
-  title: "Promote your ad — HeavyWheels",
+  title: "Promote Your Ad",
   description: "Feature your listing or subscribe as a dealer to sell heavy vehicles faster on HeavyWheels Pakistan.",
 };
 

@@ -1,7 +1,7 @@
 import { getT } from "@/lib/i18n-server";
 
 export const metadata = {
-  title: "Privacy Policy — HeavyWheels",
+  title: "Privacy Policy",
   description: "How HeavyWheels collects, uses, and protects your personal information.",
 };
 

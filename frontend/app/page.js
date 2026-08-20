@@ -14,6 +14,10 @@ import { getT } from "@/lib/i18n-server";
 
 export const revalidate = 60;
 
+export const metadata = {
+  alternates: { canonical: "/" },
+};
+
 // Homepage listings mix vehicles and parts together. Once paid plans are in
 // wide use, ?limit here should mostly surface premium/featured slots — free
 // ads fill whatever's left. Featured-first ordering already comes from the

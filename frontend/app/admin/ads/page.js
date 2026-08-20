@@ -1,7 +1,7 @@
 import AdsPanel from "@/components/admin/AdsPanel";
 
 export const metadata = {
-  title: "Advertising — HeavyWheels Admin",
+  title: "Advertising",
 };
 
 export default function AdminAdsPage() {

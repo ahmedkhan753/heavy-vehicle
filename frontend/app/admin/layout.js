@@ -1,7 +1,11 @@
 import AdminNav from "@/components/admin/AdminNav";
 
 export const metadata = {
-  title: "Admin — HeavyWheels",
+  // Own template so admin page titles read "X | HeavyWheels Admin" instead
+  // of inheriting the root's "X | HeavyWheels" — noindexed either way, this
+  // is purely for the browser tab.
+  title: { default: "Admin Dashboard", template: "%s | HeavyWheels Admin" },
+  robots: { index: false, follow: false },
 };
 
 export default function AdminLayout({ children }) {

@@ -2,7 +2,7 @@ import LoanCalculator from "@/components/services/LoanCalculator";
 import { getT } from "@/lib/i18n-server";
 
 export const metadata = {
-  title: "Loan Calculator — HeavyWheels",
+  title: "Loan Calculator",
   description: "Estimate the monthly installment for financing a truck, machinery, or commercial vehicle in Pakistan.",
 };
 

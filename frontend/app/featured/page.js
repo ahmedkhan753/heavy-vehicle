@@ -8,7 +8,7 @@ import { getT } from "@/lib/i18n-server";
 export const revalidate = 60;
 
 export const metadata = {
-  title: "Featured listings — HeavyWheels",
+  title: "Featured Listings",
   description: "Browse featured heavy vehicles and spare parts on HeavyWheels Pakistan.",
 };
 

@@ -7,7 +7,7 @@ import { getT, getLang } from "@/lib/i18n-server";
 export const revalidate = 3600;
 
 export const metadata = {
-  title: "Price Guide — HeavyWheels",
+  title: "Price Guide",
   description: "Typical market prices for trucks, tankers, and machinery in Pakistan, based on real HeavyWheels listings.",
 };
 

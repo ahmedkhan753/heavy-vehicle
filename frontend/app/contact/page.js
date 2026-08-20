@@ -1,7 +1,7 @@
 import { getT } from "@/lib/i18n-server";
 
 export const metadata = {
-  title: "Contact Us — HeavyWheels",
+  title: "Contact Us",
   description: "Get in touch with the HeavyWheels team by email, phone, or WhatsApp.",
 };
 

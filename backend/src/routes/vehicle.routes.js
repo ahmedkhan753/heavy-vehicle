@@ -16,7 +16,7 @@ const express        = require("express");
 const { body }       = require("express-validator");
 const { VEHICLE_TYPE_SLUGS } = require("../config/taxonomy");
 const {
-  list, getById, getFeatured, getSimilar,
+  list, getById, getSitemapIds, getFeatured, getSimilar,
   getMyAds, create, update, deleteVehicle,
   markAsSold, incrementView,
 } = require("../controllers/vehicle.controller");
@@ -104,6 +104,7 @@ const updateValidation = [
 
 // Public routes (no auth required)
 router.get("/",              optionalAuth, list);
+router.get("/sitemap",       getSitemapIds);
 router.get("/featured",      getFeatured);
 router.get("/:id/similar",   getSimilar);
 router.post("/:id/view",     incrementView);

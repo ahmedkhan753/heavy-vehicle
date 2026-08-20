@@ -7,7 +7,7 @@ import { getT, getLang } from "@/lib/i18n-server";
 export const revalidate = 60;
 
 export const metadata = {
-  title: "Vehicle Inspectors — HeavyWheels",
+  title: "Vehicle Inspectors",
   description: "Find verified heavy-vehicle inspectors across Pakistan. Compare fees and book an inspection before you buy.",
 };
 

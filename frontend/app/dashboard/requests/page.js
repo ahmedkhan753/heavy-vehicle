@@ -1,7 +1,7 @@
 import ServiceRequests from "@/components/dashboard/ServiceRequests";
 
 export const metadata = {
-  title: "My Service Requests — HeavyWheels",
+  title: "My Service Requests",
 };
 
 export default function DashboardRequestsPage() {

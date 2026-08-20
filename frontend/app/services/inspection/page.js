@@ -3,7 +3,7 @@ import PartnershipForm from "@/components/inspectors/PartnershipForm";
 import { getT } from "@/lib/i18n-server";
 
 export const metadata = {
-  title: "Vehicle Inspection — HeavyWheels",
+  title: "Vehicle Inspection",
   description: "Hire a verified inspector before you buy, or join HeavyWheels as an inspection officer or company.",
 };
 

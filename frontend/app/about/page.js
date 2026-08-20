@@ -1,7 +1,7 @@
 import { getT } from "@/lib/i18n-server";
 
 export const metadata = {
-  title: "About Us — HeavyWheels",
+  title: "About Us",
   description: "HeavyWheels is Pakistan's marketplace for heavy vehicles, machinery, and commercial vehicle parts.",
 };
 

@@ -7,7 +7,16 @@
 # of the old two-port split. That makes browser calls same-origin, which
 # sidesteps CORS for the primary flow and lets cookies work without any
 # cross-site SameSite complications.
-heavywheelspk.com, www.heavywheelspk.com {
+#
+# www redirects to the bare apex domain — search engines otherwise see both
+# as separate, duplicate-content sites. The apex is canonical here (matches
+# metadataBase and every canonical/OG URL the app emits), so www redirects
+# to it, not the other way round.
+www.heavywheelspk.com {
+	redir https://heavywheelspk.com{uri} permanent
+}
+
+heavywheelspk.com {
 	encode zstd gzip
 
 	handle /api/* {

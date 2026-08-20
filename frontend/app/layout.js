@@ -12,6 +12,7 @@ import { getLang } from "@/lib/i18n-server";
 import { fallbackImage } from "@/lib/constants";
 
 const SITE_NAME = "HeavyWheels Pakistan";
+const SITE_URL = "https://heavywheelspk.com";
 const SITE_DESCRIPTION =
   "Buy and sell dumpers, trollers, tankers, construction vehicles, trucks, dealers and spare parts across Pakistan in English and Urdu.";
 
@@ -19,8 +20,13 @@ export const metadata = {
   // Lets relative/og:url resolution work correctly; individual listing pages
   // override title/description/openGraph with their own via generateMetadata
   // so a shared ad link shows its own photo and price, not this default.
-  metadataBase: new URL("https://heavywheelspk.com"),
-  title: `${SITE_NAME} - Heavy Vehicles, Machinery and Parts`,
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: `${SITE_NAME} - Heavy Vehicles, Machinery and Parts`,
+    // Pages that set their own title (e.g. "Hino 500 | HeavyWheels") get it
+    // used as-is; this template only fills in for a bare title string.
+    template: "%s | HeavyWheels",
+  },
   description: SITE_DESCRIPTION,
   openGraph: {
     siteName: SITE_NAME,
@@ -36,6 +42,25 @@ export const metadata = {
     images: [fallbackImage],
   },
 };
+
+// Organization + WebSite JSON-LD — tells Google this domain is HeavyWheels
+// (not just "some new domain"), and gives it a preferred site name to show
+// in results. Emitted once, site-wide, on every page via the root layout.
+const structuredData = [
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: SITE_NAME,
+    url: SITE_URL,
+    logo: `${SITE_URL}/heavywheels-logo.png`,
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: SITE_NAME,
+    url: SITE_URL,
+  },
+];
 
 export default async function RootLayout({ children }) {
   // Read the language cookie on the server so the very first paint has the

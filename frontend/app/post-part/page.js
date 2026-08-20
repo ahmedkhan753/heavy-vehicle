@@ -2,7 +2,7 @@ import PostPartForm from "@/components/post-part/PostPartForm";
 import { getT } from "@/lib/i18n-server";
 
 export const metadata = {
-  title: "Sell Spare Parts | HeavyWheels",
+  title: "Sell Spare Parts",
 };
 
 export default async function PostPartPage() {

@@ -2,7 +2,7 @@ import InspectorRegisterForm from "@/components/inspectors/InspectorRegisterForm
 import { getT } from "@/lib/i18n-server";
 
 export const metadata = {
-  title: "Become an Inspector — HeavyWheels",
+  title: "Become an Inspector",
   description: "Join HeavyWheels as a vehicle inspector. Set your own fee and reach buyers and sellers across Pakistan.",
 };
 

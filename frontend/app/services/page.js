@@ -2,7 +2,7 @@ import Link from "next/link";
 import { getT } from "@/lib/i18n-server";
 
 export const metadata = {
-  title: "Services — HeavyWheels",
+  title: "Services",
   description: "Inspection, financing, price guidance, and warranty — everything you need to buy and sell heavy vehicles with confidence.",
 };
 

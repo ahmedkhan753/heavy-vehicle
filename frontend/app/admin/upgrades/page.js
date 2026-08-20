@@ -1,7 +1,7 @@
 import UpgradesPanel from "@/components/admin/UpgradesPanel";
 
 export const metadata = {
-  title: "Ad boosts — HeavyWheels Admin",
+  title: "Ad Boosts",
 };
 
 export default function AdminUpgradesPage() {

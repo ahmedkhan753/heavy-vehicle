@@ -2,7 +2,7 @@ import { TC_VERSION, COMMISSION_LABEL } from "@/lib/pricing";
 import { getT } from "@/lib/i18n-server";
 
 export const metadata = {
-  title: "Terms & Conditions — HeavyWheels",
+  title: "Terms & Conditions",
   description: "HeavyWheels terms of use, including the sales commission policy for sellers.",
 };
 

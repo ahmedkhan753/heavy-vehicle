@@ -7,7 +7,7 @@ import { getT, getLang } from "@/lib/i18n-server";
 export const revalidate = 60;
 
 export const metadata = {
-  title: "Business directory — HeavyWheels",
+  title: "Business Directory",
   description:
     "Find workshops, tyre shops, crane rental, transporters, insurance agents and other businesses serving heavy vehicles across Pakistan.",
 };

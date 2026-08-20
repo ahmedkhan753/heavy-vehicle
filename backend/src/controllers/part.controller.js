@@ -98,6 +98,22 @@ async function list(req, res, next) {
   }
 }
 
+// Sitemap needs every active listing's id + last-modified at once —
+// list()'s 100-per-page cap is right for browsing, useless here. No detail
+// beyond that, same as vehicle.controller's equivalent.
+async function getSitemapIds(req, res, next) {
+  try {
+    const parts = await Part.find({ status: "active", expiresAt: { $gt: new Date() } })
+      .select("_id updatedAt")
+      .sort({ _id: 1 })
+      .limit(20000)
+      .lean();
+    respond(res, 200, parts);
+  } catch (err) {
+    next(err);
+  }
+}
+
 async function getFeatured(req, res, next) {
   try {
     const limit = Math.min(parseInt(req.query.limit) || 8, 20);
@@ -360,6 +376,7 @@ async function incrementView(req, res, next) {
 
 module.exports = {
   list,
+  getSitemapIds,
   getFeatured,
   getById,
   getMyParts,

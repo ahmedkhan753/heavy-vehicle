@@ -1,7 +1,7 @@
 import CommissionsPanel from "@/components/admin/CommissionsPanel";
 
 export const metadata = {
-  title: "Commissions — HeavyWheels Admin",
+  title: "Commissions",
 };
 
 export default function AdminCommissionsPage() {
