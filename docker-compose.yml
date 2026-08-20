@@ -39,3 +39,27 @@ services:
       API_INTERNAL_URL: http://backend:5000/api
     depends_on:
       - backend
+
+  # ── Caddy (TLS termination + reverse proxy) ─────────────────
+  # Issues and auto-renews a free Let's Encrypt certificate for
+  # heavywheelspk.com on its own — no certbot, no renewal cron. Frontend
+  # and backend host ports (3000/5000) stay published for now as a
+  # fallback during the HTTPS cutover; closed off once verified.
+  caddy:
+    image: caddy:2-alpine
+    container_name: heavywheels-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - backend
+      - frontend
+
+volumes:
+  caddy_data:
+  caddy_config:

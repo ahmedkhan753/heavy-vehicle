@@ -1,0 +1,20 @@
+# Reverse proxy + automatic HTTPS (Let's Encrypt, auto-renewing) for
+# heavywheelspk.com. Caddy issues/renews the cert itself on first request —
+# no certbot, no manual renewal cron.
+#
+# Single domain, path-routed: the frontend and API share one origin
+# (heavywheelspk.com/api/* -> backend, everything else -> frontend) instead
+# of the old two-port split. That makes browser calls same-origin, which
+# sidesteps CORS for the primary flow and lets cookies work without any
+# cross-site SameSite complications.
+heavywheelspk.com, www.heavywheelspk.com {
+	encode zstd gzip
+
+	handle /api/* {
+		reverse_proxy backend:5000
+	}
+
+	handle {
+		reverse_proxy frontend:3000
+	}
+}
