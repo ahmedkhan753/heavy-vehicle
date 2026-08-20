@@ -11,8 +11,11 @@ services:
       dockerfile: Dockerfile
     container_name: heavywheels-backend
     restart: unless-stopped
-    ports:
-      - "5000:5000"
+    # No host port publish — only Caddy needs to reach this, over the
+    # internal Compose network by service name. Exposing 5000 on the host
+    # would let anyone bypass HTTPS entirely by hitting it directly.
+    expose:
+      - "5000"
     env_file:
       - ./backend/.env
     environment:
@@ -29,8 +32,10 @@ services:
         NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${NEXT_PUBLIC_GOOGLE_CLIENT_ID:-}
     container_name: heavywheels-frontend
     restart: unless-stopped
-    ports:
-      - "3000:3000"
+    # Same reasoning as backend — Caddy reaches this over the Compose
+    # network; no need (or want) to expose it on the host directly.
+    expose:
+      - "3000"
     environment:
       # Runtime-only (no NEXT_PUBLIC_ prefix, so it never reaches the browser
       # bundle) — Server Components fetch the backend by its Compose service
@@ -42,9 +47,9 @@ services:
 
   # ── Caddy (TLS termination + reverse proxy) ─────────────────
   # Issues and auto-renews a free Let's Encrypt certificate for
-  # heavywheelspk.com on its own — no certbot, no renewal cron. Frontend
-  # and backend host ports (3000/5000) stay published for now as a
-  # fallback during the HTTPS cutover; closed off once verified.
+  # heavywheelspk.com on its own — no certbot, no renewal cron. The only
+  # service with a host-published port; frontend/backend are reachable
+  # solely through it now.
   caddy:
     image: caddy:2-alpine
     container_name: heavywheels-caddy
