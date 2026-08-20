@@ -220,6 +220,19 @@ export const dealerApi = {
   adminReviewApplication: (id, approve, note) => apiRequest(`/dealers/admin/${id}/approval`, { method: "PATCH", body: JSON.stringify({ approve, note: note || "" }) }),
 };
 
+export const adApi = {
+  // Public
+  serve: (placement, limit) => apiRequest(`/ads${buildQuery({ placement, limit })}`),
+  impression: (id) => apiRequest(`/ads/${id}/impression`, { method: "POST" }),
+  clickUrl: (id) => `${API_BASE_URL}/ads/${id}/click`,
+  request: (body) => apiRequest("/ads/request", { method: "POST", body: JSON.stringify(body) }),
+  // Admin
+  adminList: (status) => apiRequest(`/ads/admin${status ? `?status=${status}` : ""}`),
+  adminCreate: (body) => apiRequest("/ads/admin", { method: "POST", body: JSON.stringify(body) }),
+  adminUpdate: (id, body) => apiRequest(`/ads/admin/${id}`, { method: "PUT", body: JSON.stringify(body) }),
+  adminRemove: (id) => apiRequest(`/ads/admin/${id}`, { method: "DELETE" }),
+};
+
 export const businessApi = {
   list: (params) => apiRequest(`/businesses${buildQuery(params)}`),
   detail: (id) => apiRequest(`/businesses/${id}`),

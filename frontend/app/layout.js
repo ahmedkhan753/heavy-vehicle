@@ -7,6 +7,7 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import MobileNav from "@/components/layout/MobileNav";
 import HeavyWheelsAssistant from "@/components/assistant/HeavyWheelsAssistant";
+import AdBanner from "@/components/ads/AdBanner";
 import { getLang } from "@/lib/i18n-server";
 
 export const metadata = {
@@ -31,6 +32,9 @@ export default async function RootLayout({ children }) {
           <ThemeProvider>
             <LanguageProvider>
               <AuthProvider>
+                {/* Leaderboard above the navbar — renders nothing when no
+                    campaign is live, so the layout is unaffected until one is. */}
+                <AdBanner placement="header" limit={1} />
                 <Navbar />
                 {children}
                 <Footer />

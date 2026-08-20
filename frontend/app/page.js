@@ -5,6 +5,7 @@ import PartCard from "@/components/parts/PartCard";
 import BrandBrowse from "@/components/home/BrandBrowse";
 import CategoryBrowse from "@/components/home/CategoryBrowse";
 import PartCategoryBrowse from "@/components/home/PartCategoryBrowse";
+import AdBanner from "@/components/ads/AdBanner";
 import { SERVER_API_BASE_URL } from "@/lib/api";
 import { CITIES, VEHICLE_TYPES, fallbackImage, typeLabel, cityLabel } from "@/lib/constants";
 import { titleCase } from "@/lib/format";
@@ -123,6 +124,11 @@ export default async function HomePage() {
             <SectionHeader eyebrow={t("home.brandsEyebrow")} title={t("home.brandsTitle")} action={t("common.viewAll")} href="/vehicles" />
             <BrandBrowse />
           </div>
+        </section>
+
+        {/* Paid banner row — self-hides when no campaign is running. */}
+        <section className="hw-container py-4 sm:py-6 empty:hidden">
+          <AdBanner placement="home-mid" limit={3} />
         </section>
 
         <section className="border-y border-[var(--hw-border-subtle)] bg-[var(--hw-bg-deep)]">

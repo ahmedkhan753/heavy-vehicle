@@ -44,6 +44,7 @@ const columns = [
       ["footer.contact", "/contact"],
       ["footer.link.dealers", "/dealers"],
       ["footer.link.parts", "/parts"],
+      ["ad.navLabel", "/advertise"],
     ],
   },
 ];
