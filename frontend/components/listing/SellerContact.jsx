@@ -11,12 +11,23 @@ import QuickAuthModal from "@/components/auth/QuickAuthModal";
 
 const DETAIL_API = { vehicle: vehicleApi, part: partApi };
 
+const PENDING_KEY = "hw_pending_contact_action";
+
 /**
  * SellerContact
  * ─────────────
- * In-app chat is the primary way to reach a seller (keeps the conversation
- * on-platform). Phone/WhatsApp remain as secondary options, revealed only to
- * signed-in users. Sellers don't see contact controls on their own listing.
+ * Message/Call/WhatsApp are always visible, even logged out — a visitor
+ * shouldn't have to find a separate "log in" button before finding out
+ * these options exist at all. Clicking any of them while signed out opens
+ * QuickAuthModal instead of performing the action; once sign-in succeeds,
+ * whichever button was clicked finishes automatically rather than making
+ * them click it a second time.
+ *
+ * The pending action is stashed in sessionStorage, not just a ref — the
+ * modal's Google/Facebook buttons sign in without leaving the page, but its
+ * "or continue with email" fallback does a full navigation to /auth/login
+ * and back, which unmounts this component and would silently drop an
+ * in-memory ref. sessionStorage survives that; a plain useRef doesn't.
  *
  * Works for either listing kind — pass `listingType="part"` on a part page;
  * defaults to "vehicle" so existing callers don't need to change.
@@ -27,7 +38,7 @@ export default function SellerContact({ listingId, listingType = "vehicle", redi
   const toast = useToast();
   const { t } = useLanguage();
   const [phone, setPhone] = useState("");
-  const [fetching, setFetching] = useState(false);
+  const [phoneFetched, setPhoneFetched] = useState(false);
   const [starting, setStarting] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
 
@@ -36,8 +47,7 @@ export default function SellerContact({ listingId, listingType = "vehicle", redi
   useEffect(() => {
     let active = true;
     async function loadPhone() {
-      if (!isAuthenticated || isOwner || phone) return;
-      setFetching(true);
+      if (!isAuthenticated || isOwner || phoneFetched) return;
       try {
         const res = await DETAIL_API[listingType].detail(listingId);
         const seller = res?.data?.sellerId || res?.data?.seller || {};
@@ -46,12 +56,12 @@ export default function SellerContact({ listingId, listingType = "vehicle", redi
       } catch {
         // Leave contact hidden on error.
       } finally {
-        if (active) setFetching(false);
+        if (active) setPhoneFetched(true);
       }
     }
     loadPhone();
     return () => { active = false; };
-  }, [isAuthenticated, isOwner, listingId, listingType, phone]);
+  }, [isAuthenticated, isOwner, listingId, listingType, phoneFetched]);
 
   async function messageSeller() {
     setStarting(true);
@@ -64,7 +74,44 @@ export default function SellerContact({ listingId, listingType = "vehicle", redi
     }
   }
 
-  if (loading || fetching) {
+  function runAction(action) {
+    if (action === "message") { messageSeller(); return; }
+    if (!phone) { toast.error(t("contact.noPhone")); return; }
+    if (action === "call") window.location.href = `tel:${phone}`;
+    else if (action === "whatsapp") window.open(`https://wa.me/${phone.replace(/[^0-9]/g, "")}`, "_blank", "noopener,noreferrer");
+  }
+
+  function requireAuth(action) {
+    return () => {
+      if (!isAuthenticated) {
+        sessionStorage.setItem(PENDING_KEY, JSON.stringify({ listingId, listingType, action }));
+        setAuthOpen(true);
+        return;
+      }
+      runAction(action);
+    };
+  }
+
+  // Once sign-in succeeds and (for call/WhatsApp) the seller's phone has
+  // finished loading, finish whatever action the visitor originally
+  // clicked instead of leaving them to click it again. Runs on mount too,
+  // since that's exactly when the email-fallback's redirect-back lands.
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    let pending;
+    try {
+      pending = JSON.parse(sessionStorage.getItem(PENDING_KEY) || "null");
+    } catch {
+      pending = null;
+    }
+    if (!pending || pending.listingId !== listingId || pending.listingType !== listingType) return;
+    if (pending.action !== "message" && !phoneFetched) return; // still waiting on the phone fetch
+    sessionStorage.removeItem(PENDING_KEY);
+    runAction(pending.action);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated, phoneFetched, listingId, listingType]);
+
+  if (loading) {
     return <div className="h-12 animate-pulse rounded-lg bg-[var(--hw-bg-elevated)]" />;
   }
 
@@ -79,56 +126,41 @@ export default function SellerContact({ listingId, listingType = "vehicle", redi
     );
   }
 
-  if (!isAuthenticated) {
-    return (
-      <div className="grid gap-3">
-        <button
-          type="button"
-          onClick={() => setAuthOpen(true)}
-          className="inline-flex h-12 items-center justify-center rounded-lg bg-[var(--hw-green)] text-sm font-black text-[var(--hw-text-inverse)]"
-        >
-          {t("contact.loginToMessage")}
-        </button>
-        <p className="text-center text-xs text-[var(--hw-text-muted)]">
-          {t("contact.loginHint")}
-        </p>
-        <QuickAuthModal open={authOpen} onClose={() => setAuthOpen(false)} redirectPath={redirectTo || "/vehicles"} />
-      </div>
-    );
-  }
-
-  const waNumber = phone.replace(/[^0-9]/g, "");
+  const phoneBusy = isAuthenticated && !phoneFetched;
 
   return (
     <div className="grid gap-3">
       {/* Primary: in-app chat */}
       <button
-        onClick={messageSeller}
+        onClick={requireAuth("message")}
         disabled={starting}
         className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-[var(--hw-orange)] text-sm font-black text-[var(--hw-text-inverse)] hover:bg-[var(--hw-amber)] disabled:opacity-60"
       >
         💬 {starting ? t("contact.opening") : t("contact.message")}
       </button>
 
-      {/* Secondary: phone / WhatsApp */}
-      {phone ? (
-        <div className="grid grid-cols-2 gap-2">
-          <a
-            href={`tel:${phone}`}
-            className="hw-ltr inline-flex h-11 items-center justify-center rounded-lg border border-[var(--hw-border-strong)] text-sm font-bold text-[var(--hw-text-primary)] hover:border-[var(--hw-orange)]"
-          >
-            {t("contact.call")}
-          </a>
-          <a
-            href={`https://wa.me/${waNumber}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex h-11 items-center justify-center rounded-lg border border-[var(--hw-border-strong)] text-sm font-bold text-[var(--hw-text-primary)] hover:border-[var(--hw-orange)]"
-          >
-            {t("contact.whatsapp")}
-          </a>
-        </div>
-      ) : null}
+      {/* Secondary: phone / WhatsApp — always visible; the real number only
+          exists once signed in, but the buttons themselves never hide. */}
+      <div className="grid grid-cols-2 gap-2">
+        <button
+          type="button"
+          onClick={requireAuth("call")}
+          disabled={phoneBusy}
+          className="hw-ltr inline-flex h-11 items-center justify-center rounded-lg border border-[var(--hw-border-strong)] text-sm font-bold text-[var(--hw-text-primary)] hover:border-[var(--hw-orange)] disabled:opacity-60"
+        >
+          {t("contact.call")}
+        </button>
+        <button
+          type="button"
+          onClick={requireAuth("whatsapp")}
+          disabled={phoneBusy}
+          className="inline-flex h-11 items-center justify-center rounded-lg border border-[var(--hw-border-strong)] text-sm font-bold text-[var(--hw-text-primary)] hover:border-[var(--hw-orange)] disabled:opacity-60"
+        >
+          {t("contact.whatsapp")}
+        </button>
+      </div>
+
+      <QuickAuthModal open={authOpen} onClose={() => setAuthOpen(false)} redirectPath={redirectTo || "/vehicles"} />
     </div>
   );
 }

@@ -2,8 +2,7 @@
 
 import { useRef, useState } from "react";
 import Image from "next/image";
-
-const SWIPE_THRESHOLD_PX = 40;
+import useSwipeTrack from "@/lib/useSwipeTrack";
 
 /**
  * VehicleGallery — used by both vehicle and part detail pages.
@@ -14,14 +13,15 @@ const SWIPE_THRESHOLD_PX = 40;
  * plus a full-width thumbnail strip, which matters most on a phone where the
  * gallery competes with the price and seller buttons for the first screen.
  *
- * Navigation works three ways so nothing is a dead end on touch: swipe, the
- * arrow buttons, and the preview tiles.
+ * Navigation works three ways so nothing is a dead end on touch: swipe
+ * (drag-following, not a delayed hard-cut), the arrow buttons, and the
+ * preview tiles.
  */
 export default function VehicleGallery({ images, title, fallbackImage }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [zoomed, setZoomed] = useState(false);
-  const touchStartX = useRef(null);
+  const suppressClick = useRef(false);
 
   const displayImages = images && images.length > 0
     ? images
@@ -29,6 +29,8 @@ export default function VehicleGallery({ images, title, fallbackImage }) {
 
   const total = displayImages.length;
   const hasMany = total > 1;
+  const prevIndex = (currentIndex - 1 + total) % total;
+  const nextIndex = (currentIndex + 1) % total;
 
   const goNext = () => setCurrentIndex((prev) => (prev + 1) % total);
   const goPrev = () => setCurrentIndex((prev) => (prev - 1 + total) % total);
@@ -36,16 +38,33 @@ export default function VehicleGallery({ images, title, fallbackImage }) {
   const handleNext = (e) => { e.stopPropagation(); goNext(); };
   const handlePrev = (e) => { e.stopPropagation(); goPrev(); };
 
-  const onTouchStart = (e) => { touchStartX.current = e.touches[0].clientX; };
+  // A completed drag shouldn't also fire the tap-to-open-lightbox/zoom
+  // handler on release. The flag only needs to survive the brief moment a
+  // browser might fire a synthetic click right after touchend — it must
+  // NOT stay armed waiting to be "consumed" by whatever tap comes next,
+  // since a horizontal drag calls preventDefault() on touchmove, which
+  // stops that synthetic click from ever firing at all. Left un-timed, the
+  // flag would silently eat the user's next real tap, however much later
+  // it happens.
+  function markJustSwiped() {
+    suppressClick.current = true;
+    window.setTimeout(() => { suppressClick.current = false; }, 300);
+  }
+  const main = useSwipeTrack({
+    enabled: hasMany,
+    onSwipeLeft: () => { markJustSwiped(); goNext(); },
+    onSwipeRight: () => { markJustSwiped(); goPrev(); },
+  });
+  const lightboxSwipe = useSwipeTrack({
+    enabled: hasMany,
+    onSwipeLeft: () => { markJustSwiped(); goNext(); },
+    onSwipeRight: () => { markJustSwiped(); goPrev(); },
+  });
 
-  const onTouchEnd = (e) => {
-    if (touchStartX.current === null) return;
-    const delta = e.changedTouches[0].clientX - touchStartX.current;
-    touchStartX.current = null;
-    if (Math.abs(delta) < SWIPE_THRESHOLD_PX) return;
-    if (delta < 0) goNext();
-    else goPrev();
-  };
+  function guardedClick(action) {
+    if (suppressClick.current) { suppressClick.current = false; return; }
+    action();
+  }
 
   const openLightbox = () => { setZoomed(false); setIsLightboxOpen(true); };
   const closeLightbox = () => { setIsLightboxOpen(false); setZoomed(false); };
@@ -57,25 +76,36 @@ export default function VehicleGallery({ images, title, fallbackImage }) {
     : [];
   const hiddenCount = total - 1 - previews.length;
 
+  function Slide({ index, isCurrent }) {
+    return (
+      <div className="relative h-full w-full shrink-0 basis-1/3">
+        <Image
+          src={displayImages[index].url || fallbackImage}
+          alt={isCurrent ? `${title} - Image ${index + 1}` : ""}
+          fill
+          priority={isCurrent}
+          sizes="(max-width: 640px) 74vw, (max-width: 1024px) 70vw, 50vw"
+          className="object-cover"
+        />
+      </div>
+    );
+  }
+
   return (
     <>
       <div className="flex gap-1.5 sm:gap-2">
         {/* Main image */}
         <div className="group relative min-w-0 flex-1 overflow-hidden rounded-xl border border-[var(--hw-border-default)] bg-[var(--hw-bg-card)]">
           <div
-            className="relative aspect-[4/3] w-full cursor-pointer touch-pan-y bg-black/5 sm:aspect-[16/10]"
-            onClick={openLightbox}
-            onTouchStart={onTouchStart}
-            onTouchEnd={onTouchEnd}
+            ref={main.containerRef}
+            className="relative aspect-[4/3] w-full cursor-pointer touch-pan-y overflow-hidden bg-black/5 sm:aspect-[16/10]"
+            onClick={() => guardedClick(openLightbox)}
           >
-            <Image
-              src={displayImages[currentIndex].url || fallbackImage}
-              alt={`${title} - Image ${currentIndex + 1}`}
-              fill
-              priority
-              sizes="(max-width: 640px) 74vw, (max-width: 1024px) 70vw, 50vw"
-              className="object-cover"
-            />
+            <div className="flex h-full w-[300%]" style={main.trackStyle}>
+              <Slide index={prevIndex} isCurrent={false} />
+              <Slide index={currentIndex} isCurrent />
+              <Slide index={nextIndex} isCurrent={false} />
+            </div>
           </div>
 
           {hasMany ? (
@@ -146,18 +176,24 @@ export default function VehicleGallery({ images, title, fallbackImage }) {
           </button>
 
           <div
+            ref={lightboxSwipe.containerRef}
             className="relative h-full max-h-[85vh] w-full max-w-5xl overflow-hidden"
-            onClick={(e) => { e.stopPropagation(); setZoomed((z) => !z); }}
-            onTouchStart={onTouchStart}
-            onTouchEnd={onTouchEnd}
+            onClick={(e) => { e.stopPropagation(); guardedClick(() => setZoomed((z) => !z)); }}
           >
-            <Image
-              src={displayImages[currentIndex].url || fallbackImage}
-              alt={`${title} - Image ${currentIndex + 1}`}
-              fill
-              sizes="100vw"
-              className={`object-contain transition-transform duration-200 ${zoomed ? "scale-[2] cursor-zoom-out" : "cursor-zoom-in"}`}
-            />
+            <div className="flex h-full w-[300%]" style={lightboxSwipe.trackStyle}>
+              {[prevIndex, currentIndex, nextIndex].map((idx, slot) => (
+                <div key={slot} className="relative h-full w-full shrink-0 basis-1/3">
+                  <Image
+                    src={displayImages[idx].url || fallbackImage}
+                    alt={slot === 1 ? `${title} - Image ${idx + 1}` : ""}
+                    fill
+                    priority={slot === 1}
+                    sizes="100vw"
+                    className={`object-contain ${slot === 1 && zoomed ? "scale-[2] cursor-zoom-out" : "cursor-zoom-in"} ${lightboxSwipe.isDragging ? "" : "transition-transform duration-200"}`}
+                  />
+                </div>
+              ))}
+            </div>
 
             {hasMany ? (
               <>
