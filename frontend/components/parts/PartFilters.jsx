@@ -43,11 +43,13 @@ export default function PartFilters({ params = {} }) {
             ref={inputRef}
             name="q"
             defaultValue={params.q || ""}
-            className="h-11 w-full rounded-lg border border-[var(--hw-border-default)] bg-[var(--hw-bg-input)] px-3.5 pe-10 text-sm text-[var(--hw-text-primary)] outline-none focus:border-[var(--hw-orange)]"
+            className="h-11 w-full rounded-lg border border-[var(--hw-border-default)] bg-[var(--hw-bg-input)] px-3.5 pe-12 text-sm text-[var(--hw-text-primary)] outline-none focus:border-[var(--hw-orange)]"
             placeholder={t("part.searchPlaceholder")}
           />
           <MicButton
-            className="absolute inset-y-0 end-2 my-auto"
+            variant="sphere"
+            size="sm"
+            className="absolute inset-y-0 end-1.5 my-auto"
             onResult={(text) => { if (inputRef.current) inputRef.current.value = text; }}
             onFinal={() => setTimeout(() => formRef.current?.requestSubmit(), 350)}
           />

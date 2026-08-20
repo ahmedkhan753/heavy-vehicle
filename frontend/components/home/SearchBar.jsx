@@ -20,10 +20,12 @@ export default function SearchBar({ defaultValue = "" }) {
           name="q"
           defaultValue={defaultValue}
           placeholder={t("home.searchPlaceholder")}
-          className="h-11 w-full rounded-lg border border-[var(--hw-border-default)] bg-[var(--hw-bg-input)] px-3.5 pe-10 text-sm text-[var(--hw-text-primary)] outline-none focus:border-[var(--hw-orange)] sm:h-12"
+          className="h-11 w-full rounded-lg border border-[var(--hw-border-default)] bg-[var(--hw-bg-input)] px-3.5 pe-12 text-sm text-[var(--hw-text-primary)] outline-none focus:border-[var(--hw-orange)] sm:h-12"
         />
         <MicButton
-          className="absolute inset-y-0 end-2 my-auto"
+          variant="sphere"
+          size="sm"
+          className="absolute inset-y-0 end-1.5 my-auto"
           onResult={(text) => { if (inputRef.current) inputRef.current.value = text; }}
           onFinal={() => setTimeout(() => inputRef.current?.form?.requestSubmit(), 350)}
         />

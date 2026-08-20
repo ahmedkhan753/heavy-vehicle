@@ -85,6 +85,11 @@ async function getAssistantReply({ message, history = [] }) {
       body: JSON.stringify({
         model: env.GROQ_MODEL,
         temperature: 0.7,
+        // Hard backstop under the prompt's "2-4 sentences" instruction — a
+        // table-heavy, field-by-field answer (the kind the prompt now
+        // explicitly forbids) runs well past this, a normal short answer
+        // doesn't get near it.
+        max_tokens: 400,
         messages: [
           ...systemMessages,
           ...compactHistory,

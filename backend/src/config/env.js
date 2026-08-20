@@ -94,7 +94,7 @@ module.exports = {
     // Translation (Groq — OpenAI-compatible, free tier). When the key is
     // absent, translation is skipped gracefully and listings stay single-language.
     GROQ_API_KEY:    process.env.GROQ_API_KEY || "",
-    GROQ_MODEL:      process.env.GROQ_MODEL || "llama-3.3-70b-versatile",
+    GROQ_MODEL:      process.env.GROQ_MODEL || "openai/gpt-oss-120b",
     TRANSLATION_ENABLED: process.env.TRANSLATION_ENABLED !== "false",
 
     // Email
