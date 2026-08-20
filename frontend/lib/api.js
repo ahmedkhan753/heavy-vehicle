@@ -336,6 +336,13 @@ export const searchApi = {
   run: (q, limit) => apiRequest(`/search${buildQuery({ q, limit })}`),
 };
 
+export const reportApi = {
+  create: (body) => apiRequest("/reports", { method: "POST", body: JSON.stringify(body) }),
+  adminList: (status) => apiRequest(`/reports/admin${status ? `?status=${status}` : ""}`),
+  adminSetStatus: (listingId, listingType, status) =>
+    apiRequest("/reports/admin/status", { method: "PATCH", body: JSON.stringify({ listingId, listingType, status }) }),
+};
+
 export const adminApi = {
   overview: () => apiRequest("/admin/overview"),
   subscribers: (params) => apiRequest(`/admin/subscribers${buildQuery(params)}`),
@@ -362,6 +369,7 @@ const api = {
   chat: chatApi,
   comments: commentApi,
   search: searchApi,
+  reports: reportApi,
   admin: adminApi,
 };
 

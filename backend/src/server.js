@@ -47,6 +47,7 @@ const commentRoutes      = require("./routes/comment.routes");
 const paymentRoutes      = require("./routes/payment.routes");
 const assistantRoutes    = require("./routes/assistant.routes");
 const searchRoutes       = require("./routes/search.routes");
+const reportRoutes       = require("./routes/report.routes");
 
 const { startSubscriptionMaintenance } = require("./utils/subscriptionMaintenance");
 const { syncAdminAccountFromEnv } = require("./utils/seedAdmin");
@@ -194,6 +195,7 @@ app.use("/api/chat", chatRoutes);
 app.use("/api/comments", commentRoutes);
 app.use("/api/assistant", assistantRoutes);
 app.use("/api/search", searchRoutes);
+app.use("/api/reports", reportRoutes);
 
 // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // 9. HANDLE 404 â€” Route not found

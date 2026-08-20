@@ -13,6 +13,7 @@ import TranslatedText from "@/components/ui/TranslatedText";
 import VehicleGallery from "@/components/vehicles/VehicleGallery";
 import ListingTopBar from "@/components/listing/ListingTopBar";
 import ShareMenu from "@/components/listing/ShareMenu";
+import ReportListingButton from "@/components/listing/ReportListingButton";
 import { Chip, QuickSpecs, SpecGrid, Panel } from "@/components/listing/ListingBits";
 import { productJsonLd, breadcrumbJsonLd } from "@/lib/seo";
 
@@ -266,6 +267,9 @@ export default async function VehicleDetailPage({ params }) {
           </div>
           <div className="mt-3.5 rounded-lg bg-[var(--hw-bg-deep)] p-3 text-[11px] leading-5 text-[var(--hw-text-secondary)] sm:mt-5 sm:p-4 sm:text-sm sm:leading-6">
             {t("veh.safetyNote")}
+          </div>
+          <div className="mt-3 flex justify-center">
+            <ReportListingButton listingId={vehicle._id} listingType="vehicle" sellerId={seller?._id || vehicle.sellerId} />
           </div>
         </aside>
 
