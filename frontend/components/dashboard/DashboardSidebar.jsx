@@ -44,7 +44,9 @@ export default function DashboardSidebar() {
     { href: "/dashboard/purchases", label: t("dash.purchases"), icon: icons.purchases },
     { href: "/dashboard/requests", label: t("dash.requests"), icon: icons.requests },
     {
-      href: "/dealers/register",
+      // Approved dealers edit their storefront; everyone else sees the
+      // application form.
+      href: isDealer ? "/dashboard/dealer" : "/dealers/register",
       label: isDealer ? t("dash.dealerProfile") : t("dash.upgradeDealer"),
       icon: icons.dealer,
     },

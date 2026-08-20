@@ -47,7 +47,7 @@ export default async function DealersPage({ searchParams }) {
                     <h2 className="text-xl font-black text-[var(--hw-text-primary)]">{dealer.businessName}</h2>
                     {dealer.isVerified ? <span className="rounded-md bg-[var(--hw-green)] px-2 py-1 text-xs font-black text-[var(--hw-text-inverse)]">{t("dealer.verified")}</span> : null}
                   </div>
-                  <p className="mt-1 text-sm text-[var(--hw-text-muted)]">{titleCase(dealer.city)} | {dealer.totalListings || 0} {t("dealer.listingsWord")}</p>
+                  <p className="mt-1 text-sm text-[var(--hw-text-muted)]">{titleCase(dealer.city)} | {dealer.activeListings ?? 0} {t("dealer.listingsWord")}</p>
                   <p className="mt-3 text-sm text-[var(--hw-text-secondary)]">{dealer.tagline || dealer.description || t("dealer.fallbackTag")}</p>
                 </div>
               </div>

@@ -198,6 +198,7 @@ export const dealerApi = {
   detail: (id) => apiRequest(`/dealers/${id}`),
   register: (body) => apiRequest("/dealers/register", { method: "POST", body: JSON.stringify(body) }),
   mine: () => apiRequest("/dealers/me"),
+  update: (id, body) => apiRequest(`/dealers/${id}`, { method: "PUT", body: JSON.stringify(body) }),
   requestWarranty: (terms) => apiRequest("/dealers/me/warranty", { method: "PATCH", body: JSON.stringify({ terms }) }),
   // Admin
   adminWarrantyList: (status) => apiRequest(`/dealers/admin/warranty${status ? `?status=${status}` : ""}`),

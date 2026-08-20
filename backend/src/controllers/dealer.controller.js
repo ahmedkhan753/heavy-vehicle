@@ -46,8 +46,30 @@ async function list(req, res, next) {
       Dealer.countDocuments(filter),
     ]);
 
+    // `totalListings` on the Dealer document is a denormalized counter that
+    // nothing maintains, so cards were always showing "0 listings". Count the
+    // live ads for this page of dealers instead.
+    const sellerIds = dealers.map((d) => d.userId?._id).filter(Boolean);
+    const liveMatch = { sellerId: { $in: sellerIds }, status: "active", expiresAt: { $gt: new Date() } };
+
+    const [vehicleCounts, partCounts] = await Promise.all([
+      Vehicle.aggregate([{ $match: liveMatch }, { $group: { _id: "$sellerId", n: { $sum: 1 } } }]),
+      Part.aggregate([{ $match: liveMatch }, { $group: { _id: "$sellerId", n: { $sum: 1 } } }]),
+    ]);
+
+    const tally = {};
+    [...vehicleCounts, ...partCounts].forEach((r) => {
+      const key = String(r._id);
+      tally[key] = (tally[key] || 0) + r.n;
+    });
+
+    const withCounts = dealers.map((d) => ({
+      ...d,
+      activeListings: tally[String(d.userId?._id)] || 0,
+    }));
+
     const pagination = getPaginationMeta(total, page, limit);
-    respond(res, 200, dealers, "Dealers fetched", pagination);
+    respond(res, 200, withCounts, "Dealers fetched", pagination);
   } catch (err) {
     next(err);
   }
@@ -186,8 +208,14 @@ async function update(req, res, next) {
       return next(new AppError("You can only update your own dealer profile.", 403));
     }
 
-    // Fields that cannot be changed
-    const IMMUTABLE = ["userId", "isVerified", "verifiedAt", "createdAt"];
+    // Fields the owner must never set on themselves. Without approvalStatus
+    // here, a dealer could PUT their own profile to "approved" and bypass
+    // admin review entirely. Admins change these through the approval route.
+    const IMMUTABLE = [
+      "userId", "isVerified", "verifiedAt", "createdAt",
+      "approvalStatus", "approvedAt", "rejectedAt", "reviewNote",
+      "totalListings", "rating", "warranty",
+    ];
     IMMUTABLE.forEach((f) => delete req.body[f]);
 
     if (req.body.city) req.body.city = req.body.city.toLowerCase().trim();

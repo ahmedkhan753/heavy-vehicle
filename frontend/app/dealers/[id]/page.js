@@ -56,11 +56,19 @@ export default async function DealerProfilePage({ params }) {
       {/* Header: cover strip, then the logo overlapping it — the identity
           block reads as one unit instead of a banner with a card under it. */}
       <section style={planBorderStyle(plan)} className="overflow-hidden rounded-xl border border-[var(--hw-border-default)] bg-[var(--hw-bg-card)]">
+        {/* NOTE: --hw-bg-elevated is a near-white tile colour even in dark
+            mode (it backs small icon chips), so using it here painted a solid
+            white band. Cover falls back to a dark branded gradient instead. */}
         <div
-          className="relative h-24 bg-[var(--hw-bg-elevated)] sm:h-36"
-          style={isPaidPlan(plan) ? { background: `linear-gradient(120deg, color-mix(in srgb, ${planMeta.color} 35%, var(--hw-bg-elevated)), var(--hw-bg-elevated))` } : undefined}
+          className="relative h-24 sm:h-36"
+          style={{
+            background: isPaidPlan(plan)
+              ? `linear-gradient(120deg, color-mix(in srgb, ${planMeta.color} 45%, var(--hw-bg-deep)), var(--hw-bg-deep))`
+              : `linear-gradient(120deg, color-mix(in srgb, var(--hw-orange) 28%, var(--hw-bg-deep)), var(--hw-bg-deep))`,
+          }}
         >
           {dealer.coverImage?.url ? <Image src={dealer.coverImage.url} alt="" fill sizes="(max-width: 768px) 100vw, 800px" className="object-cover" /> : null}
+          <div className="absolute inset-0 hw-subtle-grid opacity-40" />
         </div>
 
         <div className="p-3.5 sm:p-6">

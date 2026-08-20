@@ -154,7 +154,7 @@ export default async function HomePage() {
               {dealers.map((dealer) => (
                 <Link key={dealer._id} href={`/dealers/${dealer._id}`} className="rounded-lg border border-[var(--hw-border-default)] bg-[var(--hw-bg-card)] p-5 hover:border-[var(--hw-orange)]">
                   <h3 className="font-black text-[var(--hw-text-primary)]">{dealer.businessName}</h3>
-                  <p className="mt-2 text-sm text-[var(--hw-text-muted)]">{titleCase(dealer.city)} | {dealer.totalListings || 0} {t("dealer.listingsWord")}</p>
+                  <p className="mt-2 text-sm text-[var(--hw-text-muted)]">{titleCase(dealer.city)} | {dealer.activeListings ?? 0} {t("dealer.listingsWord")}</p>
                   <p className="mt-4 text-sm text-[var(--hw-text-secondary)]">{dealer.tagline || t("dealer.fallbackTag")}</p>
                 </Link>
               ))}
