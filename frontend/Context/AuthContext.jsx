@@ -56,6 +56,14 @@ export function AuthProvider({ children }) {
     return response;
   }
 
+  async function facebookLogin(accessToken) {
+    const response = await authApi.facebook(accessToken);
+    setStoredToken(response.data.accessToken);
+    setToken(response.data.accessToken);
+    setUser(response.data.user);
+    return response;
+  }
+
   async function register(payload) {
     const response = await authApi.register(payload);
     setStoredToken(response.data.accessToken);
@@ -83,6 +91,7 @@ export function AuthProvider({ children }) {
       isAuthenticated: Boolean(user && token),
       login,
       googleLogin,
+      facebookLogin,
       register,
       logout,
       setUser,

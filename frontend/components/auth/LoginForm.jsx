@@ -9,11 +9,12 @@ import { useLanguage } from "@/Context/LanguageContext";
 import { LANGUAGES } from "@/lib/i18n";
 import { normalizeApiError } from "@/lib/api";
 import { GoogleLogin } from "@react-oauth/google";
+import FacebookLoginButton from "./FacebookLoginButton";
 
 export default function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { login, googleLogin } = useAuth();
+  const { login, googleLogin, facebookLogin } = useAuth();
   const toast = useToast();
   const { t, lang, setLang } = useLanguage();
   const [loading, setLoading] = useState(false);
@@ -95,6 +96,21 @@ export default function LoginForm() {
           theme="filled_black"
           size="large"
           text="continue_with"
+        />
+        <FacebookLoginButton
+          onSuccess={async (accessToken) => {
+            try {
+              setLoading(true);
+              setError("");
+              await facebookLogin(accessToken);
+              toast.success("Logged in with Facebook successfully");
+              router.push(searchParams.get("redirect") || "/dashboard");
+            } catch (err) {
+              setError(normalizeApiError(err.payload || err));
+              setLoading(false);
+            }
+          }}
+          onError={() => setError("Facebook Login Failed")}
         />
         <div className="relative my-2">
           <div className="absolute inset-0 flex items-center">

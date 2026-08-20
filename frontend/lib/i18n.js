@@ -103,6 +103,10 @@ export const translations = {
     "auth.createAccount": "Create account",
     "auth.chooseLanguage": "Choose your language",
     "auth.languageHint": "You can change this anytime from the menu.",
+    "auth.continueWithFacebook": "Continue with Facebook",
+    "auth.orContinueWithEmail": "Or continue with email",
+    "auth.quickSignIn": "Sign in to continue",
+    "auth.quickSignInHint": "One tap — no password needed.",
 
     "auth.registerTitle": "Create your account",
     "auth.registerSubtitle": "Join HeavyWheels Pakistan",
@@ -1099,6 +1103,10 @@ export const translations = {
     "auth.createAccount": "اکاؤنٹ بنائیں",
     "auth.chooseLanguage": "اپنی زبان منتخب کریں",
     "auth.languageHint": "آپ اسے مینو سے کسی بھی وقت تبدیل کر سکتے ہیں۔",
+    "auth.continueWithFacebook": "فیس بک کے ساتھ جاری رکھیں",
+    "auth.orContinueWithEmail": "یا ای میل کے ساتھ جاری رکھیں",
+    "auth.quickSignIn": "جاری رکھنے کے لیے سائن ان کریں",
+    "auth.quickSignInHint": "ایک ٹیپ — پاس ورڈ کی ضرورت نہیں۔",
 
     "auth.registerTitle": "اپنا اکاؤنٹ بنائیں",
     "auth.registerSubtitle": "ہیوی وہیلز پاکستان میں شامل ہوں",

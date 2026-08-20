@@ -7,6 +7,7 @@ import { useAuth } from "@/Context/AuthContext";
 import { useToast } from "@/Context/ToastContext";
 import { useLanguage } from "@/Context/LanguageContext";
 import { vehicleApi, partApi, chatApi } from "@/lib/api";
+import QuickAuthModal from "@/components/auth/QuickAuthModal";
 
 const DETAIL_API = { vehicle: vehicleApi, part: partApi };
 
@@ -28,6 +29,7 @@ export default function SellerContact({ listingId, listingType = "vehicle", redi
   const [phone, setPhone] = useState("");
   const [fetching, setFetching] = useState(false);
   const [starting, setStarting] = useState(false);
+  const [authOpen, setAuthOpen] = useState(false);
 
   const isOwner = isAuthenticated && sellerId && String(user?._id) === String(sellerId);
 
@@ -80,15 +82,17 @@ export default function SellerContact({ listingId, listingType = "vehicle", redi
   if (!isAuthenticated) {
     return (
       <div className="grid gap-3">
-        <Link
-          href={`/auth/login?redirect=${encodeURIComponent(redirectTo || "/vehicles")}`}
+        <button
+          type="button"
+          onClick={() => setAuthOpen(true)}
           className="inline-flex h-12 items-center justify-center rounded-lg bg-[var(--hw-green)] text-sm font-black text-[var(--hw-text-inverse)]"
         >
           {t("contact.loginToMessage")}
-        </Link>
+        </button>
         <p className="text-center text-xs text-[var(--hw-text-muted)]">
           {t("contact.loginHint")}
         </p>
+        <QuickAuthModal open={authOpen} onClose={() => setAuthOpen(false)} redirectPath={redirectTo || "/vehicles"} />
       </div>
     );
   }

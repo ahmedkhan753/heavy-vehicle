@@ -51,6 +51,13 @@ const userSchema = new mongoose.Schema(
       unique: true,
     },
 
+    // ── Facebook Login ────────────────────────────────────────
+    facebookId: {
+      type: String,
+      sparse: true,
+      unique: true,
+    },
+
     // ── Profile ─────────────────────────────────────────────
     avatar: {
       url: { type: String, default: "" },
@@ -202,6 +209,7 @@ const userSchema = new mongoose.Schema(
 userSchema.index({ role: 1 });
 userSchema.index({ createdAt: -1 });
 userSchema.index({ googleId: 1 }, { sparse: true });
+userSchema.index({ facebookId: 1 }, { sparse: true });
 
 // ── BRUTE-FORCE LOCKOUT CONFIG ───────────────────────────────
 const MAX_LOGIN_ATTEMPTS = 5;
@@ -220,9 +228,9 @@ userSchema.virtual("isLocked").get(function () {
   return Boolean(this.lockUntil && this.lockUntil.getTime() > Date.now());
 });
 
-// ── PRE-VALIDATE: Require password unless Google-linked ──────
+// ── PRE-VALIDATE: Require password unless OAuth-linked ───────
 userSchema.pre("validate", function () {
-  if (!this.googleId && !this.password) {
+  if (!this.googleId && !this.facebookId && !this.password) {
     this.invalidate("password", "Password is required");
   }
 });

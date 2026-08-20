@@ -116,6 +116,11 @@ module.exports = {
     GOOGLE_CLIENT_ID:     process.env.GOOGLE_CLIENT_ID || "",
     GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET || "",
 
+    // Facebook Login (optional — same pattern as Google, button stays
+    // hidden until a real Meta app's credentials are set).
+    FACEBOOK_APP_ID:     process.env.FACEBOOK_APP_ID || "",
+    FACEBOOK_APP_SECRET: process.env.FACEBOOK_APP_SECRET || "",
+
     // Admin
     ADMIN_EMAIL:    process.env.ADMIN_EMAIL,
     ADMIN_PASSWORD: process.env.ADMIN_PASSWORD,

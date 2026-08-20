@@ -659,4 +659,140 @@ async function googleLogin(req, res, next) {
   }
 }
 
-module.exports = { register, login, logout, me, refresh, forgotPassword, resetPassword, verifyEmail, resendVerificationEmail, googleLogin };
+// ─────────────────────────────────────────────────────────────
+// FACEBOOK LOGIN
+// POST /api/auth/facebook   { accessToken }
+// Receives the user access token from the frontend's FB.login() call,
+// verifies it server-side against our own app (so a token minted for a
+// different Facebook app can't be replayed here), and finds-or-creates
+// the user. Mirrors googleLogin exactly — same shape, same
+// phone-completion-later behavior, same account-linking-by-email.
+// ─────────────────────────────────────────────────────────────
+async function facebookLogin(req, res, next) {
+  try {
+    const { accessToken: fbToken } = req.body;
+    if (!fbToken) {
+      return next(new AppError("Facebook access token is required.", 400));
+    }
+
+    if (!env.FACEBOOK_APP_ID || !env.FACEBOOK_APP_SECRET) {
+      return next(new AppError("Facebook login is not configured on this server.", 501));
+    }
+
+    // Verify the token was actually issued for OUR app before trusting it —
+    // without this, any valid Facebook token from any app could be replayed
+    // here to impersonate whichever user it belongs to.
+    const appAccessToken = `${env.FACEBOOK_APP_ID}|${env.FACEBOOK_APP_SECRET}`;
+    let debugData;
+    try {
+      const debugRes = await fetch(
+        `https://graph.facebook.com/debug_token?input_token=${encodeURIComponent(fbToken)}&access_token=${encodeURIComponent(appAccessToken)}`
+      );
+      const debugJson = await debugRes.json();
+      debugData = debugJson.data;
+    } catch (verifyErr) {
+      console.error("⚠️  Facebook token verification request failed:", verifyErr.message);
+      return next(new AppError("Couldn't verify the Facebook credential. Please try again.", 401));
+    }
+
+    if (!debugData?.is_valid || String(debugData.app_id) !== String(env.FACEBOOK_APP_ID)) {
+      return next(new AppError("Invalid Facebook credential. Please try again.", 401));
+    }
+
+    const facebookId = debugData.user_id;
+
+    // Now fetch the actual profile using the user's own token.
+    const profileRes = await fetch(
+      `https://graph.facebook.com/me?fields=id,name,email,picture.type(large)&access_token=${encodeURIComponent(fbToken)}`
+    );
+    const profile = await profileRes.json();
+
+    if (!profile.email) {
+      return next(new AppError("Your Facebook account needs a verified email address to sign in this way.", 400));
+    }
+
+    const email = String(profile.email).toLowerCase().trim();
+    const name = profile.name || email.split("@")[0];
+    const picture = profile.picture?.data?.url;
+
+    // ── Find or create the user ──────────────────────────────
+    let user = await User.findOne({
+      $or: [{ facebookId }, { email }],
+    }).select("+password");
+
+    if (user) {
+      if (!user.facebookId) {
+        user.facebookId = facebookId;
+      }
+      if (picture && (!user.avatar || !user.avatar.url)) {
+        user.avatar = { url: picture, publicId: "" };
+      }
+    } else {
+      user = new User({
+        name,
+        email,
+        phone: "",          // Will be prompted to complete later
+        facebookId,
+        isEmailVerified: true, // Facebook already verified the email
+        avatar: picture ? { url: picture, publicId: "" } : undefined,
+        role: "user",
+        city: "",
+        address: "",
+      });
+    }
+
+    if (user.isBanned) {
+      return next(new AppError("Your account has been suspended. Contact support.", 403));
+    }
+    if (user.isActive === false) {
+      return next(new AppError("Your account is inactive. Contact support.", 403));
+    }
+
+    const accessToken = signAccessToken({ id: user._id || undefined, role: user.role });
+    const refreshToken = signRefreshToken({ id: user._id || undefined });
+
+    user.refreshToken = hashToken(refreshToken);
+    user.lastLoginAt = new Date();
+    user.lastLoginIp = req.ip;
+    user.isEmailVerified = true;
+    await user.save({ validateBeforeSave: false });
+
+    const finalAccessToken = user._id
+      ? signAccessToken({ id: user._id, role: user.role })
+      : accessToken;
+    const finalRefreshToken = user._id
+      ? signRefreshToken({ id: user._id })
+      : refreshToken;
+
+    if (user._id && finalRefreshToken !== refreshToken) {
+      user.refreshToken = hashToken(finalRefreshToken);
+      await user.save({ validateBeforeSave: false });
+    }
+
+    setRefreshCookie(res, finalRefreshToken);
+
+    respond(res, 200, {
+      accessToken: finalAccessToken,
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        role: user.role,
+        plan: user.plan,
+        city: user.city,
+        avatar: user.avatar,
+        isVerifiedSeller: user.isVerifiedSeller,
+        totalAds: user.totalAds,
+        bio: user.bio,
+        whatsapp: user.whatsapp,
+        links: user.links,
+      },
+    }, "Logged in with Facebook successfully");
+
+  } catch (err) {
+    next(err);
+  }
+}
+
+module.exports = { register, login, logout, me, refresh, forgotPassword, resetPassword, verifyEmail, resendVerificationEmail, googleLogin, facebookLogin };

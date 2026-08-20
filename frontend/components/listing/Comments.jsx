@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
 import { useAuth } from "@/Context/AuthContext";
 import { useToast } from "@/Context/ToastContext";
 import { useLanguage } from "@/Context/LanguageContext";
 import { commentApi } from "@/lib/api";
 import { formatPrice } from "@/lib/format";
+import QuickAuthModal from "@/components/auth/QuickAuthModal";
 
 const timeAgo = (v) => {
   if (!v) return "";
@@ -26,6 +26,7 @@ export default function Comments({ listingId, listingType = "vehicle", sellerId 
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [replyTo, setReplyTo] = useState(null);
+  const [authOpen, setAuthOpen] = useState(false);
 
   const myId = user?._id;
   const isAdmin = user?.role === "admin";
@@ -78,7 +79,8 @@ export default function Comments({ listingId, listingType = "vehicle", sellerId 
         <CommentForm listingId={listingId} listingType={listingType} onPosted={load} />
       ) : (
         <div className="mt-4 rounded-lg border border-dashed border-[var(--hw-border-default)] p-4 text-center text-sm text-[var(--hw-text-secondary)]">
-          <Link href={`/auth/login?redirect=/${listingType === "part" ? "parts" : "vehicles"}/${listingId}`} className="font-bold text-[var(--hw-orange)] hover:underline">{t("comments.login")}</Link> {t("comments.loginRest")}
+          <button type="button" onClick={() => setAuthOpen(true)} className="font-bold text-[var(--hw-orange)] hover:underline">{t("comments.login")}</button> {t("comments.loginRest")}
+          <QuickAuthModal open={authOpen} onClose={() => setAuthOpen(false)} redirectPath={`/${listingType === "part" ? "parts" : "vehicles"}/${listingId}`} />
         </div>
       )}
 
