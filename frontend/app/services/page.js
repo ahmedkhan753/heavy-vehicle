@@ -14,6 +14,7 @@ export default async function ServicesPage() {
     { icon: "📊", title: t("services.priceGuideTitle"), desc: t("services.priceGuideDesc"), href: "/services/price-guide" },
     { icon: "💰", title: t("services.loanTitle"), desc: t("services.loanDesc"), href: "/services/loan-calculator" },
     { icon: "🛡️", title: t("services.warrantyTitle"), desc: t("services.warrantyDesc"), href: "/services/warranty" },
+    { icon: "📢", title: t("biz.servicesTitle"), desc: t("biz.servicesDesc"), href: "/businesses" },
   ];
 
   return (

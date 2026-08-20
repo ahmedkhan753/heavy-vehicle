@@ -61,6 +61,13 @@ export default function DashboardSidebar() {
       label: dealerApproved ? t("dash.dealerProfile") : t("dash.upgradeDealer"),
       icon: icons.dealer,
     },
+    {
+      // Single destination: BusinessForm shows apply / pending / manage
+      // depending on the account's listing state.
+      href: "/businesses/register",
+      label: t("biz.navLabel"),
+      icon: icons.dealer,
+    },
   ];
 
   const isActive = (link) =>

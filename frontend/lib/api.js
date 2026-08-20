@@ -220,6 +220,18 @@ export const dealerApi = {
   adminReviewApplication: (id, approve, note) => apiRequest(`/dealers/admin/${id}/approval`, { method: "PATCH", body: JSON.stringify({ approve, note: note || "" }) }),
 };
 
+export const businessApi = {
+  list: (params) => apiRequest(`/businesses${buildQuery(params)}`),
+  detail: (id) => apiRequest(`/businesses/${id}`),
+  mine: () => apiRequest("/businesses/me"),
+  register: (body) => apiRequest("/businesses/register", { method: "POST", body: JSON.stringify(body) }),
+  update: (id, body) => apiRequest(`/businesses/${id}`, { method: "PUT", body: JSON.stringify(body) }),
+  // Admin
+  adminApplications: (status) => apiRequest(`/businesses/admin/applications${status ? `?status=${status}` : ""}`),
+  adminReview: (id, approve, note) => apiRequest(`/businesses/admin/${id}/approval`, { method: "PATCH", body: JSON.stringify({ approve, note: note || "" }) }),
+  adminToggleFeatured: (id, featured) => apiRequest(`/businesses/admin/${id}/featured`, { method: "PATCH", body: JSON.stringify({ featured }) }),
+};
+
 export const subscriptionApi = {
   plans: () => apiRequest("/subscriptions/plans"),
   me: () => apiRequest("/subscriptions/me"),

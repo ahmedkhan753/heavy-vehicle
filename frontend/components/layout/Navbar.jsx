@@ -54,6 +54,7 @@ export default function Navbar() {
     [t("footer.link.priceGuide"), "/services/price-guide"],
     [t("footer.link.loan"), "/services/loan-calculator"],
     [t("footer.link.warranty"), "/services/warranty"],
+    [t("biz.navLabel"), "/businesses"],
     [t("nav.allServices"), "/services"],
   ];
 

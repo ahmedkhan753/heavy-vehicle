@@ -34,6 +34,7 @@ const columns = [
       ["footer.link.loan", "/services/loan-calculator"],
       ["footer.link.priceGuide", "/services/price-guide"],
       ["footer.link.warranty", "/services/warranty"],
+      ["biz.navLabel", "/businesses"],
     ],
   },
   {
