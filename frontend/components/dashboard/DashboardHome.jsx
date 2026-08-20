@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useAuth } from "@/Context/AuthContext";
 import { useLanguage } from "@/Context/LanguageContext";
-import { userApi, vehicleApi, partApi } from "@/lib/api";
+import { userApi, vehicleApi, partApi, dealerApi } from "@/lib/api";
 import { formatPrice } from "@/lib/format";
 import Badge from "@/components/ui/Badge";
 import PlanBadge from "@/components/marketing/PlanBadge";
@@ -23,6 +23,7 @@ export default function DashboardHome() {
   const { t } = useLanguage();
   const [profile, setProfile] = useState(null);
   const [ads, setAds] = useState([]);
+  const [dealer, setDealer] = useState(undefined); // undefined = loading, null = none
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -33,7 +34,8 @@ export default function DashboardHome() {
       userApi.profile().catch(() => null),
       vehicleApi.myAds({ limit: 5 }).catch(() => null),
       partApi.myParts({ limit: 5 }).catch(() => null),
-    ]).then(([profileRes, adsRes, partsRes]) => {
+      dealerApi.mine().catch(() => null),
+    ]).then(([profileRes, adsRes, partsRes, dealerRes]) => {
       setProfile(profileRes?.data || null);
       const vehicles = (adsRes?.data || []).map((ad) => ({ ...ad, kind: "vehicle" }));
       const parts = (partsRes?.data || []).map((ad) => ({ ...ad, kind: "part" }));
@@ -42,6 +44,7 @@ export default function DashboardHome() {
           .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))
           .slice(0, 5)
       );
+      setDealer(dealerRes?.data ?? null);
     });
   }, [isAuthenticated]);
 
@@ -63,7 +66,10 @@ export default function DashboardHome() {
   // to user.totalAds — that's a lifetime counter and stays inflated.
   const activeAds = profile?.activeAds ?? 0;
   const totalViews = ads.reduce((sum, ad) => sum + Number(ad.views || 0), 0);
-  const isDealer = user?.role === "dealer";
+  // Role alone isn't reliable here: an admin who also owns an approved
+  // dealer profile keeps role "admin" (approval never demotes an admin), so
+  // this reads the actual application instead of user.role === "dealer".
+  const dealerStatus = dealer?.approvalStatus || null; // null | "pending" | "approved" | "rejected"
   const plan = user?.plan || profile?.plan;
   const planMeta = getPlanMeta(plan);
   const onTopTier = plan === "elite" || plan === "elitePro";
@@ -167,20 +173,40 @@ export default function DashboardHome() {
           </div>
         </section>
 
-        {/* Role-aware callout */}
+        {/* Dealer callout — reflects the actual application, not just role,
+            so a pending applicant can't be invited to "apply again" and an
+            approved dealer sees their storefront link. */}
         <aside className="min-w-0 rounded-xl border border-[var(--hw-border-default)] bg-[var(--hw-bg-card)] p-3.5 sm:p-5">
-          <h2 className="text-base font-black text-[var(--hw-text-primary)] sm:text-xl">
-            {isDealer ? t("dash.dealerProfile") : t("dash.upgradeDealer")}
-          </h2>
-          <p className="mt-1.5 text-[13px] leading-6 text-[var(--hw-text-secondary)] sm:mt-2 sm:text-sm">
-            {isDealer ? t("dash.dealerHint") : t("dash.upgradeHint")}
-          </p>
-          <Link
-            href={isDealer ? "/dealers" : "/dealers/register"}
-            className="mt-3 inline-flex h-10 w-full items-center justify-center rounded-lg border border-[var(--hw-border-strong)] px-4 text-[13px] font-bold text-[var(--hw-text-primary)] transition hover:border-[var(--hw-orange)] sm:mt-4 sm:h-11 sm:text-sm"
-          >
-            {isDealer ? t("dealer.title") : t("dealer.become")}
-          </Link>
+          {dealerStatus === "approved" ? (
+            <>
+              <h2 className="text-base font-black text-[var(--hw-text-primary)] sm:text-xl">{t("dash.dealerProfile")}</h2>
+              <p className="mt-1.5 text-[13px] leading-6 text-[var(--hw-text-secondary)] sm:mt-2 sm:text-sm">{t("dash.dealerHint")}</p>
+              <Link href="/dashboard/dealer" className="mt-3 inline-flex h-10 w-full items-center justify-center rounded-lg border border-[var(--hw-border-strong)] px-4 text-[13px] font-bold text-[var(--hw-text-primary)] transition hover:border-[var(--hw-orange)] sm:mt-4 sm:h-11 sm:text-sm">
+                {t("dealer.title")}
+              </Link>
+            </>
+          ) : dealerStatus === "pending" ? (
+            <>
+              <h2 className="text-base font-black text-[var(--hw-text-primary)] sm:text-xl">{t("dealerForm.pendingTitle")}</h2>
+              <p className="mt-1.5 text-[13px] leading-6 text-[var(--hw-text-secondary)] sm:mt-2 sm:text-sm">{t("dealerForm.pendingBody")}</p>
+            </>
+          ) : dealerStatus === "rejected" ? (
+            <>
+              <h2 className="text-base font-black text-[var(--hw-text-primary)] sm:text-xl">{t("dealerForm.rejectedTitle")}</h2>
+              <p className="mt-1.5 text-[13px] leading-6 text-[var(--hw-text-secondary)] sm:mt-2 sm:text-sm">{t("dealerForm.rejectedBody")}</p>
+              <Link href="/dealers/register" className="mt-3 inline-flex h-10 w-full items-center justify-center rounded-lg border border-[var(--hw-border-strong)] px-4 text-[13px] font-bold text-[var(--hw-text-primary)] transition hover:border-[var(--hw-orange)] sm:mt-4 sm:h-11 sm:text-sm">
+                {t("dealerForm.applyAgain")}
+              </Link>
+            </>
+          ) : (
+            <>
+              <h2 className="text-base font-black text-[var(--hw-text-primary)] sm:text-xl">{t("dash.upgradeDealer")}</h2>
+              <p className="mt-1.5 text-[13px] leading-6 text-[var(--hw-text-secondary)] sm:mt-2 sm:text-sm">{t("dash.upgradeHint")}</p>
+              <Link href="/dealers/register" className="mt-3 inline-flex h-10 w-full items-center justify-center rounded-lg border border-[var(--hw-border-strong)] px-4 text-[13px] font-bold text-[var(--hw-text-primary)] transition hover:border-[var(--hw-orange)] sm:mt-4 sm:h-11 sm:text-sm">
+                {t("dealer.become")}
+              </Link>
+            </>
+          )}
         </aside>
       </div>
     </>

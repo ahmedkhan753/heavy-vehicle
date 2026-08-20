@@ -1,10 +1,12 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/Context/AuthContext";
 import { useLanguage } from "@/Context/LanguageContext";
+import { dealerApi } from "@/lib/api";
 
 /* ── Inline icons (no icon lib installed) ───────────────────────── */
 const Icon = ({ d, className = "h-5 w-5" }) => (
@@ -30,8 +32,15 @@ export default function DashboardSidebar() {
   const pathname = usePathname();
   const { user, isAuthenticated } = useAuth();
   const { t } = useLanguage();
+  const [dealerApproved, setDealerApproved] = useState(false);
 
-  const isDealer = user?.role === "dealer";
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    // user.role alone isn't reliable: an admin who also owns an approved
+    // dealer profile keeps role "admin" (approval never demotes an admin),
+    // so this checks the actual application instead of user.role === "dealer".
+    dealerApi.mine().then((res) => setDealerApproved(res?.data?.approvalStatus === "approved")).catch(() => {});
+  }, [isAuthenticated]);
 
   const links = [
     { href: "/dashboard", label: t("dash.overview"), icon: icons.overview, exact: true },
@@ -44,10 +53,12 @@ export default function DashboardSidebar() {
     { href: "/dashboard/purchases", label: t("dash.purchases"), icon: icons.purchases },
     { href: "/dashboard/requests", label: t("dash.requests"), icon: icons.requests },
     {
-      // Approved dealers edit their storefront; everyone else sees the
-      // application form.
-      href: isDealer ? "/dashboard/dealer" : "/dealers/register",
-      label: isDealer ? t("dash.dealerProfile") : t("dash.upgradeDealer"),
+      // Approved dealers edit their storefront; everyone else lands on the
+      // application page, which itself shows a pending/rejected notice
+      // instead of the form when applicable — no need to duplicate that
+      // branching here.
+      href: dealerApproved ? "/dashboard/dealer" : "/dealers/register",
+      label: dealerApproved ? t("dash.dealerProfile") : t("dash.upgradeDealer"),
       icon: icons.dealer,
     },
   ];
