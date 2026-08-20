@@ -215,22 +215,14 @@ export default async function VehicleDetailPage({ params }) {
           </Panel>
 
           {Number(vehicle.price) > 0 ? (
-            <div className="grid gap-2 sm:grid-cols-2">
+            <div className="grid gap-2">
               <Link
                 href={`/services/loan-calculator?price=${vehicle.price}`}
                 className="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-[var(--hw-border-strong)] px-4 text-[13px] font-bold text-[var(--hw-text-primary)] transition hover:border-[var(--hw-orange)] hover:text-[var(--hw-orange)] sm:text-sm"
               >
                 🧮 {t("veh.calculateFinancing")}
               </Link>
-              <Link
-                href={`/services/transfer?vehicleId=${vehicle._id}`}
-                className="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-[var(--hw-border-strong)] px-4 text-[13px] font-bold text-[var(--hw-text-primary)] transition hover:border-[var(--hw-orange)] hover:text-[var(--hw-orange)] sm:text-sm"
-              >
-                📄 {t("veh.requestTransfer")}
-              </Link>
-              <div className="sm:col-span-2">
-                <PriceFairnessBadge price={vehicle.price} estimate={priceEstimate} t={t} />
-              </div>
+              <PriceFairnessBadge price={vehicle.price} estimate={priceEstimate} t={t} />
             </div>
           ) : null}
         </div>

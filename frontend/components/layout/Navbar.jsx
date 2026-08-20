@@ -45,7 +45,7 @@ export default function Navbar() {
         : { title: t("nav.byCity"), links: MENU_CITIES.map((c) => [cityLabel(c, lang), `/vehicles?condition=${cond}&city=${c}`]) },
       cond === "new"
         ? { title: t("nav.helpful"), links: [[t("footer.link.priceGuide"), "/services/price-guide"], [t("footer.link.loan"), "/services/loan-calculator"], [t("nav.findDealers"), "/dealers"], [t("nav.postYourAd"), "/post-ad"]] }
-        : { title: t("nav.servicesCol"), links: [[t("footer.link.inspection"), "/services/inspection"], [t("footer.link.transfer"), "/services/transfer"], [t("footer.link.priceGuide"), "/services/price-guide"], [t("nav.sellVehicle"), "/post-ad"]] },
+        : { title: t("nav.servicesCol"), links: [[t("footer.link.inspection"), "/services/inspection"], [t("footer.link.warranty"), "/services/warranty"], [t("footer.link.priceGuide"), "/services/price-guide"], [t("nav.sellVehicle"), "/post-ad"]] },
     ],
   });
 
@@ -53,7 +53,6 @@ export default function Navbar() {
     [t("footer.link.inspection"), "/services/inspection"],
     [t("footer.link.priceGuide"), "/services/price-guide"],
     [t("footer.link.loan"), "/services/loan-calculator"],
-    [t("footer.link.transfer"), "/services/transfer"],
     [t("footer.link.warranty"), "/services/warranty"],
     [t("nav.allServices"), "/services"],
   ];

@@ -1,7 +1,7 @@
 /**
  * Service Request Controller
  * ──────────────────────────
- * Generic handler for all booking-style services (ownership transfer first).
+ * Generic handler for all booking-style services (inspection, warranty).
  *
  * User:
  *   create   → POST  /api/service-requests

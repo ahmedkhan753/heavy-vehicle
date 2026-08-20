@@ -22,11 +22,6 @@ const SERVICES = [
         desc: "Estimate monthly installments for truck financing options.",
     },
     {
-        icon: "📄",
-        title: "Ownership Transfer",
-        desc: "Hassle-free documentation and transfer assistance.",
-    },
-    {
         icon: "🛡️",
         title: "Warranty Program",
         desc: "6-month warranty on selected verified vehicles.",

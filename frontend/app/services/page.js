@@ -3,7 +3,7 @@ import { getT } from "@/lib/i18n-server";
 
 export const metadata = {
   title: "Services — HeavyWheels",
-  description: "Inspection, financing, price guidance, ownership transfer, and warranty — everything you need to buy and sell heavy vehicles with confidence.",
+  description: "Inspection, financing, price guidance, and warranty — everything you need to buy and sell heavy vehicles with confidence.",
 };
 
 export default async function ServicesPage() {
@@ -13,7 +13,6 @@ export default async function ServicesPage() {
     { icon: "🔍", title: t("services.inspectionTitle"), desc: t("services.inspectionDesc"), href: "/services/inspection" },
     { icon: "📊", title: t("services.priceGuideTitle"), desc: t("services.priceGuideDesc"), href: "/services/price-guide" },
     { icon: "💰", title: t("services.loanTitle"), desc: t("services.loanDesc"), href: "/services/loan-calculator" },
-    { icon: "📄", title: t("services.transferTitle"), desc: t("services.transferDesc"), href: "/services/transfer" },
     { icon: "🛡️", title: t("services.warrantyTitle"), desc: t("services.warrantyDesc"), href: "/services/warranty" },
   ];
 

@@ -195,10 +195,9 @@ async function sendRenewalReminder(user, listing, daysLeft, extendPrice) {
   });
 }
 
-/* ── Service requests (ownership transfer, inspection, warranty) ── */
+/* ── Service requests (inspection, warranty) ── */
 
 const SERVICE_LABEL = {
-  "ownership-transfer": "Ownership Transfer",
   inspection: "Vehicle Inspection",
   warranty: "Warranty Program",
 };

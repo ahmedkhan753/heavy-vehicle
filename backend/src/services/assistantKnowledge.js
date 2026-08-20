@@ -11,7 +11,6 @@ const MARKETPLACE_ROUTES = {
   priceGuide: "/services/price-guide",
   loanCalculator: "/services/loan-calculator",
   inspection: "/services/inspection",
-  ownershipTransfer: "/services/transfer",
   warranty: "/services/warranty",
   messages: "/dashboard/messages",
   profile: "/dashboard/profile",

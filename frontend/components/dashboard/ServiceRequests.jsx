@@ -7,7 +7,6 @@ import { useToast } from "@/Context/ToastContext";
 import { serviceRequestApi } from "@/lib/api";
 
 const SERVICE_LABEL = {
-  "ownership-transfer": "Ownership Transfer",
   inspection: "Vehicle Inspection",
   warranty: "Warranty Program",
 };
@@ -79,8 +78,8 @@ export default function ServiceRequests() {
     return (
       <div className="rounded-xl border border-dashed border-[var(--hw-border-default)] bg-[var(--hw-bg-card)] p-10 text-center">
         <h2 className="text-xl font-black text-[var(--hw-text-primary)]">No service requests yet</h2>
-        <p className="mt-2 text-[var(--hw-text-secondary)]">Need help with paperwork? Request our ownership transfer service.</p>
-        <Link href="/services/transfer" className="mt-5 inline-flex h-11 items-center rounded-lg bg-[var(--hw-orange)] px-5 text-sm font-black text-[var(--hw-text-inverse)]">Request a service</Link>
+        <p className="mt-2 text-[var(--hw-text-secondary)]">Book a vehicle inspection or request warranty cover.</p>
+        <Link href="/services" className="mt-5 inline-flex h-11 items-center rounded-lg bg-[var(--hw-orange)] px-5 text-sm font-black text-[var(--hw-text-inverse)]">Request a service</Link>
       </div>
     );
   }

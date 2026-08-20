@@ -1,6 +1,6 @@
 /**
  * Service Request Routes  → mounted at /api/service-requests
- * Generic for ownership transfer, inspection, and warranty.
+ * Generic for inspection and warranty requests.
  */
 
 const express = require("express");

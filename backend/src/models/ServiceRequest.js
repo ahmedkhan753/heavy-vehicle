@@ -8,12 +8,14 @@
 
 const mongoose = require("mongoose");
 
-const SERVICE_TYPES = ["ownership-transfer", "inspection", "warranty"];
+// "ownership-transfer" was removed — the paperwork service was dropped as
+// it needed manual staff involvement we don't have. No requests of that
+// type were ever created, so nothing needed migrating.
+const SERVICE_TYPES = ["inspection", "warranty"];
 const STATUSES = ["pending", "in-progress", "completed", "cancelled", "rejected"];
 
 // Short human-friendly reference prefix per service.
 const PREFIX = {
-  "ownership-transfer": "OT",
   inspection: "INS",
   warranty: "WR",
 };

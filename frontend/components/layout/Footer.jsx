@@ -32,7 +32,6 @@ const columns = [
     links: [
       ["footer.link.inspection", "/services/inspection"],
       ["footer.link.loan", "/services/loan-calculator"],
-      ["footer.link.transfer", "/services/transfer"],
       ["footer.link.priceGuide", "/services/price-guide"],
       ["footer.link.warranty", "/services/warranty"],
     ],

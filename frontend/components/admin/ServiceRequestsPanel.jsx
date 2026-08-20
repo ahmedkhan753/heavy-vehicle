@@ -7,7 +7,6 @@ import { serviceRequestApi } from "@/lib/api";
 
 const TYPES = [
   { value: "", label: "All services" },
-  { value: "ownership-transfer", label: "Ownership Transfer" },
   { value: "inspection", label: "Inspection" },
   { value: "warranty", label: "Warranty" },
 ];
