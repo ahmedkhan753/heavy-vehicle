@@ -1,9 +1,12 @@
 /**
  * Chat Controller
  * ───────────────
- * In-app buyer↔seller messaging (polling-based; no websockets).
+ * In-app buyer↔seller messaging (polling-based; no websockets). Works for
+ * either listing kind — the caller says which via `listingType`, since the
+ * page it's called from already knows (a vehicle page never messages about
+ * a part). No cross-collection lookup needed.
  *
- *   startConversation → POST /api/chat/conversations            { vehicleId }
+ *   startConversation → POST /api/chat/conversations            { listingId, listingType }
  *   listConversations → GET  /api/chat/conversations            (my inbox)
  *   unreadCount       → GET  /api/chat/unread
  *   getMessages       → GET  /api/chat/conversations/:id/messages  (marks read)
@@ -13,6 +16,7 @@
 const Conversation = require("../models/Conversation");
 const Message = require("../models/Message");
 const Vehicle = require("../models/Vehicle");
+const Part = require("../models/Part");
 const { AppError } = require("../middleware/error.middleware");
 
 const respond = (res, statusCode, data, message = "Success") =>
@@ -20,28 +24,44 @@ const respond = (res, statusCode, data, message = "Success") =>
 
 const sameId = (a, b) => String(a) === String(b);
 
+const LISTING_MODELS = { vehicle: Vehicle, part: Part };
+
+// Lowercase on the wire, capitalized in the DB (Mongoose refPath needs the
+// exact model name to resolve `.populate("listing")`).
+const toModelType = (t) => (String(t || "vehicle").toLowerCase() === "part" ? "Part" : "Vehicle");
+const toWireType = (t) => String(t || "Vehicle").toLowerCase();
+
+// listingType lowercased for the API response.
+const toWire = (convo) => ({ ...convo, listingType: toWireType(convo.listingType) });
+
 // Buyer starts (or reopens) a conversation about a listing.
 async function startConversation(req, res, next) {
   try {
-    const { vehicleId } = req.body;
-    const vehicle = await Vehicle.findById(vehicleId).select("title sellerId");
-    if (!vehicle) return next(new AppError("Listing not found.", 404));
+    // `vehicleId` kept as a fallback for a brief window during rolling deploys.
+    const listingId = req.body.listingId || req.body.vehicleId;
+    const listingType = toModelType(req.body.listingType);
+    if (!listingId) return next(new AppError("listingId is required.", 400));
 
-    if (sameId(vehicle.sellerId, req.user._id)) {
+    const Model = LISTING_MODELS[listingType.toLowerCase()];
+    const listing = await Model.findById(listingId).select("title sellerId");
+    if (!listing) return next(new AppError("Listing not found.", 404));
+
+    if (sameId(listing.sellerId, req.user._id)) {
       return next(new AppError("You can't message your own listing.", 400));
     }
 
-    let convo = await Conversation.findOne({ vehicle: vehicle._id, buyer: req.user._id });
+    let convo = await Conversation.findOne({ listing: listing._id, listingType, buyer: req.user._id });
     if (!convo) {
       convo = await Conversation.create({
-        vehicle: vehicle._id,
-        vehicleTitle: vehicle.title,
+        listing: listing._id,
+        listingType,
+        listingTitle: listing.title,
         buyer: req.user._id,
-        seller: vehicle.sellerId,
+        seller: listing.sellerId,
       });
     }
 
-    respond(res, 201, convo, "Conversation ready.");
+    respond(res, 201, toWire(convo.toObject()), "Conversation ready.");
   } catch (err) {
     next(err);
   }
@@ -55,21 +75,22 @@ async function listConversations(req, res, next) {
       .sort({ lastMessageAt: -1, updatedAt: -1 })
       .populate("buyer", "name avatar")
       .populate("seller", "name avatar")
-      .populate("vehicle", "title images price")
+      .populate("listing", "title images price")
       .lean();
 
     const data = convos.map((c) => {
       const isBuyer = sameId(c.buyer._id, me);
-      return {
+      return toWire({
         _id: c._id,
-        vehicle: c.vehicle,
-        vehicleTitle: c.vehicleTitle,
+        listing: c.listing,
+        listingType: c.listingType,
+        listingTitle: c.listingTitle,
         role: isBuyer ? "buyer" : "seller",
         other: isBuyer ? c.seller : c.buyer,
         lastMessage: c.lastMessage,
         lastMessageAt: c.lastMessageAt,
         unread: isBuyer ? c.buyerUnread : c.sellerUnread,
-      };
+      });
     });
 
     respond(res, 200, data);
@@ -101,7 +122,7 @@ async function getMessages(req, res, next) {
     const convo = await Conversation.findById(req.params.id)
       .populate("buyer", "name avatar")
       .populate("seller", "name avatar")
-      .populate("vehicle", "title images price");
+      .populate("listing", "title images price");
     if (!convo) return next(new AppError("Conversation not found.", 404));
 
     const me = req.user._id;
@@ -119,12 +140,13 @@ async function getMessages(req, res, next) {
     if (isSeller && convo.sellerUnread > 0) { convo.sellerUnread = 0; await convo.save(); }
 
     respond(res, 200, {
-      conversation: {
+      conversation: toWire({
         _id: convo._id,
-        vehicle: convo.vehicle,
+        listing: convo.listing,
+        listingType: convo.listingType,
         role: isBuyer ? "buyer" : "seller",
         other: isBuyer ? convo.seller : convo.buyer,
-      },
+      }),
       messages,
     });
   } catch (err) {

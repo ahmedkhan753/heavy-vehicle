@@ -19,7 +19,7 @@ const timeAgo = (v) => {
   return `${Math.floor(h / 24)}d ago`;
 };
 
-export default function Comments({ vehicleId, sellerId }) {
+export default function Comments({ listingId, listingType = "vehicle", sellerId }) {
   const { user, isAuthenticated } = useAuth();
   const toast = useToast();
   const { t } = useLanguage();
@@ -33,7 +33,7 @@ export default function Comments({ vehicleId, sellerId }) {
 
   async function load() {
     try {
-      const res = await commentApi.list(vehicleId);
+      const res = await commentApi.list(listingId, listingType);
       setComments(res?.data || []);
     } catch {
       setComments([]);
@@ -42,7 +42,7 @@ export default function Comments({ vehicleId, sellerId }) {
     }
   }
 
-  useEffect(() => { load(); /* eslint-disable-next-line */ }, [vehicleId]);
+  useEffect(() => { load(); /* eslint-disable-next-line */ }, [listingId, listingType]);
 
   // Group into top-level comments + their replies.
   const threaded = useMemo(() => {
@@ -75,10 +75,10 @@ export default function Comments({ vehicleId, sellerId }) {
 
       {/* Composer */}
       {isAuthenticated ? (
-        <CommentForm vehicleId={vehicleId} onPosted={load} />
+        <CommentForm listingId={listingId} listingType={listingType} onPosted={load} />
       ) : (
         <div className="mt-4 rounded-lg border border-dashed border-[var(--hw-border-default)] p-4 text-center text-sm text-[var(--hw-text-secondary)]">
-          <Link href={`/auth/login?redirect=/vehicles/${vehicleId}`} className="font-bold text-[var(--hw-orange)] hover:underline">{t("comments.login")}</Link> {t("comments.loginRest")}
+          <Link href={`/auth/login?redirect=/${listingType === "part" ? "parts" : "vehicles"}/${listingId}`} className="font-bold text-[var(--hw-orange)] hover:underline">{t("comments.login")}</Link> {t("comments.loginRest")}
         </div>
       )}
 
@@ -106,7 +106,7 @@ export default function Comments({ vehicleId, sellerId }) {
               {isAuthenticated ? (
                 replyTo === c._id ? (
                   <div className="mt-3 pl-4">
-                    <CommentForm vehicleId={vehicleId} parentId={c._id} onPosted={() => { setReplyTo(null); load(); }} compact />
+                    <CommentForm listingId={listingId} listingType={listingType} parentId={c._id} onPosted={() => { setReplyTo(null); load(); }} compact />
                   </div>
                 ) : (
                   <button onClick={() => setReplyTo(c._id)} className="mt-2 text-xs font-bold text-[var(--hw-orange)] hover:underline">{t("comments.reply")}</button>
@@ -142,7 +142,7 @@ function CommentBody({ c, canDelete, onDelete, small }) {
   );
 }
 
-function CommentForm({ vehicleId, parentId, onPosted, compact }) {
+function CommentForm({ listingId, listingType, parentId, onPosted, compact }) {
   const toast = useToast();
   const { t } = useLanguage();
   const [text, setText] = useState("");
@@ -156,7 +156,8 @@ function CommentForm({ vehicleId, parentId, onPosted, compact }) {
     setPosting(true);
     try {
       await commentApi.create({
-        vehicleId,
+        listingId,
+        listingType,
         parentId: parentId || undefined,
         text: text.trim(),
         offerAmount: showOffer && offer ? Number(offer) : undefined,

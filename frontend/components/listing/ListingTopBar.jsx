@@ -6,6 +6,7 @@ import { useAuth } from "@/Context/AuthContext";
 import { useToast } from "@/Context/ToastContext";
 import { useLanguage } from "@/Context/LanguageContext";
 import { userApi } from "@/lib/api";
+import ShareMenu from "@/components/listing/ShareMenu";
 
 /**
  * ListingTopBar — back / share / save row above a listing.
@@ -59,22 +60,6 @@ export default function ListingTopBar({ saveId, title }) {
     }
   }
 
-  async function share() {
-    const url = typeof window !== "undefined" ? window.location.href : "";
-    try {
-      // Native sheet where available (all modern mobile browsers), otherwise
-      // fall back to copying — never leave the button doing nothing.
-      if (navigator.share) {
-        await navigator.share({ title, url });
-        return;
-      }
-      await navigator.clipboard.writeText(url);
-      toast.success(t("listing.linkCopied"));
-    } catch {
-      // User dismissed the share sheet — not an error worth surfacing.
-    }
-  }
-
   return (
     <div className="mb-3 flex items-center justify-between gap-2 lg:hidden">
       <button
@@ -89,17 +74,7 @@ export default function ListingTopBar({ saveId, title }) {
       </button>
 
       <div className="flex items-center gap-2">
-        <button
-          type="button"
-          onClick={share}
-          aria-label="Share this listing"
-          className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[var(--hw-border-default)] bg-[var(--hw-bg-card)] text-[var(--hw-text-primary)]"
-        >
-          <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" />
-            <path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4" />
-          </svg>
-        </button>
+        <ShareMenu title={title} iconOnly />
 
         {saveId ? (
           <button

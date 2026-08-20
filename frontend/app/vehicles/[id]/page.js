@@ -1,8 +1,8 @@
 import Link from "next/link";
 import VehicleCard from "@/components/vehicles/VehicleCard";
-import SellerContact from "@/components/vehicles/SellerContact";
+import SellerContact from "@/components/listing/SellerContact";
 import PriceFairnessBadge from "@/components/vehicles/PriceFairnessBadge";
-import Comments from "@/components/vehicles/Comments";
+import Comments from "@/components/listing/Comments";
 import PlanBadge from "@/components/marketing/PlanBadge";
 import { planBorderStyle } from "@/components/marketing/PlanAdornments";
 import { SERVER_API_BASE_URL, buildQuery } from "@/lib/api";
@@ -12,6 +12,7 @@ import { getT, getLang } from "@/lib/i18n-server";
 import TranslatedText from "@/components/ui/TranslatedText";
 import VehicleGallery from "@/components/vehicles/VehicleGallery";
 import ListingTopBar from "@/components/listing/ListingTopBar";
+import ShareMenu from "@/components/listing/ShareMenu";
 import { Chip, QuickSpecs, SpecGrid, Panel } from "@/components/listing/ListingBits";
 
 export const revalidate = 60;
@@ -130,6 +131,9 @@ export default async function VehicleDetailPage({ params }) {
           />
 
           <div className="mt-3 rounded-xl border border-[var(--hw-border-default)] bg-[var(--hw-bg-card)] p-3.5 sm:mt-4 sm:p-5">
+            <div className="mb-2 hidden justify-end lg:flex">
+              <ShareMenu title={title} iconOnly />
+            </div>
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <h1 className="text-lg font-black leading-tight text-[var(--hw-text-primary)] sm:text-2xl lg:text-3xl">{title}</h1>
@@ -189,8 +193,13 @@ export default async function VehicleDetailPage({ params }) {
           <p className="mt-0.5 text-[11px] text-[var(--hw-text-muted)] sm:mt-1 sm:text-sm">
             {seller.isVerifiedSeller || vehicle.seller?.verified ? t("listing.verifiedSeller") : t("listing.seller")} · {titleCase(seller.city || vehicle.seller?.city || vehicle.city)}
           </p>
+          {seller?._id || vehicle.sellerId ? (
+            <Link href={`/sellers/${seller?._id || vehicle.sellerId}`} className="mt-1 inline-block text-[11px] font-bold text-[var(--hw-orange)] hover:underline sm:text-sm">
+              {t("listing.viewProfile")}
+            </Link>
+          ) : null}
           <div className="mt-3.5 sm:mt-5">
-            <SellerContact vehicleId={vehicle._id} redirectTo={`/vehicles/${vehicle._id}`} sellerId={seller?._id || vehicle.sellerId} />
+            <SellerContact listingId={vehicle._id} listingType="vehicle" redirectTo={`/vehicles/${vehicle._id}`} sellerId={seller?._id || vehicle.sellerId} />
           </div>
           <div className="mt-3.5 rounded-lg bg-[var(--hw-bg-deep)] p-3 text-[11px] leading-5 text-[var(--hw-text-secondary)] sm:mt-5 sm:p-4 sm:text-sm sm:leading-6">
             {t("veh.safetyNote")}
@@ -229,7 +238,7 @@ export default async function VehicleDetailPage({ params }) {
       </div>
 
       <section className="mt-6 sm:mt-10">
-        <Comments vehicleId={vehicle._id} sellerId={seller?._id || vehicle.sellerId} />
+        <Comments listingId={vehicle._id} listingType="vehicle" sellerId={seller?._id || vehicle.sellerId} />
       </section>
 
       {similar.length ? (

@@ -10,6 +10,9 @@ import { formatPrice, titleCase } from "@/lib/format";
 import { getT, getLang } from "@/lib/i18n-server";
 import TranslatedText from "@/components/ui/TranslatedText";
 import ListingTopBar from "@/components/listing/ListingTopBar";
+import SellerContact from "@/components/listing/SellerContact";
+import Comments from "@/components/listing/Comments";
+import ShareMenu from "@/components/listing/ShareMenu";
 import { Chip, QuickSpecs, SpecGrid, Panel } from "@/components/listing/ListingBits";
 
 export const revalidate = 60;
@@ -117,6 +120,9 @@ export default async function PartDetailPage({ params }) {
           />
 
           <div className="mt-3 rounded-xl border border-[var(--hw-border-default)] bg-[var(--hw-bg-card)] p-3.5 sm:mt-4 sm:p-5">
+            <div className="mb-2 hidden justify-end lg:flex">
+              <ShareMenu title={title} iconOnly />
+            </div>
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <h1 className="text-lg font-black leading-tight text-[var(--hw-text-primary)] sm:text-2xl lg:text-3xl">{title}</h1>
@@ -166,23 +172,13 @@ export default async function PartDetailPage({ params }) {
           <p className="mt-0.5 text-[11px] text-[var(--hw-text-muted)] sm:mt-1 sm:text-sm">
             {titleCase(seller.city || part.city)} · {seller.role ? titleCase(seller.role) : t("partd.partsSeller")}
           </p>
-          <div className="mt-3.5 grid gap-2 sm:mt-5 sm:gap-3">
-            {(seller.phone || part.seller?.phone) ? (
-              <a
-                href={`tel:${seller.phone || part.seller.phone}`}
-                className="inline-flex h-11 items-center justify-center rounded-lg bg-[var(--hw-green)] text-[13px] font-black text-[var(--hw-text-inverse)] sm:h-12 sm:text-sm"
-              >
-                {t("partd.callSeller")}
-              </a>
-            ) : null}
-            {(part.seller?.whatsapp || seller.phone) ? (
-              <a
-                href={`https://wa.me/${part.seller?.whatsapp || seller.phone}`}
-                className="inline-flex h-11 items-center justify-center rounded-lg border border-[var(--hw-border-strong)] text-[13px] font-bold text-[var(--hw-text-primary)] hover:border-[var(--hw-orange)] sm:h-12 sm:text-sm"
-              >
-                {t("partd.whatsapp")}
-              </a>
-            ) : null}
+          {seller?._id || part.sellerId ? (
+            <Link href={`/sellers/${seller?._id || part.sellerId}`} className="mt-1 inline-block text-[11px] font-bold text-[var(--hw-orange)] hover:underline sm:text-sm">
+              {t("listing.viewProfile")}
+            </Link>
+          ) : null}
+          <div className="mt-3.5 sm:mt-5">
+            <SellerContact listingId={part._id} listingType="part" redirectTo={`/parts/${part._id}`} sellerId={seller?._id || part.sellerId} />
           </div>
           <div className="mt-3.5 rounded-lg bg-[var(--hw-bg-deep)] p-3 text-[11px] leading-5 text-[var(--hw-text-secondary)] sm:mt-5 sm:p-4 sm:text-sm sm:leading-6">
             {t("partd.safetyNote")}
@@ -207,6 +203,10 @@ export default async function PartDetailPage({ params }) {
           </Panel>
         </div>
       </div>
+
+      <section className="mt-6 sm:mt-10">
+        <Comments listingId={part._id} listingType="part" sellerId={seller?._id || part.sellerId} />
+      </section>
 
       {related.length ? (
         <section className="mt-6 sm:mt-10">

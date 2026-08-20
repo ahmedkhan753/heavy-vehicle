@@ -315,7 +315,8 @@ export const inspectorApi = {
 };
 
 export const chatApi = {
-  start: (vehicleId) => apiRequest("/chat/conversations", { method: "POST", body: JSON.stringify({ vehicleId }) }),
+  start: (listingId, listingType = "vehicle") =>
+    apiRequest("/chat/conversations", { method: "POST", body: JSON.stringify({ listingId, listingType }) }),
   conversations: () => apiRequest("/chat/conversations"),
   messages: (id) => apiRequest(`/chat/conversations/${id}/messages`),
   send: (id, text) => apiRequest(`/chat/conversations/${id}/messages`, { method: "POST", body: JSON.stringify({ text }) }),
@@ -323,7 +324,7 @@ export const chatApi = {
 };
 
 export const commentApi = {
-  list: (vehicleId) => apiRequest(`/comments?vehicleId=${vehicleId}`),
+  list: (listingId, listingType = "vehicle") => apiRequest(`/comments${buildQuery({ listingId, listingType })}`),
   create: (body) => apiRequest("/comments", { method: "POST", body: JSON.stringify(body) }),
   remove: (id) => apiRequest(`/comments/${id}`, { method: "DELETE" }),
 };

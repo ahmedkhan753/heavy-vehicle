@@ -1,16 +1,19 @@
 /**
  * Comment Model
  * ─────────────
- * Public comments on a vehicle listing — questions, discussion, and offers.
- * One level of replies via `parentId`. An `offerAmount` marks a comment as
- * an offer. The listing owner and admins can moderate.
+ * Public comments on a listing — either a Vehicle or a Part — questions,
+ * discussion, and offers. `listing` is a polymorphic reference
+ * (`refPath: "listingType"`). One level of replies via `parentId`. An
+ * `offerAmount` marks a comment as an offer. The listing owner and admins
+ * can moderate.
  */
 
 const mongoose = require("mongoose");
 
 const commentSchema = new mongoose.Schema(
   {
-    vehicle: { type: mongoose.Schema.Types.ObjectId, ref: "Vehicle", required: true },
+    listing: { type: mongoose.Schema.Types.ObjectId, required: true, refPath: "listingType" },
+    listingType: { type: String, required: true, enum: ["Vehicle", "Part"] },
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
 
     text: {
@@ -32,7 +35,7 @@ const commentSchema = new mongoose.Schema(
   }
 );
 
-commentSchema.index({ vehicle: 1, createdAt: 1 });
+commentSchema.index({ listing: 1, listingType: 1, createdAt: 1 });
 commentSchema.index({ parentId: 1 });
 
 module.exports = mongoose.model("Comment", commentSchema);

@@ -6,7 +6,9 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/Context/AuthContext";
 import { useToast } from "@/Context/ToastContext";
 import { useLanguage } from "@/Context/LanguageContext";
-import { vehicleApi, chatApi } from "@/lib/api";
+import { vehicleApi, partApi, chatApi } from "@/lib/api";
+
+const DETAIL_API = { vehicle: vehicleApi, part: partApi };
 
 /**
  * SellerContact
@@ -14,8 +16,11 @@ import { vehicleApi, chatApi } from "@/lib/api";
  * In-app chat is the primary way to reach a seller (keeps the conversation
  * on-platform). Phone/WhatsApp remain as secondary options, revealed only to
  * signed-in users. Sellers don't see contact controls on their own listing.
+ *
+ * Works for either listing kind — pass `listingType="part"` on a part page;
+ * defaults to "vehicle" so existing callers don't need to change.
  */
-export default function SellerContact({ vehicleId, redirectTo, sellerId }) {
+export default function SellerContact({ listingId, listingType = "vehicle", redirectTo, sellerId }) {
   const { isAuthenticated, loading, user } = useAuth();
   const router = useRouter();
   const toast = useToast();
@@ -32,7 +37,7 @@ export default function SellerContact({ vehicleId, redirectTo, sellerId }) {
       if (!isAuthenticated || isOwner || phone) return;
       setFetching(true);
       try {
-        const res = await vehicleApi.detail(vehicleId);
+        const res = await DETAIL_API[listingType].detail(listingId);
         const seller = res?.data?.sellerId || res?.data?.seller || {};
         const found = seller.phone || res?.data?.seller?.phone || "";
         if (active) setPhone(found);
@@ -44,12 +49,12 @@ export default function SellerContact({ vehicleId, redirectTo, sellerId }) {
     }
     loadPhone();
     return () => { active = false; };
-  }, [isAuthenticated, isOwner, vehicleId, phone]);
+  }, [isAuthenticated, isOwner, listingId, listingType, phone]);
 
   async function messageSeller() {
     setStarting(true);
     try {
-      const res = await chatApi.start(vehicleId);
+      const res = await chatApi.start(listingId, listingType);
       router.push(`/dashboard/messages?c=${res.data._id}`);
     } catch (err) {
       toast.error(err?.message || "Couldn't start the chat.");

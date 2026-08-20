@@ -133,7 +133,7 @@ export default function Inbox({ initialConversationId }) {
                   <span className="truncate font-bold text-[var(--hw-text-primary)]">{c.other?.name || "User"}</span>
                   <span className="shrink-0 text-[10px] text-[var(--hw-text-muted)]">{timeAgo(c.lastMessageAt)}</span>
                 </div>
-                <p className="truncate text-xs text-[var(--hw-text-muted)]">{c.vehicleTitle || c.vehicle?.title}</p>
+                <p className="truncate text-xs text-[var(--hw-text-muted)]">{c.listingTitle || c.listing?.title}</p>
                 <p className="truncate text-sm text-[var(--hw-text-secondary)]">{c.lastMessage || t("chat.noMessages")}</p>
               </div>
               {c.unread > 0 ? <span className="mt-1 shrink-0 rounded-full bg-[var(--hw-orange)] px-2 py-0.5 text-[10px] font-black text-[var(--hw-text-inverse)]">{c.unread}</span> : null}
@@ -150,9 +150,12 @@ export default function Inbox({ initialConversationId }) {
               <button onClick={() => setActiveId("")} className="lg:hidden text-sm font-bold text-[var(--hw-orange)]">←</button>
               <div className="min-w-0">
                 <p className="truncate font-black text-[var(--hw-text-primary)]">{thread.conversation?.other?.name || "User"}</p>
-                {thread.conversation?.vehicle?._id ? (
-                  <Link href={`/vehicles/${thread.conversation.vehicle._id}`} className="truncate text-xs text-[var(--hw-orange)] hover:underline">
-                    {thread.conversation.vehicle.title}
+                {thread.conversation?.listing?._id ? (
+                  <Link
+                    href={`/${thread.conversation.listingType === "part" ? "parts" : "vehicles"}/${thread.conversation.listing._id}`}
+                    className="truncate text-xs text-[var(--hw-orange)] hover:underline"
+                  >
+                    {thread.conversation.listing.title}
                   </Link>
                 ) : null}
               </div>
