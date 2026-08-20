@@ -1,7 +1,6 @@
 import Link from "next/link";
-import Image from "next/image";
+import DealerCard from "@/components/dealers/DealerCard";
 import { SERVER_API_BASE_URL, buildQuery } from "@/lib/api";
-import { titleCase } from "@/lib/format";
 import { getT } from "@/lib/i18n-server";
 
 export const revalidate = 60;
@@ -35,23 +34,9 @@ export default async function DealersPage({ searchParams }) {
       </div>
 
       {dealers.length ? (
-        <div className="grid gap-5 md:grid-cols-2">
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {dealers.map((dealer) => (
-            <Link key={dealer._id} href={`/dealers/${dealer._id}`} className="rounded-lg border border-[var(--hw-border-default)] bg-[var(--hw-bg-card)] p-5 hover:border-[var(--hw-orange)]">
-              <div className="flex items-start gap-4">
-                <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-lg bg-[var(--hw-orange)] text-xl font-black text-[var(--hw-text-inverse)]">
-                  {dealer.logo?.url ? <Image src={dealer.logo.url} alt="" width={56} height={56} className="h-full w-full object-cover" /> : dealer.businessName?.slice(0, 1)}
-                </div>
-                <div className="min-w-0">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <h2 className="text-xl font-black text-[var(--hw-text-primary)]">{dealer.businessName}</h2>
-                    {dealer.isVerified ? <span className="rounded-md bg-[var(--hw-green)] px-2 py-1 text-xs font-black text-[var(--hw-text-inverse)]">{t("dealer.verified")}</span> : null}
-                  </div>
-                  <p className="mt-1 text-sm text-[var(--hw-text-muted)]">{titleCase(dealer.city)} | {dealer.activeListings ?? 0} {t("dealer.listingsWord")}</p>
-                  <p className="mt-3 text-sm text-[var(--hw-text-secondary)]">{dealer.tagline || dealer.description || t("dealer.fallbackTag")}</p>
-                </div>
-              </div>
-            </Link>
+            <DealerCard key={dealer._id} dealer={dealer} />
           ))}
         </div>
       ) : (

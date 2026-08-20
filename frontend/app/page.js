@@ -5,12 +5,12 @@ import PartCard from "@/components/parts/PartCard";
 import BrandBrowse from "@/components/home/BrandBrowse";
 import CategoryBrowse from "@/components/home/CategoryBrowse";
 import PartCategoryBrowse from "@/components/home/PartCategoryBrowse";
-import HeroSearchInput from "@/components/home/HeroSearchInput";
+import HomeHeroSearch from "@/components/home/HomeHeroSearch";
+import DealerCard from "@/components/dealers/DealerCard";
 import AdBanner from "@/components/ads/AdBanner";
 import { SERVER_API_BASE_URL } from "@/lib/api";
-import { CITIES, VEHICLE_TYPES, fallbackImage, typeLabel, cityLabel } from "@/lib/constants";
-import { titleCase } from "@/lib/format";
-import { getT, getLang } from "@/lib/i18n-server";
+import { fallbackImage } from "@/lib/constants";
+import { getT } from "@/lib/i18n-server";
 
 export const revalidate = 60;
 
@@ -59,7 +59,6 @@ async function getHomeData() {
 export default async function HomePage() {
   const { listings, dealers } = await getHomeData();
   const t = await getT();
-  const lang = await getLang();
 
   return (
     <>
@@ -91,19 +90,7 @@ export default async function HomePage() {
             </div>
           </div>
 
-          <form action="/vehicles" className="rounded-xl border border-[var(--hw-border-default)] bg-[var(--hw-bg-card)] p-3 shadow-2xl sm:p-4">
-            <h2 className="mb-3 text-base font-black text-[var(--hw-text-primary)] sm:mb-4 sm:text-xl">{t("home.findVehicles")}</h2>
-            <div className="grid gap-2.5 sm:gap-3">
-              <HeroSearchInput placeholder={t("home.searchPlaceholder")} />
-              <div className="grid gap-2.5 sm:grid-cols-2 sm:gap-3">
-                <Select name="type" label={t("filter.type")} allText={t("filter.allTypes")} options={VEHICLE_TYPES} lang={lang} />
-                <Select name="city" label={t("filter.city")} allText={t("filter.allCities")} options={CITIES} lang={lang} />
-              </div>
-              <button className="mt-0.5 h-11 rounded-lg bg-[var(--hw-green)] px-5 text-sm font-black text-[var(--hw-text-inverse)] sm:mt-1 sm:h-12">
-                {t("home.searchBtn")}
-              </button>
-            </div>
-          </form>
+          <HomeHeroSearch />
         </div>
       </section>
 
@@ -159,11 +146,7 @@ export default async function HomePage() {
           {dealers.length ? (
             <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
               {dealers.map((dealer) => (
-                <Link key={dealer._id} href={`/dealers/${dealer._id}`} className="rounded-lg border border-[var(--hw-border-default)] bg-[var(--hw-bg-card)] p-5 hover:border-[var(--hw-orange)]">
-                  <h3 className="font-black text-[var(--hw-text-primary)]">{dealer.businessName}</h3>
-                  <p className="mt-2 text-sm text-[var(--hw-text-muted)]">{titleCase(dealer.city)} | {dealer.activeListings ?? 0} {t("dealer.listingsWord")}</p>
-                  <p className="mt-4 text-sm text-[var(--hw-text-secondary)]">{dealer.tagline || t("dealer.fallbackTag")}</p>
-                </Link>
+                <DealerCard key={dealer._id} dealer={dealer} />
               ))}
             </div>
           ) : (
@@ -188,22 +171,6 @@ export default async function HomePage() {
         </section>
       </main>
     </>
-  );
-}
-
-function Select({ name, label, allText, options, lang }) {
-  return (
-    <label className="text-[10px] font-bold uppercase text-[var(--hw-text-muted)] sm:text-xs">
-      {label}
-      <select name={name} className="mt-1.5 h-11 w-full rounded-lg border border-[var(--hw-border-default)] bg-[var(--hw-bg-input)] px-3 text-sm font-medium text-[var(--hw-text-secondary)] outline-none focus:border-[var(--hw-orange)] sm:mt-2 sm:h-12">
-        <option value="">{allText || label}</option>
-        {options.map((option) => {
-          const value = typeof option === "string" ? option : option.value;
-          const labelText = typeof option === "string" ? cityLabel(option, lang) : typeLabel(option, lang);
-          return <option key={value} value={value}>{labelText}</option>;
-        })}
-      </select>
-    </label>
   );
 }
 

@@ -1,5 +1,7 @@
 "use client";
 
+import MicButton from "@/components/ui/MicButton";
+
 export default function AssistantInput({
   value,
   loading,
@@ -20,6 +22,7 @@ export default function AssistantInput({
         maxLength={2000}
         className="w-full rounded-xl border border-[var(--hw-border-default)] bg-[var(--hw-bg-base)] px-3 py-2 text-sm text-[var(--hw-text-primary)] outline-none ring-0 placeholder:text-[var(--hw-text-muted)] focus:border-[var(--hw-orange)]"
       />
+      <MicButton variant="sphere" onResult={onChange} />
       <button
         type="button"
         onClick={onSend}

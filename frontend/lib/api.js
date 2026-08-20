@@ -329,6 +329,13 @@ export const commentApi = {
   remove: (id) => apiRequest(`/comments/${id}`, { method: "DELETE" }),
 };
 
+export const searchApi = {
+  // Unified vehicle+part search for the homepage box — /vehicles and
+  // /parts keep their own per-collection ?q= search; this is the one that
+  // doesn't assume which side of the marketplace the visitor means.
+  run: (q, limit) => apiRequest(`/search${buildQuery({ q, limit })}`),
+};
+
 export const adminApi = {
   overview: () => apiRequest("/admin/overview"),
   subscribers: (params) => apiRequest(`/admin/subscribers${buildQuery(params)}`),
@@ -354,6 +361,7 @@ const api = {
   inspectors: inspectorApi,
   chat: chatApi,
   comments: commentApi,
+  search: searchApi,
   admin: adminApi,
 };
 

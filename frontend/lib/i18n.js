@@ -83,6 +83,12 @@ export const translations = {
     "mic.listening": "Listening…",
     "mic.denied": "Microphone access was blocked. Allow it in your browser's site settings to use voice search.",
     "mic.error": "Couldn't hear that. Try again.",
+    "search.title": "Search results",
+    "search.resultsFor": "Results for",
+    "search.noResults": "No matching listings found",
+    "search.noResultsBody": "We couldn't find any vehicle or part matching that search. Try a different word, or browse all listings instead.",
+    "search.browseVehicles": "Browse vehicles",
+    "search.browseParts": "Browse parts",
 
     // ── Auth ──────────────────────────────────────
     "auth.accountLabel": "Account",
@@ -1054,6 +1060,12 @@ export const translations = {
     "mic.listening": "سن رہے ہیں…",
     "mic.denied": "مائیکروفون تک رسائی مسدود کر دی گئی۔ آواز سے تلاش کے لیے اپنے براؤزر کی سائٹ سیٹنگز میں اجازت دیں۔",
     "mic.error": "سمجھ نہیں آیا۔ دوبارہ کوشش کریں۔",
+    "search.title": "تلاش کے نتائج",
+    "search.resultsFor": "کے نتائج",
+    "search.noResults": "کوئی مماثل اشتہار نہیں ملا",
+    "search.noResultsBody": "ہمیں اس تلاش سے ملتی کوئی گاڑی یا پارٹ نہیں ملا۔ کوئی اور لفظ آزمائیں، یا تمام اشتہارات دیکھیں۔",
+    "search.browseVehicles": "گاڑیاں دیکھیں",
+    "search.browseParts": "پارٹس دیکھیں",
 
     // ── Auth ──────────────────────────────────────
     "auth.accountLabel": "اکاؤنٹ",
