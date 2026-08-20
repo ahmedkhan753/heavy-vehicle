@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { API_BASE_URL } from "@/lib/api";
+import { SERVER_API_BASE_URL } from "@/lib/api";
 import { getT } from "@/lib/i18n-server";
 
 export const revalidate = 3600;
@@ -13,7 +13,7 @@ const fmt = (n) => Number(n || 0).toLocaleString("en-PK");
 
 async function getJson(path) {
   try {
-    const res = await fetch(`${API_BASE_URL}${path}`, { next: { revalidate: 3600 } });
+    const res = await fetch(`${SERVER_API_BASE_URL}${path}`, { next: { revalidate: 3600 } });
     if (!res.ok) throw new Error("Failed");
     const json = await res.json();
     return json.data || null;

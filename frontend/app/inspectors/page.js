@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { API_BASE_URL, buildQuery } from "@/lib/api";
+import { SERVER_API_BASE_URL, buildQuery } from "@/lib/api";
 import { CITIES, cityLabel } from "@/lib/constants";
 import { formatPrice, titleCase } from "@/lib/format";
 import { getT, getLang } from "@/lib/i18n-server";
@@ -14,7 +14,7 @@ export const metadata = {
 async function getInspectors(params) {
   try {
     const query = buildQuery({ city: params.city, limit: 24 });
-    const res = await fetch(`${API_BASE_URL}/inspectors${query}`, { next: { revalidate: 60 } });
+    const res = await fetch(`${SERVER_API_BASE_URL}/inspectors${query}`, { next: { revalidate: 60 } });
     if (!res.ok) return [];
     const json = await res.json();
     return json.data || [];

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { API_BASE_URL, buildQuery } from "@/lib/api";
+import { SERVER_API_BASE_URL, buildQuery } from "@/lib/api";
 import { VEHICLE_TYPES, VEHICLE_MAKES, CITIES, CONDITIONS, typeLabel, makeLabel, cityLabel } from "@/lib/constants";
 import { formatPrice } from "@/lib/format";
 import { getT, getLang } from "@/lib/i18n-server";
@@ -18,7 +18,7 @@ async function getGuide(params) {
       condition: params.condition,
       city: params.city,
     });
-    const res = await fetch(`${API_BASE_URL}/meta/price-guide${query}`, { next: { revalidate: 3600 } });
+    const res = await fetch(`${SERVER_API_BASE_URL}/meta/price-guide${query}`, { next: { revalidate: 3600 } });
     if (!res.ok) return [];
     const json = await res.json();
     return json.data || [];

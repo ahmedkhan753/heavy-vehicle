@@ -31,5 +31,11 @@ services:
     restart: unless-stopped
     ports:
       - "3000:3000"
+    environment:
+      # Runtime-only (no NEXT_PUBLIC_ prefix, so it never reaches the browser
+      # bundle) — Server Components fetch the backend by its Compose service
+      # name over the Docker network instead of round-tripping through the
+      # public IP. See SERVER_API_BASE_URL in frontend/lib/api.js for why.
+      API_INTERNAL_URL: http://backend:5000/api
     depends_on:
       - backend

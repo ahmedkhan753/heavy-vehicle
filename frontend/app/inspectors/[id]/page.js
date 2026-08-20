@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { API_BASE_URL } from "@/lib/api";
+import { SERVER_API_BASE_URL } from "@/lib/api";
 import { formatPrice } from "@/lib/format";
 import { cityLabel } from "@/lib/constants";
 import { getT, getLang } from "@/lib/i18n-server";
@@ -8,7 +8,7 @@ export const revalidate = 60;
 
 async function getInspector(id) {
   try {
-    const res = await fetch(`${API_BASE_URL}/inspectors/${id}`, { next: { revalidate: 60 } });
+    const res = await fetch(`${SERVER_API_BASE_URL}/inspectors/${id}`, { next: { revalidate: 60 } });
     if (!res.ok) return null;
     const json = await res.json();
     return json.data || null;

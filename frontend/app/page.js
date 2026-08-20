@@ -5,7 +5,7 @@ import PartCard from "@/components/parts/PartCard";
 import BrandBrowse from "@/components/home/BrandBrowse";
 import CategoryBrowse from "@/components/home/CategoryBrowse";
 import PartCategoryBrowse from "@/components/home/PartCategoryBrowse";
-import { API_BASE_URL } from "@/lib/api";
+import { SERVER_API_BASE_URL } from "@/lib/api";
 import { CITIES, VEHICLE_TYPES, fallbackImage, typeLabel, cityLabel } from "@/lib/constants";
 import { titleCase } from "@/lib/format";
 import { getT, getLang } from "@/lib/i18n-server";
@@ -23,12 +23,12 @@ const HOME_LISTINGS_LIMIT = 24;
 async function getHomeData() {
   try {
     const [vehiclesRes, partsRes, dealersRes] = await Promise.all([
-      fetch(`${API_BASE_URL}/vehicles?limit=${HOME_LISTINGS_LIMIT}&sort=newest`, { next: { revalidate: 60 } }),
-      fetch(`${API_BASE_URL}/parts?limit=${HOME_LISTINGS_LIMIT}&sort=newest`, { next: { revalidate: 60 } }),
+      fetch(`${SERVER_API_BASE_URL}/vehicles?limit=${HOME_LISTINGS_LIMIT}&sort=newest`, { next: { revalidate: 60 } }),
+      fetch(`${SERVER_API_BASE_URL}/parts?limit=${HOME_LISTINGS_LIMIT}&sort=newest`, { next: { revalidate: 60 } }),
       // Every admin-approved dealer belongs here. Filtering on verified=true
       // meant the section stayed empty until a dealer also earned the
       // separate "verified" badge, which almost none have.
-      fetch(`${API_BASE_URL}/dealers?limit=4`, { next: { revalidate: 60 } }),
+      fetch(`${SERVER_API_BASE_URL}/dealers?limit=4`, { next: { revalidate: 60 } }),
     ]);
 
     const vehiclesJson = vehiclesRes.ok ? await vehiclesRes.json() : { data: [] };

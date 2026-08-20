@@ -3,7 +3,7 @@ import PartCard from "@/components/parts/PartCard";
 import VehicleGallery from "@/components/vehicles/VehicleGallery";
 import PlanBadge from "@/components/marketing/PlanBadge";
 import { planBorderStyle } from "@/components/marketing/PlanAdornments";
-import { API_BASE_URL } from "@/lib/api";
+import { SERVER_API_BASE_URL } from "@/lib/api";
 import { fallbackImage } from "@/lib/constants";
 import { partCategoryLabel, partSubcategoryLabel, partTypeLabel, warrantyLabel } from "@/lib/parts";
 import { formatPrice, titleCase } from "@/lib/format";
@@ -21,10 +21,10 @@ function partImage(part) {
 async function getPartDetail(id) {
   try {
     const [partRes, featuredRes] = await Promise.all([
-      fetch(`${API_BASE_URL}/parts/${id}`, { next: { revalidate: 60 } }),
-      fetch(`${API_BASE_URL}/parts/featured?limit=3`, { next: { revalidate: 60 } }),
+      fetch(`${SERVER_API_BASE_URL}/parts/${id}`, { next: { revalidate: 60 } }),
+      fetch(`${SERVER_API_BASE_URL}/parts/featured?limit=3`, { next: { revalidate: 60 } }),
       // View count is a mutation — never cache it, so every visit still counts.
-      fetch(`${API_BASE_URL}/parts/${id}/view`, { method: "POST", cache: "no-store" }).catch(() => null),
+      fetch(`${SERVER_API_BASE_URL}/parts/${id}/view`, { method: "POST", cache: "no-store" }).catch(() => null),
     ]);
 
     if (!partRes.ok) throw new Error("Part not found");

@@ -5,7 +5,7 @@ import PriceFairnessBadge from "@/components/vehicles/PriceFairnessBadge";
 import Comments from "@/components/vehicles/Comments";
 import PlanBadge from "@/components/marketing/PlanBadge";
 import { planBorderStyle } from "@/components/marketing/PlanAdornments";
-import { API_BASE_URL, buildQuery } from "@/lib/api";
+import { SERVER_API_BASE_URL, buildQuery } from "@/lib/api";
 import { fallbackImage } from "@/lib/constants";
 import { formatMileage, formatPrice, titleCase } from "@/lib/format";
 import { getT, getLang } from "@/lib/i18n-server";
@@ -19,10 +19,10 @@ export const revalidate = 60;
 async function getDetail(id) {
   try {
     const [vehicleRes, similarRes] = await Promise.all([
-      fetch(`${API_BASE_URL}/vehicles/${id}`, { next: { revalidate: 60 } }),
-      fetch(`${API_BASE_URL}/vehicles/${id}/similar?limit=3`, { next: { revalidate: 60 } }),
+      fetch(`${SERVER_API_BASE_URL}/vehicles/${id}`, { next: { revalidate: 60 } }),
+      fetch(`${SERVER_API_BASE_URL}/vehicles/${id}/similar?limit=3`, { next: { revalidate: 60 } }),
       // View count is a mutation — never cache it, so every visit still counts.
-      fetch(`${API_BASE_URL}/vehicles/${id}/view`, { method: "POST", cache: "no-store" }).catch(() => null),
+      fetch(`${SERVER_API_BASE_URL}/vehicles/${id}/view`, { method: "POST", cache: "no-store" }).catch(() => null),
     ]);
 
     if (!vehicleRes.ok) throw new Error("Vehicle not found");
@@ -43,7 +43,7 @@ async function getPriceEstimate(vehicle) {
       condition: vehicle.condition,
       excludeId: vehicle._id,
     });
-    const res = await fetch(`${API_BASE_URL}/meta/price-guide/estimate${query}`, { next: { revalidate: 3600 } });
+    const res = await fetch(`${SERVER_API_BASE_URL}/meta/price-guide/estimate${query}`, { next: { revalidate: 3600 } });
     if (!res.ok) return null;
     const json = await res.json();
     return json.data || null;

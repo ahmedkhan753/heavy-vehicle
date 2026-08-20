@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import VehicleCard from "@/components/vehicles/VehicleCard";
 import VehicleFilters from "@/components/vehicles/VehicleFilters";
-import { API_BASE_URL, buildQuery } from "@/lib/api";
+import { SERVER_API_BASE_URL, buildQuery } from "@/lib/api";
 import { getT } from "@/lib/i18n-server";
 
 export const revalidate = 60;
@@ -10,7 +10,7 @@ export const revalidate = 60;
 async function getVehicles(searchParams) {
   const query = buildQuery({ ...(await searchParams), limit: 12 });
   try {
-    const response = await fetch(`${API_BASE_URL}/vehicles${query}`, {
+    const response = await fetch(`${SERVER_API_BASE_URL}/vehicles${query}`, {
       next: { revalidate: 60 },
     });
     if (!response.ok) throw new Error("Failed to fetch vehicles");

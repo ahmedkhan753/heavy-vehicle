@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { API_BASE_URL } from "@/lib/api";
+import { SERVER_API_BASE_URL } from "@/lib/api";
 import VehicleCard from "@/components/vehicles/VehicleCard";
 import PartCard from "@/components/parts/PartCard";
 import PlanBanners from "@/components/marketing/PlanBanners";
@@ -14,7 +14,7 @@ export const metadata = {
 
 async function getJson(path, fallback) {
   try {
-    const res = await fetch(`${API_BASE_URL}${path}`, { next: { revalidate: 60 } });
+    const res = await fetch(`${SERVER_API_BASE_URL}${path}`, { next: { revalidate: 60 } });
     if (!res.ok) throw new Error("Failed");
     const json = await res.json();
     return json.data ?? fallback;

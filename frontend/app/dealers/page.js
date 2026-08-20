@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { API_BASE_URL, buildQuery } from "@/lib/api";
+import { SERVER_API_BASE_URL, buildQuery } from "@/lib/api";
 import { titleCase } from "@/lib/format";
 import { getT } from "@/lib/i18n-server";
 
@@ -9,7 +9,7 @@ export const revalidate = 60;
 async function getDealers(searchParams) {
   const query = buildQuery(await searchParams);
   try {
-    const response = await fetch(`${API_BASE_URL}/dealers${query}`, { next: { revalidate: 60 } });
+    const response = await fetch(`${SERVER_API_BASE_URL}/dealers${query}`, { next: { revalidate: 60 } });
     if (!response.ok) throw new Error("Failed");
     return response.json();
   } catch {

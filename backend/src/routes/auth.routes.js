@@ -18,13 +18,19 @@ const { env }      = require("../config/env");
 
 const router = express.Router();
 
-// Strict rate limiter for auth endpoints
+// Strict rate limiter for auth endpoints. skipSuccessfulRequests means only
+// failed attempts (wrong password, invalid email, etc. — anything the
+// controller answers with a 4xx) count against the budget, so a string of
+// correct logins never trips this even if it's the same IP running many
+// requests. This is what actually gates brute-forcing; the account-level
+// lockout in login() (registerFailedLogin / isLocked) is the other half.
 const authLimiter = rateLimit({
   windowMs: env.RATE_LIMIT_WINDOW_MS,
   max:      env.AUTH_RATE_LIMIT_MAX,
+  skipSuccessfulRequests: true,
   message: {
     success: false,
-    message: "Too many login attempts. Please try again in 15 minutes.",
+    message: "Too many failed attempts. Please try again in 15 minutes.",
   },
   standardHeaders: true,
   legacyHeaders:   false,

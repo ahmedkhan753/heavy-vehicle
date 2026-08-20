@@ -2,7 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import VehicleCard from "@/components/vehicles/VehicleCard";
 import PartCard from "@/components/parts/PartCard";
-import { API_BASE_URL } from "@/lib/api";
+import { SERVER_API_BASE_URL } from "@/lib/api";
 import { cityLabel } from "@/lib/constants";
 import { titleCase } from "@/lib/format";
 import { getT, getLang } from "@/lib/i18n-server";
@@ -12,7 +12,7 @@ export const revalidate = 60;
 
 async function getSeller(id) {
   try {
-    const res = await fetch(`${API_BASE_URL}/users/${id}/public`, { next: { revalidate: 60 } });
+    const res = await fetch(`${SERVER_API_BASE_URL}/users/${id}/public`, { next: { revalidate: 60 } });
     if (!res.ok) throw new Error("Failed");
     return res.json();
   } catch {

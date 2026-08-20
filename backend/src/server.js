@@ -95,7 +95,25 @@ app.use(cors({
   allowedHeaders: ["Content-Type", "Authorization"],
 }));
 
-// Global rate limiter â€” 100 requests per 15 minutes per IP
+// Requests that never left our own Docker network. Real internet traffic
+// can't arrive with a private source address, so this is safe to trust —
+// and it's the fix for a real incident: a server-side fetch() to the
+// container's public IP gets hairpin-NATed by Docker back to the bridge
+// gateway address, which made every visitor's page render (site-wide) share
+// one rate-limit bucket. The frontend now calls the backend by its Compose
+// service name for that traffic (see SERVER_API_BASE_URL), so this exists
+// as a second layer in case anything else ever calls in over the bridge.
+function isInternalIp(ip) {
+  const v = String(ip || "").replace(/^::ffff:/, "");
+  return (
+    v === "127.0.0.1" || v === "::1" ||
+    /^10\./.test(v) ||
+    /^192\.168\./.test(v) ||
+    /^172\.(1[6-9]|2\d|3[01])\./.test(v)
+  );
+}
+
+// Global rate limiter — per real (non-internal) IP
 const globalLimiter = rateLimit({
   windowMs: env.RATE_LIMIT_WINDOW_MS,
   max:      env.RATE_LIMIT_MAX_REQUESTS,
@@ -105,7 +123,7 @@ const globalLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders:   false,
-  skip: (req) => env.IS_DEVELOPMENT && req.ip === "::1", // Skip localhost in dev
+  skip: (req) => isInternalIp(req.ip),
 });
 
 app.use(globalLimiter);

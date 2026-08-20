@@ -5,7 +5,7 @@ import PartCard from "@/components/parts/PartCard";
 import PlanBadge from "@/components/marketing/PlanBadge";
 import { planBorderStyle } from "@/components/marketing/PlanAdornments";
 import { getPlanMeta, isPaidPlan } from "@/lib/plans";
-import { API_BASE_URL } from "@/lib/api";
+import { SERVER_API_BASE_URL } from "@/lib/api";
 import { cityLabel } from "@/lib/constants";
 import { getT, getLang } from "@/lib/i18n-server";
 import { Icon } from "@/components/listing/ListingBits";
@@ -14,7 +14,7 @@ export const revalidate = 60;
 
 async function getDealer(id) {
   try {
-    const response = await fetch(`${API_BASE_URL}/dealers/${id}`, { next: { revalidate: 60 } });
+    const response = await fetch(`${SERVER_API_BASE_URL}/dealers/${id}`, { next: { revalidate: 60 } });
     if (!response.ok) throw new Error("Failed");
     return response.json();
   } catch {
@@ -53,14 +53,17 @@ export default async function DealerProfilePage({ params }) {
         </p>
       ) : null}
 
-      {/* Header: cover strip, then the logo overlapping it — the identity
-          block reads as one unit instead of a banner with a card under it. */}
+      {/* Header: cover strip, then the logo — the two used to overlap
+          (avatar-over-banner style), but with no uploaded photo it was just
+          a plain letter tile half-submerged in the gradient, reading as
+          clipped rather than intentional. A plain stacked layout is clearer,
+          especially at the mobile sizes this renders at most. */}
       <section style={planBorderStyle(plan)} className="overflow-hidden rounded-xl border border-[var(--hw-border-default)] bg-[var(--hw-bg-card)]">
         {/* NOTE: --hw-bg-elevated is a near-white tile colour even in dark
             mode (it backs small icon chips), so using it here painted a solid
             white band. Cover falls back to a dark branded gradient instead. */}
         <div
-          className="relative h-24 sm:h-36"
+          className="relative h-20 sm:h-28"
           style={{
             background: isPaidPlan(plan)
               ? `linear-gradient(120deg, color-mix(in srgb, ${planMeta.color} 45%, var(--hw-bg-deep)), var(--hw-bg-deep))`
@@ -72,14 +75,14 @@ export default async function DealerProfilePage({ params }) {
         </div>
 
         <div className="p-3.5 sm:p-6">
-          <div className="-mt-11 flex items-end gap-3 sm:-mt-16 sm:gap-4">
+          <div className="flex items-center gap-3 sm:gap-4">
             <div
-              className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-xl text-xl font-black text-[var(--hw-text-inverse)] ring-4 ring-[var(--hw-bg-card)] sm:h-24 sm:w-24 sm:text-3xl"
+              className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl text-lg font-black text-[var(--hw-text-inverse)] sm:h-20 sm:w-20 sm:text-2xl"
               style={{ background: isPaidPlan(plan) ? planMeta.color : "var(--hw-orange)" }}
             >
-              {dealer.logo?.url ? <Image src={dealer.logo.url} alt="" width={96} height={96} className="h-full w-full object-cover" /> : dealer.businessName?.slice(0, 1)}
+              {dealer.logo?.url ? <Image src={dealer.logo.url} alt="" width={80} height={80} className="h-full w-full object-cover" /> : dealer.businessName?.slice(0, 1)}
             </div>
-            <div className="min-w-0 flex-1 pb-0.5">
+            <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-1.5">
                 <p className="text-[10px] font-black uppercase text-[var(--hw-orange)] sm:text-xs">
                   {dealer.isVerified ? t("dealerp.verifiedDealer") : t("dealerp.dealer")}

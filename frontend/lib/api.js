@@ -1,5 +1,18 @@
 export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
+// Server Components fetch through this instead of API_BASE_URL. On a single-
+// VPS Docker deployment, API_BASE_URL is the public IP — a server-side
+// fetch() to that address leaves the frontend container, hits the host's
+// public interface, and gets port-forwarded back into the backend container.
+// Docker's hairpin NAT then makes the backend see the source as the bridge
+// gateway IP, not the real visitor — so every page render, for every visitor
+// site-wide, was sharing ONE rate-limit bucket keyed on that single gateway
+// address. API_INTERNAL_URL (unprefixed, so it never reaches the browser
+// bundle) points at the Docker-internal service name instead, which avoids
+// the round trip entirely and gives each container its own address. Falls
+// back to the public URL for non-Docker / local dev setups that don't set it.
+export const SERVER_API_BASE_URL = process.env.API_INTERNAL_URL || API_BASE_URL;
+
 const TOKEN_KEY = "hw_access_token";
 
 export function getStoredToken() {

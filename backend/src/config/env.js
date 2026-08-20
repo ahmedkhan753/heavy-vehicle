@@ -105,7 +105,11 @@ module.exports = {
 
     // Rate limiting
     RATE_LIMIT_WINDOW_MS:    parseInt(process.env.RATE_LIMIT_WINDOW_MS)    || 900000,
-    RATE_LIMIT_MAX_REQUESTS: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 100,
+    // 100 was sized for a handful of requests per visit, but a single active
+    // session (browsing + the dashboard/admin panel, each screen firing
+    // several API calls) legitimately exceeds that within 15 minutes even
+    // for one honest user — raised accordingly.
+    RATE_LIMIT_MAX_REQUESTS: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 400,
     AUTH_RATE_LIMIT_MAX:     parseInt(process.env.AUTH_RATE_LIMIT_MAX)     || 10,
 
     // Google OAuth (optional — button stays hidden when unset)
