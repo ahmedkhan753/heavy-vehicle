@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { CITIES, CONDITIONS, FUELS, SORTS, TRANSMISSIONS, VEHICLE_MAKES, VEHICLE_TYPE_GROUPS } from "@/lib/constants";
 import { titleCase } from "@/lib/format";
 import { useLanguage } from "@/Context/LanguageContext";
+import MicButton from "@/components/ui/MicButton";
 
 // Params that count as an active filter for the mobile badge (`q` is shown in
 // its own search box, `page` is pagination — neither is a filter chip).
@@ -73,6 +74,8 @@ export default function VehicleFilters() {
   // Desktop keeps the always-open sticky sidebar.
   const [open, setOpen] = useState(false);
   const activeCount = FILTER_PARAMS.filter((key) => searchParams.get(key)).length;
+  const formRef = useRef(null);
+  const inputRef = useRef(null);
 
   function submit(event) {
     event.preventDefault();
@@ -94,15 +97,23 @@ export default function VehicleFilters() {
 
   return (
     <aside className="h-fit rounded-xl border border-[var(--hw-border-default)] bg-[var(--hw-bg-card)] p-3 sm:p-4 lg:sticky lg:top-24">
-      <form onSubmit={submit} className="mb-3 sm:mb-4">
+      <form ref={formRef} onSubmit={submit} className="mb-3 sm:mb-4">
         <label className="text-[10px] font-bold uppercase text-[var(--hw-text-muted)] sm:text-xs">
           {t("filter.search")}
-          <input
-            name="q"
-            defaultValue={q}
-            className="mt-1.5 h-11 w-full rounded-lg border border-[var(--hw-border-default)] bg-[var(--hw-bg-input)] px-3 text-sm text-[var(--hw-text-primary)] outline-none focus:border-[var(--hw-orange)] sm:mt-2"
-            placeholder={t("filter.searchPlaceholder")}
-          />
+          <div className="relative mt-1.5 sm:mt-2">
+            <input
+              ref={inputRef}
+              name="q"
+              defaultValue={q}
+              className="h-11 w-full rounded-lg border border-[var(--hw-border-default)] bg-[var(--hw-bg-input)] px-3 pe-10 text-sm text-[var(--hw-text-primary)] outline-none focus:border-[var(--hw-orange)]"
+              placeholder={t("filter.searchPlaceholder")}
+            />
+            <MicButton
+              className="absolute inset-y-0 end-2 my-auto"
+              onResult={(text) => { if (inputRef.current) inputRef.current.value = text; }}
+              onFinal={() => setTimeout(() => formRef.current?.requestSubmit(), 350)}
+            />
+          </div>
         </label>
         <button className="mt-2.5 h-10 w-full rounded-lg bg-[var(--hw-orange)] text-[13px] font-black text-[var(--hw-text-inverse)] sm:mt-3 sm:text-sm">
           {t("filter.apply")}

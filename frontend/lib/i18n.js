@@ -79,6 +79,10 @@ export const translations = {
     "common.loading": "Loading...",
     "common.viewAll": "View all",
     "common.backToHome": "Back to home",
+    "mic.search": "Search by voice",
+    "mic.listening": "Listening…",
+    "mic.denied": "Microphone access was blocked. Allow it in your browser's site settings to use voice search.",
+    "mic.error": "Couldn't hear that. Try again.",
 
     // ── Auth ──────────────────────────────────────
     "auth.accountLabel": "Account",
@@ -1039,6 +1043,10 @@ export const translations = {
     "common.loading": "لوڈ ہو رہا ہے...",
     "common.viewAll": "سب دیکھیں",
     "common.backToHome": "ہوم پر واپس جائیں",
+    "mic.search": "آواز سے تلاش کریں",
+    "mic.listening": "سن رہے ہیں…",
+    "mic.denied": "مائیکروفون تک رسائی مسدود کر دی گئی۔ آواز سے تلاش کے لیے اپنے براؤزر کی سائٹ سیٹنگز میں اجازت دیں۔",
+    "mic.error": "سمجھ نہیں آیا۔ دوبارہ کوشش کریں۔",
 
     // ── Auth ──────────────────────────────────────
     "auth.accountLabel": "اکاؤنٹ",

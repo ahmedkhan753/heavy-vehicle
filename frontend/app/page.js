@@ -5,6 +5,7 @@ import PartCard from "@/components/parts/PartCard";
 import BrandBrowse from "@/components/home/BrandBrowse";
 import CategoryBrowse from "@/components/home/CategoryBrowse";
 import PartCategoryBrowse from "@/components/home/PartCategoryBrowse";
+import HeroSearchInput from "@/components/home/HeroSearchInput";
 import AdBanner from "@/components/ads/AdBanner";
 import { SERVER_API_BASE_URL } from "@/lib/api";
 import { CITIES, VEHICLE_TYPES, fallbackImage, typeLabel, cityLabel } from "@/lib/constants";
@@ -93,7 +94,7 @@ export default async function HomePage() {
           <form action="/vehicles" className="rounded-xl border border-[var(--hw-border-default)] bg-[var(--hw-bg-card)] p-3 shadow-2xl sm:p-4">
             <h2 className="mb-3 text-base font-black text-[var(--hw-text-primary)] sm:mb-4 sm:text-xl">{t("home.findVehicles")}</h2>
             <div className="grid gap-2.5 sm:gap-3">
-              <input name="q" className="h-11 rounded-lg border border-[var(--hw-border-default)] bg-[var(--hw-bg-input)] px-3.5 text-sm text-[var(--hw-text-primary)] outline-none focus:border-[var(--hw-orange)] sm:h-12 sm:px-4" placeholder={t("home.searchPlaceholder")} />
+              <HeroSearchInput placeholder={t("home.searchPlaceholder")} />
               <div className="grid gap-2.5 sm:grid-cols-2 sm:gap-3">
                 <Select name="type" label={t("filter.type")} allText={t("filter.allTypes")} options={VEHICLE_TYPES} lang={lang} />
                 <Select name="city" label={t("filter.city")} allText={t("filter.allCities")} options={CITIES} lang={lang} />

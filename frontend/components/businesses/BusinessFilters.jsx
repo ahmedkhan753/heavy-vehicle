@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useLanguage } from "@/Context/LanguageContext";
 import { CITIES } from "@/lib/constants";
 import { titleCase } from "@/lib/format";
 import { BUSINESS_CATEGORIES, businessCategoryLabel } from "@/lib/businesses";
+import MicButton from "@/components/ui/MicButton";
 
 const FILTER_KEYS = ["category", "city"];
 
@@ -22,16 +23,26 @@ export default function BusinessFilters({ params = {}, lang = "en" }) {
   const { t } = useLanguage();
   const [open, setOpen] = useState(false);
   const activeCount = FILTER_KEYS.filter((k) => params[k]).length;
+  const formRef = useRef(null);
+  const inputRef = useRef(null);
 
   return (
-    <form className="mb-4 rounded-xl border border-[var(--hw-border-default)] bg-[var(--hw-bg-card)] p-3 sm:mb-5 sm:p-4">
+    <form ref={formRef} className="mb-4 rounded-xl border border-[var(--hw-border-default)] bg-[var(--hw-bg-card)] p-3 sm:mb-5 sm:p-4">
       <div className="flex gap-2">
-        <input
-          name="q"
-          defaultValue={params.q || ""}
-          className="h-11 min-w-0 flex-1 rounded-lg border border-[var(--hw-border-default)] bg-[var(--hw-bg-input)] px-3.5 text-sm text-[var(--hw-text-primary)] outline-none focus:border-[var(--hw-orange)]"
-          placeholder={t("biz.searchPlaceholder")}
-        />
+        <div className="relative min-w-0 flex-1">
+          <input
+            ref={inputRef}
+            name="q"
+            defaultValue={params.q || ""}
+            className="h-11 w-full rounded-lg border border-[var(--hw-border-default)] bg-[var(--hw-bg-input)] px-3.5 pe-10 text-sm text-[var(--hw-text-primary)] outline-none focus:border-[var(--hw-orange)]"
+            placeholder={t("biz.searchPlaceholder")}
+          />
+          <MicButton
+            className="absolute inset-y-0 end-2 my-auto"
+            onResult={(text) => { if (inputRef.current) inputRef.current.value = text; }}
+            onFinal={() => setTimeout(() => formRef.current?.requestSubmit(), 350)}
+          />
+        </div>
         <button className="h-11 shrink-0 rounded-lg bg-[var(--hw-orange)] px-4 text-[13px] font-black text-[var(--hw-text-inverse)] sm:text-sm">
           {t("common.search")}
         </button>
