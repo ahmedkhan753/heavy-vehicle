@@ -313,11 +313,13 @@ async function adminReviewWarranty(req, res, next) {
     dealer.markModified("warranty");
     await dealer.save();
 
-    // Keep the denormalized flag on the dealer's listings in sync.
-    await Vehicle.updateMany(
-      { sellerId: dealer.userId },
-      { $set: { "seller.warranty": approve } }
-    );
+    // Keep the denormalized flag on the dealer's listings in sync — both
+    // kinds. Parts were missed here, so a dealer's approved warranty badge
+    // showed on their vehicles but never on their spare-part ads.
+    await Promise.all([
+      Vehicle.updateMany({ sellerId: dealer.userId }, { $set: { "seller.warranty": approve } }),
+      Part.updateMany({ sellerId: dealer.userId }, { $set: { "seller.warranty": approve } }),
+    ]);
 
     respond(res, 200, dealer, approve ? "Warranty approved." : "Warranty rejected.");
   } catch (err) {

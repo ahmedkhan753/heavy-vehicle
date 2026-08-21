@@ -109,7 +109,9 @@ async function seedDevData() {
         condition: "used", price: 15300000, city: "Lahore",
         mileage: 8000, mileageUnit: "hrs", transmission: "hydraulic", fuel: "diesel",
         images: [PLACEHOLDER_IMAGE], sellerId: dealer._id,
-        seller: { name: dealer.name, phone: dealer.phone, plan: dealer.plan },
+        // Verified + warranty so the card/detail trust badges have something
+        // to render against without hand-editing records.
+        seller: { name: dealer.name, phone: dealer.phone, plan: dealer.plan, verified: true, warranty: true },
         status: "active", expiresAt: daysFromNow(3),
       },
     ]);
@@ -121,6 +123,16 @@ async function seedDevData() {
         category: "engine", condition: "used", price: 85000, city: "Karachi",
         images: [PLACEHOLDER_IMAGE], sellerId: seller._id,
         seller: { name: seller.name, phone: seller.phone, plan: seller.plan },
+        status: "active", expiresAt: daysFromNow(30),
+      },
+      {
+        // Paid plan + verified + warranty: the combination that has to look
+        // identical on a part card and a vehicle card.
+        title: "DEV Brake Assembly for Komatsu PC200",
+        description: "Synthetic development listing. Not a real part for sale.",
+        category: "brakes", condition: "new", price: 45000, city: "Lahore",
+        images: [PLACEHOLDER_IMAGE], sellerId: dealer._id,
+        seller: { name: dealer.name, phone: dealer.phone, plan: dealer.plan, verified: true, warranty: true },
         status: "active", expiresAt: daysFromNow(30),
       },
     ]);

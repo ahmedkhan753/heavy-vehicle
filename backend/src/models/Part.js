@@ -150,6 +150,10 @@ const partSchema = new mongoose.Schema(
       whatsapp: { type: String, default: "" },
       city: { type: String, default: "" },
       verified: { type: Boolean, default: false },
+      // Denormalized: seller is a dealer with an approved warranty badge.
+      // Synced when admin approves/revokes the dealer's warranty. Mirrors
+      // the same field on Vehicle — a part listing shows the badge too.
+      warranty: { type: Boolean, default: false },
       totalAds: { type: Number, default: 0 },
       memberSince: { type: Number, default: 0 },
       avatar: { type: String, default: "" },

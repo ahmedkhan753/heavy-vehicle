@@ -61,9 +61,17 @@ export default function VehicleCard({ vehicle }) {
           {titleCase(vehicle.make)} {vehicle.model} · {vehicle.year}
         </p>
 
-        <p className="mt-1.5 text-sm font-black text-[var(--hw-orange)] sm:mt-3 sm:text-xl">
-          {formatPrice(vehicle.price, vehicle.priceDisplay)}
-        </p>
+        {/* Condition rides the price row rather than the meta line below —
+            that line is already two facts wide, and a third shrank all of
+            them into unreadable stubs on a ~170px phone card. */}
+        <div className="mt-1.5 flex items-baseline justify-between gap-2 sm:mt-3">
+          <p className="min-w-0 truncate text-sm font-black text-[var(--hw-orange)] sm:text-xl">
+            {formatPrice(vehicle.price, vehicle.priceDisplay)}
+          </p>
+          <span className="shrink-0 rounded bg-[var(--hw-soft-panel)] px-1.5 py-0.5 text-[9px] font-black uppercase text-[var(--hw-green)] sm:text-[10px]">
+            {titleCase(vehicle.condition || "used")}
+          </span>
+        </div>
 
         {/* Meta line replaces the old chip stack — same information, one row,
             no wrapping into a third line on a 170px-wide phone card. */}

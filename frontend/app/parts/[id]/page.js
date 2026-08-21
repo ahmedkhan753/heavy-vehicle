@@ -219,6 +219,17 @@ export default async function PartDetailPage({ params }) {
               ) : null}
               <Chip icon="pin">{titleCase(part.city)}</Chip>
             </div>
+
+            {/* Dealer-provided warranty badge — distinct from the part's own
+                warranty chip above, and shown the same way vehicles show it. */}
+            {part.seller?.warranty ? (
+              <div className="mt-3 rounded-lg border border-[var(--hw-green)] bg-[var(--hw-soft-panel)] p-2.5 sm:p-3">
+                <p className="flex items-center gap-2 text-[13px] font-black text-[var(--hw-green)] sm:text-sm">
+                  🛡️ {t("veh.warrantyVerified")}
+                </p>
+                <p className="mt-0.5 text-[11px] text-[var(--hw-text-muted)] sm:text-xs">{t("veh.warrantyByDealer")}</p>
+              </div>
+            ) : null}
           </div>
         </section>
 
@@ -231,11 +242,22 @@ export default async function PartDetailPage({ params }) {
             <PlanBadge plan={part.seller?.plan} size="sm" hideFree />
           </div>
           <h2 className="mt-1.5 text-base font-black text-[var(--hw-text-primary)] sm:mt-2 sm:text-xl">{seller.name || t("partd.seller")}</h2>
+          {/* Mirrors the vehicle page: a verified seller is called out here,
+              not left to be inferred from a badge on the photo. */}
           <p className="mt-0.5 text-[11px] text-[var(--hw-text-muted)] sm:mt-1 sm:text-sm">
-            {titleCase(seller.city || part.city)} · {seller.role ? titleCase(seller.role) : t("partd.partsSeller")}
+            {seller.isVerifiedSeller || part.seller?.verified ? t("listing.verifiedSeller") : t("partd.partsSeller")} · {titleCase(seller.city || part.city)}
           </p>
+          {/* A full-width outlined button, not the 11px text link this used
+              to be — buyers check who they're dealing with before they call,
+              and the link was small enough that they had to hunt for it. */}
           {seller?._id || part.sellerId ? (
-            <Link href={`/sellers/${seller?._id || part.sellerId}`} className="mt-1 inline-block text-[11px] font-bold text-[var(--hw-orange)] hover:underline sm:text-sm">
+            <Link
+              href={`/sellers/${seller?._id || part.sellerId}`}
+              className="mt-3 flex h-11 w-full items-center justify-center gap-2 rounded-lg border border-[var(--hw-orange)] text-[13px] font-black text-[var(--hw-orange)] transition hover:bg-[var(--hw-orange)] hover:text-[var(--hw-text-inverse)] sm:text-sm"
+            >
+              <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                <circle cx="12" cy="8" r="4" /><path d="M4 20a8 8 0 0 1 16 0" />
+              </svg>
               {t("listing.viewProfile")}
             </Link>
           ) : null}

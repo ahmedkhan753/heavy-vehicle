@@ -6,6 +6,7 @@
 const { validationResult } = require("express-validator");
 const Part = require("../models/Part");
 const User = require("../models/User");
+const Dealer = require("../models/Dealer");
 const { getPaginationMeta } = require("../utils/apiFeatures");
 const { AppError } = require("../middleware/error.middleware");
 const pricing = require("../config/pricing");
@@ -221,6 +222,12 @@ async function create(req, res, next) {
 
     const seller = await User.findById(req.user._id);
 
+    // If the seller is a dealer with an approved warranty badge, stamp it on
+    // the listing so cards/detail can show "Verified Warranty" without a
+    // lookup — same denormalization vehicles do.
+    const sellerDealer = await Dealer.findOne({ userId: req.user._id }).select("warranty").lean();
+    const sellerHasWarranty = sellerDealer?.warranty?.status === "approved";
+
     // Bilingual: canonical English + Urdu, failing soft so a translation
     // hiccup never blocks posting.
     const localized = await localizeListing({ title: title.trim(), description: description.trim() });
@@ -252,7 +259,8 @@ async function create(req, res, next) {
         whatsapp: seller.phone,
         city: seller.city,
         verified: seller.isVerifiedSeller,
-        totalAds: seller.totalAds,
+        warranty: sellerHasWarranty,
+        totalAds: seller.totalAds + 1,
         memberSince: seller.createdAt?.getFullYear(),
         avatar: seller.avatar?.url || "",
         plan: limits.planKey,

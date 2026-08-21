@@ -257,8 +257,17 @@ export default async function VehicleDetailPage({ params }) {
           <p className="mt-0.5 text-[11px] text-[var(--hw-text-muted)] sm:mt-1 sm:text-sm">
             {seller.isVerifiedSeller || vehicle.seller?.verified ? t("listing.verifiedSeller") : t("listing.seller")} · {titleCase(seller.city || vehicle.seller?.city || vehicle.city)}
           </p>
+          {/* A full-width outlined button, not the 11px text link this used
+              to be — buyers check who they're dealing with before they call,
+              and the link was small enough that they had to hunt for it. */}
           {seller?._id || vehicle.sellerId ? (
-            <Link href={`/sellers/${seller?._id || vehicle.sellerId}`} className="mt-1 inline-block text-[11px] font-bold text-[var(--hw-orange)] hover:underline sm:text-sm">
+            <Link
+              href={`/sellers/${seller?._id || vehicle.sellerId}`}
+              className="mt-3 flex h-11 w-full items-center justify-center gap-2 rounded-lg border border-[var(--hw-orange)] text-[13px] font-black text-[var(--hw-orange)] transition hover:bg-[var(--hw-orange)] hover:text-[var(--hw-text-inverse)] sm:text-sm"
+            >
+              <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                <circle cx="12" cy="8" r="4" /><path d="M4 20a8 8 0 0 1 16 0" />
+              </svg>
               {t("listing.viewProfile")}
             </Link>
           ) : null}
