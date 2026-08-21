@@ -52,6 +52,23 @@ module.exports = {
     MONGODB_URI:        process.env.MONGODB_URI,
     MONGODB_DB_NAME:    process.env.MONGODB_DB_NAME || "heavywheels",
 
+    // ── Destructive-work guards ───────────────────────────────
+    // The hourly maintenance sweep permanently deletes expired listings and
+    // their Cloudinary images, and emails real sellers. That must only ever
+    // run from the real deployment — never from a laptop that happens to be
+    // pointed at the same database. Opt in explicitly to run it anywhere
+    // else (e.g. RUN_MAINTENANCE_SWEEPS=true against a scratch database).
+    RUN_MAINTENANCE_SWEEPS:
+      process.env.RUN_MAINTENANCE_SWEEPS === "true" ||
+      (process.env.NODE_ENV === "production" && process.env.RUN_MAINTENANCE_SWEEPS !== "false"),
+
+    // Same reasoning for outbound mail: a dev run should not be able to send
+    // to real users' inboxes just because it inherited production SMTP
+    // credentials from a copied .env.
+    ALLOW_OUTBOUND_EMAIL:
+      process.env.ALLOW_OUTBOUND_EMAIL === "true" ||
+      (process.env.NODE_ENV === "production" && process.env.ALLOW_OUTBOUND_EMAIL !== "false"),
+
     // JWT
     JWT_ACCESS_SECRET:  process.env.JWT_ACCESS_SECRET,
     JWT_REFRESH_SECRET: process.env.JWT_REFRESH_SECRET,

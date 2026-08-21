@@ -22,6 +22,10 @@ let isConnecting = false;      // Guard against overlapping connection attempts
 let hasConnected = false;      // True once we've had at least one live connection
 const MAX_RETRIES = 5;
 
+// The database the live site runs on. Only used to warn when a non-production
+// process connects to it — see the banner in connectDB().
+const PRODUCTION_DB_NAME = "heavywheels";
+
 async function connectDB() {
   // Prevent concurrent attempts — without this, the `disconnected` event
   // fired during a failed connect races with the scheduled retry below,
@@ -34,6 +38,19 @@ async function connectDB() {
     retryCount   = 0;
     hasConnected = true;
     console.log(`✅ MongoDB connected → ${env.MONGODB_DB_NAME}`);
+
+    // Say plainly when a non-production process is attached to the live
+    // data. Every write from here lands on real users' records, and the
+    // single most expensive mistake available is not realising that.
+    if (!env.IS_PRODUCTION && env.MONGODB_DB_NAME === PRODUCTION_DB_NAME) {
+      console.warn(
+        "\n⚠️  ─────────────────────────────────────────────────────────\n" +
+        `   NODE_ENV=${env.NODE_ENV} but connected to the PRODUCTION database\n` +
+        `   ("${PRODUCTION_DB_NAME}"). Writes here affect real users.\n` +
+        "   Point MONGODB_DB_NAME at a scratch database for local work.\n" +
+        "⚠️  ─────────────────────────────────────────────────────────\n"
+      );
+    }
   } catch (error) {
     retryCount++;
     console.error(`❌ MongoDB connection failed (attempt ${retryCount}/${MAX_RETRIES}):`, error.message);

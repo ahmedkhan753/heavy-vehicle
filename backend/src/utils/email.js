@@ -32,9 +32,17 @@ function getTransporter() {
  * @param {{ to, subject, html, text }} options
  */
 async function sendEmail({ to, subject, html, text }) {
-  // Skip sending in development if email not configured
-  if (env.IS_DEVELOPMENT && !env.EMAIL_USER) {
-    console.log(`📧 [DEV] Email skipped → ${to}: ${subject}`);
+  // Outbound mail is off outside production by default. The old guard only
+  // skipped when EMAIL_USER was missing, which meant a dev run with a copied
+  // production .env would happily mail real users — the credentials being
+  // present is exactly when it's most dangerous, not least.
+  if (!env.ALLOW_OUTBOUND_EMAIL) {
+    console.log(`📧 [${env.NODE_ENV}] Email suppressed → ${to}: ${subject}`);
+    return;
+  }
+
+  if (!env.EMAIL_USER) {
+    console.log(`📧 Email not configured, skipped → ${to}: ${subject}`);
     return;
   }
 

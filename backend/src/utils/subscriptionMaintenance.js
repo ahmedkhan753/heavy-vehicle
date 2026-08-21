@@ -7,6 +7,13 @@
  *   - reminds sellers (daily, in the final week) to renew an expiring ad,
  *   - deletes ads past their 30-day life and purges their Cloudinary images.
  * Runs on a simple interval (no external cron dependency).
+ *
+ * Two of those steps are irreversible (deleting listings + their images) and
+ * one is externally visible (emailing sellers), so the scheduler refuses to
+ * start unless env.RUN_MAINTENANCE_SWEEPS is on — production only by
+ * default. A dev server pointed at the same database would otherwise run the
+ * whole destructive sweep ten seconds after boot, from an environment where
+ * this file might be half-edited.
  */
 
 const Subscription = require("../models/Subscription");
@@ -14,6 +21,7 @@ const Vehicle = require("../models/Vehicle");
 const Part = require("../models/Part");
 const User = require("../models/User");
 const pricing = require("../config/pricing");
+const { env } = require("../config/env");
 const { deleteFromCloudinary } = require("../config/cloudinary");
 const { sendRenewalReminder } = require("./email");
 
@@ -217,6 +225,17 @@ async function runAllSweeps() {
 }
 
 function startSubscriptionMaintenance(intervalMs = 60 * 60 * 1000) {
+  if (!env.RUN_MAINTENANCE_SWEEPS) {
+    console.log(
+      `🛡️  Maintenance sweeps DISABLED (NODE_ENV=${env.NODE_ENV}). ` +
+      "No listings will be deleted and no seller emails sent from this process. " +
+      "Set RUN_MAINTENANCE_SWEEPS=true to override."
+    );
+    return null;
+  }
+
+  console.log(`🧹 Maintenance sweeps ENABLED on db "${env.MONGODB_DB_NAME}" (hourly).`);
+
   // Run once shortly after boot, then on the interval.
   const kickoff = setTimeout(() => {
     runAllSweeps().catch((err) => console.error("Maintenance sweep failed:", err.message));
