@@ -4,6 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useLanguage } from "@/Context/LanguageContext";
 import { useAuth } from "@/Context/AuthContext";
+import useNotifications from "@/lib/useNotifications";
+import { NotificationBadge } from "@/components/ui/NotificationBadge";
 
 const items = [
   ["nav.home", "/", "home"],
@@ -63,6 +65,10 @@ export default function MobileNav() {
   const pathname = usePathname();
   const { t } = useLanguage();
   const { isAuthenticated } = useAuth();
+  // Badging the Account tab is what makes a notification reachable from
+  // anywhere on the site — otherwise unread messages and an expiring plan
+  // are only discoverable by happening to open the dashboard.
+  const { total } = useNotifications("me", isAuthenticated);
 
   if (pathname.startsWith("/post-ad")) return null;
 
@@ -90,6 +96,14 @@ export default function MobileNav() {
               {center ? (
                 <span className="flex h-11 w-11 items-center justify-center rounded-lg bg-[var(--hw-orange)]">
                   <Icon type={type} active />
+                </span>
+              ) : type === "account" && total > 0 ? (
+                <span className="relative inline-flex">
+                  <Icon type={type} active={active} />
+                  <NotificationBadge
+                    count={total}
+                    className="absolute -end-2 -top-1.5 ring-[var(--hw-bg-deep)]"
+                  />
                 </span>
               ) : (
                 <Icon type={type} active={active} />
