@@ -77,6 +77,7 @@ function errorMiddleware(err, req, res, next) {
   res.status(statusCode).json({
     success:    false,
     message,
+    code:       err.code && typeof err.code === "string" ? err.code : undefined,
     errors:     errors.length > 0 ? errors : undefined,
     // Only include stack trace in development
     stack:      env.IS_DEVELOPMENT ? err.stack : undefined,
@@ -85,10 +86,15 @@ function errorMiddleware(err, req, res, next) {
 
 // ── Helper: Create AppError ───────────────────────────────────
 class AppError extends Error {
-  constructor(message, statusCode = 500, errors = []) {
+  // `code` is an optional stable identifier (e.g. "PLAN_LIMIT_REACHED") for
+  // errors the UI needs to react to specifically rather than just display.
+  // Matching on the human message would break the moment it's reworded or
+  // translated.
+  constructor(message, statusCode = 500, errors = [], code = undefined) {
     super(message);
     this.statusCode = statusCode;
     this.errors     = errors;
+    this.code       = code;
     this.isOperational = true;
     Error.captureStackTrace(this, this.constructor);
   }

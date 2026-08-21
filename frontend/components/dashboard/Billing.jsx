@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/Context/AuthContext";
 import { useToast } from "@/Context/ToastContext";
@@ -26,6 +26,15 @@ export default function Billing() {
   const [submitting, setSubmitting] = useState(false);
   const [payingCard, setPayingCard] = useState(false);
   const [error, setError] = useState("");
+  const checkoutRef = useRef(null);
+
+  // "Choose plan" renders the payment form further down the page, which on a
+  // phone is entirely below the fold — the button looked broken because
+  // nothing visibly happened. Scroll it into view once it has rendered.
+  useEffect(() => {
+    if (!selected || !checkoutRef.current) return;
+    checkoutRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [selected]);
 
   async function loadMine() {
     const res = await subscriptionApi.me().catch(() => null);
@@ -188,7 +197,7 @@ export default function Billing() {
 
       {/* Checkout panel */}
       {selected ? (
-        <section className="rounded-xl border border-[var(--hw-orange)] bg-[var(--hw-bg-card)] p-5">
+        <section ref={checkoutRef} className="scroll-mt-24 rounded-xl border border-[var(--hw-orange)] bg-[var(--hw-bg-card)] p-5">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-black text-[var(--hw-text-primary)]">
               Pay for {plans.find((p) => p.key === selected)?.name} — Rs {fmt(cycle === "annual" ? plans.find((p) => p.key === selected)?.annual : plans.find((p) => p.key === selected)?.monthly)}

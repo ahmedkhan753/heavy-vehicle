@@ -111,6 +111,9 @@ export async function apiRequest(endpoint, options = {}) {
     throw {
       message: payload?.message || `Request failed with status ${response.status}`,
       statusCode: response.status,
+      // Stable identifier for errors the UI branches on (e.g.
+      // PLAN_LIMIT_REACHED → show the upgrade prompt, not just the text).
+      code: payload?.code,
       errors: payload?.errors || [],
       raw: payload,
     };
@@ -342,6 +345,11 @@ export const reportApi = {
   adminList: (status) => apiRequest(`/reports/admin${status ? `?status=${status}` : ""}`),
   adminSetStatus: (listingId, listingType, status) =>
     apiRequest("/reports/admin/status", { method: "PATCH", body: JSON.stringify({ listingId, listingType, status }) }),
+};
+
+export const notificationApi = {
+  adminCounts: () => apiRequest("/notifications/admin-counts"),
+  mine: () => apiRequest("/notifications/me"),
 };
 
 export const adminApi = {

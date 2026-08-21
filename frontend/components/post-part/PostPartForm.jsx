@@ -13,6 +13,7 @@ import { titleCase } from "@/lib/format";
 import { TC_VERSION } from "@/lib/pricing";
 import SuggestInput from "@/components/ui/SuggestInput";
 import PhotoUploader from "@/components/ui/PhotoUploader";
+import UpgradePrompt from "@/components/marketing/UpgradePrompt";
 import { onLettersInput } from "@/lib/validators";
 
 function Req() {
@@ -53,6 +54,9 @@ export default function PostPartForm() {
   const { t } = useLanguage();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  // Hitting the plan cap isn't really an error the seller can fix by
+  // re-reading the form — it needs its own prompt with a way out.
+  const [limitReached, setLimitReached] = useState(false);
   // Selected category drives which subcategory options show.
   const [category, setCategory] = useState("");
   // Photos picked for upload, managed by <PhotoUploader>. Each entry is
@@ -66,6 +70,7 @@ export default function PostPartForm() {
     event.preventDefault();
     setLoading(true);
     setError("");
+    setLimitReached(false);
 
     const formData = new FormData(event.currentTarget);
 
@@ -108,6 +113,7 @@ export default function PostPartForm() {
       toast.success("Part ad created successfully");
       router.push(`/parts/${response.data._id}`);
     } catch (err) {
+      if (err?.code === "PLAN_LIMIT_REACHED") setLimitReached(true);
       setError(normalizeApiError(err.payload || err));
     } finally {
       setLoading(false);
@@ -142,7 +148,8 @@ export default function PostPartForm() {
       <p className="text-sm text-[var(--hw-text-muted)]">
         Fields marked <Req /> are required.
       </p>
-      {error ? (
+      {limitReached ? <UpgradePrompt message={error} /> : null}
+      {error && !limitReached ? (
         <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-sm font-bold text-red-200">
           {error}
         </div>

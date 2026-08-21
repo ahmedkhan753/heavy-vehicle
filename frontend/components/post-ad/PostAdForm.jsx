@@ -12,6 +12,7 @@ import { titleCase } from "@/lib/format";
 import { TC_VERSION } from "@/lib/pricing";
 import SuggestInput from "@/components/ui/SuggestInput";
 import PhotoUploader from "@/components/ui/PhotoUploader";
+import UpgradePrompt from "@/components/marketing/UpgradePrompt";
 import { onLettersInput, onDigitsInput } from "@/lib/validators";
 
 // Free-text spec fields render from one map; `mode` picks the input filter.
@@ -70,6 +71,9 @@ export default function PostAdForm() {
   const { t } = useLanguage();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  // Hitting the plan cap isn't really an error the seller can fix by
+  // re-reading the form — it needs its own prompt with a way out.
+  const [limitReached, setLimitReached] = useState(false);
   // Photos picked for upload, owned here and managed by <PhotoUploader>.
   // Each entry: { id, file, url }. `photosBusy` is true while compression runs.
   const [photos, setPhotos] = useState([]);
@@ -79,6 +83,7 @@ export default function PostAdForm() {
     event.preventDefault();
     setLoading(true);
     setError("");
+    setLimitReached(false);
 
     const formData = new FormData(event.currentTarget);
 
@@ -128,6 +133,7 @@ export default function PostAdForm() {
       toast.success(t("form.publish"));
       router.push(`/vehicles/${response.data._id}`);
     } catch (err) {
+      if (err?.code === "PLAN_LIMIT_REACHED") setLimitReached(true);
       setError(normalizeApiError(err.payload || err));
     } finally {
       setLoading(false);
@@ -159,7 +165,8 @@ export default function PostAdForm() {
       <p className="text-sm text-[var(--hw-text-muted)]">
         Fields marked <Req /> are required.
       </p>
-      {error ? (
+      {limitReached ? <UpgradePrompt message={error} /> : null}
+      {error && !limitReached ? (
         <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-sm font-bold text-red-200">
           {error}
         </div>

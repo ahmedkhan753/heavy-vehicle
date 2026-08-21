@@ -7,6 +7,9 @@ import { usePathname } from "next/navigation";
 import { useAuth } from "@/Context/AuthContext";
 import { useLanguage } from "@/Context/LanguageContext";
 import { dealerApi } from "@/lib/api";
+import useNotifications from "@/lib/useNotifications";
+import { NotificationBadge, AlertBadge } from "@/components/ui/NotificationBadge";
+import DashboardAlerts from "./DashboardAlerts";
 
 /* ── Inline icons (no icon lib installed) ───────────────────────── */
 const Icon = ({ d, className = "h-5 w-5" }) => (
@@ -26,6 +29,8 @@ const icons = {
   post: <Icon d={<><circle cx="12" cy="12" r="9" /><path d="M12 8v8M8 12h8" /></>} />,
   requests: <Icon d={<><path d="M9 4h6a1 1 0 0 1 1 1v1h2a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h2V5a1 1 0 0 1 1-1z" /><path d="M9 12h6M9 16h4" /></>} />,
   messages: <Icon d={<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />} />,
+  menu: <Icon d={<><path d="M3 6h18M3 12h18M3 18h18" /></>} />,
+  close: <Icon d={<><path d="M18 6 6 18M6 6l12 12" /></>} />,
 };
 
 export default function DashboardSidebar() {
@@ -33,6 +38,8 @@ export default function DashboardSidebar() {
   const { user, isAuthenticated } = useAuth();
   const { t } = useLanguage();
   const [dealerApproved, setDealerApproved] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const { counts, alerts, total } = useNotifications("me", isAuthenticated);
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -41,6 +48,24 @@ export default function DashboardSidebar() {
     // so this checks the actual application instead of user.role === "dealer".
     dealerApi.mine().then((res) => setDealerApproved(res?.data?.approvalStatus === "approved")).catch(() => {});
   }, [isAuthenticated]);
+
+  // Navigating is what closes the drawer — without this it would stay
+  // open over the page the user just asked for.
+  useEffect(() => { setMenuOpen(false); }, [pathname]);
+
+  // A drawer over a still-scrollable page lets the content slide away
+  // behind it, which reads as the menu itself being broken.
+  useEffect(() => {
+    if (!menuOpen) return undefined;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKey = (e) => { if (e.key === "Escape") setMenuOpen(false); };
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = previous;
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [menuOpen]);
 
   const links = [
     { href: "/dashboard", label: t("dash.overview"), icon: icons.overview, exact: true },
@@ -74,6 +99,34 @@ export default function DashboardSidebar() {
     link.exact ? pathname === link.href : pathname.startsWith(link.href);
 
   const initial = (user?.name || "?").trim().charAt(0).toUpperCase();
+
+  // Alerts carry the href of the page that resolves them, so the same
+  // data drives both the "!" on a nav row and the explanatory cards.
+  const alertHrefs = new Set((alerts || []).map((a) => a.href));
+  const badgeFor = (href) => counts?.[href] || 0;
+
+  // One nav row, shared by the desktop rail and the mobile drawer so the
+  // two can't drift apart in what they show or badge.
+  const NavRow = ({ link, onNavigate }) => {
+    const count = badgeFor(link.href);
+    const flagged = alertHrefs.has(link.href);
+    return (
+      <Link
+        href={link.href}
+        onClick={onNavigate}
+        className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-bold transition ${
+          isActive(link)
+            ? "bg-[var(--hw-orange)] text-[var(--hw-text-inverse)]"
+            : "text-[var(--hw-text-secondary)] hover:bg-[var(--hw-soft-panel)] hover:text-[var(--hw-text-primary)]"
+        }`}
+      >
+        {link.icon}
+        <span className="min-w-0 flex-1 truncate">{link.label}</span>
+        {count > 0 ? <NotificationBadge count={count} /> : null}
+        {flagged && count === 0 ? <AlertBadge title={t("dash.needsAttention")} /> : null}
+      </Link>
+    );
+  };
 
   return (
     <aside className="min-w-0 lg:sticky lg:top-24 lg:self-start">
@@ -118,38 +171,67 @@ export default function DashboardSidebar() {
       {/* Desktop nav */}
       <nav className="mt-4 hidden rounded-xl border border-[var(--hw-border-default)] bg-[var(--hw-bg-card)] p-2 lg:block">
         {links.map((link) => (
-          <Link
-            key={link.href}
-            href={link.href}
-            className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-bold transition ${
-              isActive(link)
-                ? "bg-[var(--hw-orange)] text-[var(--hw-text-inverse)]"
-                : "text-[var(--hw-text-secondary)] hover:bg-[var(--hw-soft-panel)] hover:text-[var(--hw-text-primary)]"
-            }`}
-          >
-            {link.icon}
-            {link.label}
-          </Link>
+          <NavRow key={link.href} link={link} />
         ))}
       </nav>
 
-      {/* Mobile nav — horizontal scrollable tabs */}
-      <nav className="hw-no-scrollbar mt-3 flex gap-1.5 overflow-x-auto pb-1 lg:hidden">
-        {links.map((link) => (
-          <Link
-            key={link.href}
-            href={link.href}
-            className={`flex shrink-0 items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-[12px] font-bold transition ${
-              isActive(link)
-                ? "border-[var(--hw-orange)] bg-[var(--hw-orange)] text-[var(--hw-text-inverse)]"
-                : "border-[var(--hw-border-default)] bg-[var(--hw-bg-card)] text-[var(--hw-text-secondary)]"
-            }`}
-          >
-            <span className="[&>svg]:h-4 [&>svg]:w-4">{link.icon}</span>
-            {link.label}
-          </Link>
-        ))}
-      </nav>
+      {/* Desktop alerts sit under the rail, where there's room to read them. */}
+      <div className="hidden lg:block">
+        <DashboardAlerts alerts={alerts} />
+      </div>
+
+      {/* Mobile — a single menu button instead of a tab strip that ran off
+          the side of the screen. The count on the button is what tells the
+          user there's something inside worth opening it for. */}
+      <div className="mt-3 lg:hidden">
+        <button
+          type="button"
+          onClick={() => setMenuOpen(true)}
+          aria-expanded={menuOpen}
+          aria-haspopup="dialog"
+          className="flex h-11 w-full items-center gap-2.5 rounded-xl border border-[var(--hw-border-default)] bg-[var(--hw-bg-card)] px-3 text-sm font-bold text-[var(--hw-text-primary)]"
+        >
+          <span className="[&>svg]:h-5 [&>svg]:w-5">{icons.menu}</span>
+          <span className="min-w-0 flex-1 truncate text-start">
+            {links.find(isActive)?.label || t("dash.menu")}
+          </span>
+          {total > 0 ? <NotificationBadge count={total} /> : null}
+          <span className="text-[var(--hw-text-muted)]">▾</span>
+        </button>
+
+        {/* Alerts stay visible on the dashboard itself, not just inside the
+            drawer — an expiring plan shouldn't need a tap to be discovered. */}
+        <DashboardAlerts alerts={alerts} compact />
+      </div>
+
+      {/* Mobile drawer */}
+      {menuOpen ? (
+        <div className="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true" aria-label={t("dash.menu")}>
+          <div className="absolute inset-0 bg-black/60" onClick={() => setMenuOpen(false)} />
+          <div className="absolute inset-y-0 start-0 flex w-[82%] max-w-[320px] flex-col bg-[var(--hw-bg-card)] shadow-2xl">
+            <div className="flex items-center justify-between border-b border-[var(--hw-border-subtle)] px-4 py-3">
+              <span className="text-sm font-black text-[var(--hw-text-primary)]">{t("dash.menu")}</span>
+              <button
+                type="button"
+                onClick={() => setMenuOpen(false)}
+                aria-label={t("common.close")}
+                className="rounded-lg p-1.5 text-[var(--hw-text-muted)] hover:bg-[var(--hw-soft-panel)] hover:text-[var(--hw-text-primary)]"
+              >
+                <span className="[&>svg]:h-5 [&>svg]:w-5">{icons.close}</span>
+              </button>
+            </div>
+
+            <div className="min-h-0 flex-1 overflow-y-auto p-2">
+              {links.map((link) => (
+                <NavRow key={link.href} link={link} onNavigate={() => setMenuOpen(false)} />
+              ))}
+              <div className="px-1 pb-2">
+                <DashboardAlerts alerts={alerts} />
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </aside>
   );
 }

@@ -257,7 +257,12 @@ async function create(req, res, next) {
     if (limits.maxActiveAds !== -1) {
       const activeCount = await countActiveListings(req.user._id);
       if (activeCount >= limits.maxActiveAds) {
-        return next(new AppError(`You've reached your ${limits.planKey} plan limit of ${limits.maxActiveAds} active ads. Upgrade your plan or remove an ad to post more.`, 403));
+        return next(new AppError(
+          `You've reached your ${limits.planKey} plan limit of ${limits.maxActiveAds} active ads. Upgrade your plan or remove an ad to post more.`,
+          403,
+          [],
+          "PLAN_LIMIT_REACHED",
+        ));
       }
     }
 
