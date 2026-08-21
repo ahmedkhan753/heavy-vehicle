@@ -48,11 +48,15 @@ export default function HScroller({ children, ariaLabel }) {
     <div className="relative">
       <Arrow side="left" onClick={() => page(-1)} hidden={atStart} label="Scroll left" />
 
+      {/* One row at every width. The two-row mobile grid this replaced ate
+          twice the vertical space for the same tiles, and since the row
+          scrolls anyway the second row bought nothing — about four tiles
+          are visible at a phone width either way. */}
       <div
         ref={trackRef}
         dir="ltr"
         aria-label={ariaLabel}
-        className="hw-no-scrollbar grid grid-flow-col grid-rows-2 gap-2 overflow-x-auto scroll-smooth pb-1 sm:flex sm:snap-x sm:snap-mandatory sm:gap-4"
+        className="hw-no-scrollbar flex snap-x snap-mandatory gap-2 overflow-x-auto scroll-smooth pb-1 sm:gap-4"
       >
         {children}
       </div>

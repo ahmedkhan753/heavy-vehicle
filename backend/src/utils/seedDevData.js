@@ -19,6 +19,7 @@ const mongoose = require("mongoose");
 const User = require("../models/User");
 const Vehicle = require("../models/Vehicle");
 const Part = require("../models/Part");
+const Dealer = require("../models/Dealer");
 
 const PRODUCTION_DB_NAME = "heavywheels";
 const DEV_EMAIL_DOMAIN = "example.test";
@@ -67,6 +68,7 @@ async function seedDevData() {
       await Promise.all([
         Vehicle.deleteMany({ sellerId: { $in: devUserIds } }),
         Part.deleteMany({ sellerId: { $in: devUserIds } }),
+        Dealer.deleteMany({ userId: { $in: devUserIds } }),
         User.deleteMany({ _id: { $in: devUserIds } }),
       ]);
       console.log(`🧹 Cleared ${devUserIds.length} previous dev user(s) and their listings`);
@@ -137,7 +139,21 @@ async function seedDevData() {
       },
     ]);
 
-    console.log(`🚛 Created ${vehicles.length} vehicles and ${parts.length} part(s)`);
+    // An approved dealer so the homepage dealer strip and /dealers aren't
+    // empty locally — that section is invisible without one.
+    await Dealer.create({
+      userId: dealer._id,
+      businessName: "DEV Heavy Machinery Traders",
+      businessType: "showroom",
+      tagline: "Synthetic dev dealer — not a real business.",
+      phone: dealer.phone,
+      city: "Lahore",
+      approvalStatus: "approved",
+      isVerified: true,
+      isActive: true,
+    });
+
+    console.log(`🚛 Created ${vehicles.length} vehicles, ${parts.length} part(s) and 1 approved dealer`);
     console.log(`\n✅ Dev database "${dbName}" seeded.`);
     console.log(`   Log in as ${DEV_USERS[0].email} / ${DEV_PASSWORD}`);
     console.log("   Run `npm run seed:admin` too if you need an admin account here.\n");

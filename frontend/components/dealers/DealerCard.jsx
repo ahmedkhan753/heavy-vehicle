@@ -22,10 +22,12 @@ export default async function DealerCard({ dealer }) {
   const logoUrl = dealer.logo?.url;
 
   return (
+    /* Shorter on phones so a dealer tile sits two-up next to another,
+       matching the listing cards instead of taking a full-width slab each. */
     <Link
       href={`/dealers/${dealer._id}`}
       style={planBorderStyle(plan)}
-      className="group relative block h-44 overflow-hidden rounded-xl border border-[var(--hw-border-default)] bg-[var(--hw-bg-card)] transition hover:border-[var(--hw-orange)]"
+      className="group relative block h-36 overflow-hidden rounded-xl border border-[var(--hw-border-default)] bg-[var(--hw-bg-card)] transition hover:border-[var(--hw-orange)] sm:h-44"
     >
       {logoUrl ? (
         <>
@@ -38,22 +40,26 @@ export default async function DealerCard({ dealer }) {
         </div>
       )}
 
-      <div className="absolute inset-x-0 top-0 flex items-center justify-between gap-1.5 p-3">
+      <div className="absolute inset-x-0 top-0 flex items-center justify-between gap-1 p-2 sm:gap-1.5 sm:p-3">
         {plan ? <PlanBadge plan={plan} size="sm" hideFree /> : <span />}
         {dealer.isVerified ? (
-          <span className="inline-flex items-center gap-1 rounded-full bg-[var(--hw-green)] px-2 py-0.5 text-[10px] font-black uppercase text-[var(--hw-text-inverse)] shadow">
+          // Icon-only on phones: at half width the word alongside the plan
+          // badge pushed one of the two off the card.
+          <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[var(--hw-green)] px-1.5 py-0.5 text-[10px] font-black uppercase text-[var(--hw-text-inverse)] shadow sm:px-2">
             <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m5 12 5 5L20 7" /></svg>
-            {t("dealer.verified")}
+            <span className="hidden sm:inline">{t("dealer.verified")}</span>
           </span>
         ) : null}
       </div>
 
-      <div className="absolute inset-x-0 bottom-0 p-3.5">
-        <h3 className="truncate font-black text-white drop-shadow">{dealer.businessName}</h3>
-        <p className="mt-0.5 truncate text-[11px] text-white/75">
+      <div className="absolute inset-x-0 bottom-0 p-2.5 sm:p-3.5">
+        <h3 className="truncate text-[13px] font-black text-white drop-shadow sm:text-base">{dealer.businessName}</h3>
+        <p className="mt-0.5 truncate text-[10px] text-white/75 sm:text-[11px]">
           {titleCase(dealer.city)} · {dealer.activeListings ?? 0} {t("dealer.listingsWord")}
         </p>
-        <p className="mt-1 truncate text-[12px] text-white/60">{dealer.tagline || t("dealer.fallbackTag")}</p>
+        {/* The tagline truncates to nothing useful in a half-width card, so
+            it only earns its line from the tablet breakpoint up. */}
+        <p className="mt-1 hidden truncate text-[12px] text-white/60 sm:block">{dealer.tagline || t("dealer.fallbackTag")}</p>
       </div>
     </Link>
   );

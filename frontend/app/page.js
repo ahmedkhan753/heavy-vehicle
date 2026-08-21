@@ -148,7 +148,9 @@ export default async function HomePage() {
         <section className="hw-section hw-container">
           <SectionHeader eyebrow={t("page.dealers")} title={t("home.dealerNetwork")} action={t("home.browseDealers")} href="/dealers" />
           {dealers.length ? (
-            <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
+            /* Same two-up grid and gaps as the listing cards above, so a
+               dealer tile reads as the same size object on a phone. */
+            <div className="grid grid-cols-2 gap-2.5 sm:gap-5 lg:grid-cols-4">
               {dealers.map((dealer) => (
                 <DealerCard key={dealer._id} dealer={dealer} />
               ))}

@@ -11,11 +11,14 @@ import BrandLogo from "@/components/layout/BrandLogo";
 // instead of linking to a route that would 404.
 const columns = [
   {
+    // Whole destinations, not three arbitrary vehicle types — someone
+    // looking for a grader or a trailer got nothing out of a list that
+    // named only prime movers, dumpers and tankers.
     title: "footer.buy",
     links: [
-      ["footer.link.primeMovers", "/vehicles?type=prime-mover"],
-      ["footer.link.dumpers", "/vehicles?type=dumper"],
-      ["footer.link.tankers", "/vehicles?type=oil-tanker"],
+      ["footer.link.vehicles", "/vehicles"],
+      ["footer.link.spareParts", "/parts"],
+      ["footer.link.plans", "/subscription-pricings"],
       ["footer.link.featuredAds", "/featured"],
     ],
   },
