@@ -63,7 +63,6 @@ export const translations = {
     "footer.link.warranty": "Warranty Program",
     "footer.link.about": "About",
     "footer.link.dealers": "Dealers",
-    "footer.link.parts": "Parts",
 
     // ── Categories ────────────────────────────────
     "cat.primeMovers": "Prime Movers",
@@ -1082,7 +1081,6 @@ export const translations = {
     "footer.link.warranty": "وارنٹی پروگرام",
     "footer.link.about": "ہمارے بارے میں",
     "footer.link.dealers": "ڈیلرز",
-    "footer.link.parts": "پارٹس",
 
     // ── Categories ────────────────────────────────
     "cat.primeMovers": "پرائم موورز",
