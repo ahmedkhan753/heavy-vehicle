@@ -20,17 +20,23 @@ import { Fragment } from "react";
 // Splits one line into bold / italic / code / link spans.
 const INLINE = /(\*\*[^*]+\*\*|__[^_]+__|\*[^*\n]+\*|_[^_\n]+_|`[^`]+`|\[[^\]]+\]\([^)\s]+\))/g;
 
-function renderInline(text, keyPrefix) {
+// Recursive: emphasis frequently wraps a link — the model reliably writes
+// **[Post your ad](/post-ad)**. Rendering a bold span's contents as plain
+// text left that link as visible "[label](/href)" punctuation, so bold and
+// italic re-enter the parser on their inner text. Depth-capped since each
+// level strips delimiters and can only shrink the string.
+function renderInline(text, keyPrefix, depth = 0) {
   const parts = String(text).split(INLINE).filter(Boolean);
 
   return parts.map((part, i) => {
     const key = `${keyPrefix}-${i}`;
+    const inner = (s) => (depth < 4 ? renderInline(s, key, depth + 1) : s);
 
     if ((part.startsWith("**") && part.endsWith("**")) || (part.startsWith("__") && part.endsWith("__"))) {
-      return <strong key={key} className="font-bold text-[var(--hw-text-primary)]">{part.slice(2, -2)}</strong>;
+      return <strong key={key} className="font-bold text-[var(--hw-text-primary)]">{inner(part.slice(2, -2))}</strong>;
     }
     if ((part.startsWith("*") && part.endsWith("*")) || (part.startsWith("_") && part.endsWith("_"))) {
-      return <em key={key}>{part.slice(1, -1)}</em>;
+      return <em key={key}>{inner(part.slice(1, -1))}</em>;
     }
     if (part.startsWith("`") && part.endsWith("`")) {
       return (
