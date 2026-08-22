@@ -282,20 +282,27 @@ textarea {
   --hw-text-inverse: #071016;
 }
 
-/* Intro experience — slow industrial gear rotation behind the logo, and a
-   scale+fade entrance for the logo itself (hw-rise-in covers everything
-   else that just fades/rises). */
+/* Urdu's site-wide line-height:2 gives Nastaliq the vertical room it needs
+   in flowing page copy, but the intro is a fixed single screen — at 2.0 the
+   content column overflowed and the centred flex silently clipped the
+   category tiles, motive and CTA off both ends. Tighter here only. */
+[lang="ur"] .hw-intro-scope {
+  line-height: 1.45;
+}
+
+/* Intro experience — slow industrial gear rotation behind the logo. */
 @keyframes hw-gear-spin {
   to { transform: rotate(360deg); }
 }
 
 .hw-intro-gear {
-  animation: hw-gear-spin 32s linear infinite;
+  animation: hw-gear-spin 26s linear infinite;
+  transform-origin: 50% 50%;
 }
 
 @keyframes hw-logo-in {
-  from { opacity: 0; transform: scale(0.9) translateY(8px); }
-  to { opacity: 1; transform: scale(1) translateY(0); }
+  from { opacity: 0; transform: scale(0.92); }
+  to { opacity: 1; transform: scale(1); }
 }
 
 .hw-logo-in {
@@ -303,11 +310,73 @@ textarea {
   animation: hw-logo-in 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
 
+/* Staggered fade-up for each block of intro content. Delay is set inline
+   per element so the sequence reads top-to-bottom. */
+@keyframes hw-intro-reveal {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.hw-intro-reveal {
+  opacity: 0;
+  animation: hw-intro-reveal 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
+}
+
+/* Brushed-steel and molten-amber gradient text, the visual signature of
+   the brand artwork. background-clip:text needs a transparent fill. */
+.hw-steel-text {
+  background: linear-gradient(180deg, #ffffff 0%, #dfe5ee 45%, #8a97a8 60%, #f2f5f9 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.6));
+}
+
+.hw-amber-text {
+  background: linear-gradient(180deg, #fdba74 0%, var(--hw-orange) 50%, #c2410c 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 2px 8px rgba(249, 115, 22, 0.45));
+}
+
+/* Condensed italic display treatment approximating the artwork's wordmark
+   without pulling in a webfont (no external requests from this project). */
+.hw-intro-display {
+  font-style: italic;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+}
+
+.hw-intro-rule {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--hw-border-strong), transparent);
+}
+
+.hw-intro-tile {
+  background: linear-gradient(180deg, rgba(36, 49, 73, 0.9), rgba(13, 20, 32, 0.9));
+  border: 1px solid var(--hw-border-subtle);
+  border-radius: 0.75rem;
+  transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.hw-intro-tile:hover,
+.hw-intro-tile:focus-visible {
+  transform: translateY(-4px);
+  border-color: var(--hw-orange);
+  box-shadow: 0 12px 30px rgba(249, 115, 22, 0.25);
+  outline: none;
+}
+
 /* Breathing glow ring on the intro CTA — box-shadow, not opacity, so the
-   button itself never dims. */
+   button itself never dims. Kept on its own element (the button) while the
+   fade-up lives on a wrapper: both set `animation`, and a single element
+   carrying both classes would let the later declaration win outright,
+   stranding the fade-up's opacity:0 and rendering the button invisible. */
 @keyframes hw-cta-glow {
-  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--hw-orange) 45%, transparent); }
-  50% { box-shadow: 0 0 22px 4px color-mix(in srgb, var(--hw-orange) 45%, transparent); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.45), 0 0 24px rgba(249, 115, 22, 0.3); }
+  50% { box-shadow: 0 0 22px 4px rgba(249, 115, 22, 0.45), 0 0 40px rgba(249, 115, 22, 0.45); }
 }
 
 .hw-cta-glow {
@@ -322,12 +391,18 @@ textarea {
   .hw-rise-in,
   .hw-intro-gear,
   .hw-logo-in,
+  .hw-intro-reveal,
   .hw-cta-glow {
     animation: none;
   }
   .hw-rise-in,
-  .hw-logo-in {
+  .hw-logo-in,
+  .hw-intro-reveal {
     opacity: 1;
+  }
+  .hw-intro-tile:hover,
+  .hw-intro-tile:focus-visible {
+    transform: none;
   }
 }
 
