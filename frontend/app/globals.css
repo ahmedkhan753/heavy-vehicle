@@ -270,15 +270,65 @@ textarea {
   animation: hw-rise-in 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
 
+/* Pins the intro experience to its cinematic dark palette regardless of the
+   site's light/dark theme toggle — a one-time branded splash shouldn't flip
+   appearance with a setting that governs the persistent marketplace UI.
+   Custom properties resolve to the nearest declaration in the tree, so
+   re-declaring these here overrides whatever [data-theme="light"] set
+   higher up, for this subtree only. Values match :root's dark defaults. */
+.hw-intro-scope {
+  --hw-bg-base: #070a0f;
+  --hw-orange: #f97316;
+  --hw-text-inverse: #071016;
+}
+
+/* Intro experience — slow industrial gear rotation behind the logo, and a
+   scale+fade entrance for the logo itself (hw-rise-in covers everything
+   else that just fades/rises). */
+@keyframes hw-gear-spin {
+  to { transform: rotate(360deg); }
+}
+
+.hw-intro-gear {
+  animation: hw-gear-spin 32s linear infinite;
+}
+
+@keyframes hw-logo-in {
+  from { opacity: 0; transform: scale(0.9) translateY(8px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.hw-logo-in {
+  opacity: 0;
+  animation: hw-logo-in 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+/* Breathing glow ring on the intro CTA — box-shadow, not opacity, so the
+   button itself never dims. */
+@keyframes hw-cta-glow {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--hw-orange) 45%, transparent); }
+  50% { box-shadow: 0 0 22px 4px color-mix(in srgb, var(--hw-orange) 45%, transparent); }
+}
+
+.hw-cta-glow {
+  animation: hw-cta-glow 2.6s ease-in-out infinite;
+}
+
 /* Respect users who prefer less motion: keep the look, drop the movement. */
 @media (prefers-reduced-motion: reduce) {
   .hw-neon-card::before,
   .hw-neon-card::after,
   .hw-shimmer,
-  .hw-rise-in {
+  .hw-rise-in,
+  .hw-intro-gear,
+  .hw-logo-in,
+  .hw-cta-glow {
     animation: none;
   }
-  .hw-rise-in { opacity: 1; }
+  .hw-rise-in,
+  .hw-logo-in {
+    opacity: 1;
+  }
 }
 
 /* ── Urdu typography + RTL support ──────────────────────────────

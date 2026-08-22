@@ -8,6 +8,7 @@ import Footer from "@/components/layout/Footer";
 import MobileNav from "@/components/layout/MobileNav";
 import HeavyWheelsAssistant from "@/components/assistant/HeavyWheelsAssistant";
 import AdBanner from "@/components/ads/AdBanner";
+import IntroExperience from "@/components/intro/IntroExperience";
 import { getLang } from "@/lib/i18n-server";
 import { fallbackImage } from "@/lib/constants";
 
@@ -86,6 +87,9 @@ export default async function RootLayout({ children }) {
                 <Footer />
                 <MobileNav />
                 <HeavyWheelsAssistant />
+                {/* Sits above everything via z-index — no restructuring of
+                    Navbar/Footer/MobileNav needed to hide them visually. */}
+                <IntroExperience />
               </AuthProvider>
             </LanguageProvider>
           </ThemeProvider>

@@ -48,6 +48,11 @@ const columns = [
       ["footer.contact", "/contact"],
       ["footer.link.dealers", "/dealers"],
       ["ad.navLabel", "/advertise"],
+      // Replays the first-visit intro. A hard reload, not a <Link> — a
+      // same-page client navigation wouldn't change usePathname()'s value
+      // when already on "/", so IntroExperience's mount effect would never
+      // re-run and the click would silently do nothing.
+      ["footer.link.watchIntro", "/?intro=1", "watchIntro"],
     ],
   },
 ];
@@ -104,28 +109,44 @@ export default function Footer() {
                 </button>
 
                 <ul className={`grid gap-3 pb-4 sm:mt-5 sm:block sm:space-y-3 sm:pb-0 ${isOpen ? "grid" : "hidden"}`}>
-                  {column.links.map(([labelKey, href, comingSoon]) =>
-                    comingSoon ? (
-                      <li key={href}>
-                        <button
-                          type="button"
-                          onClick={() => toast.info(`${t(labelKey)} — coming soon!`)}
-                          className="flex items-center gap-2 text-left text-sm text-[var(--hw-text-secondary)] cursor-default hover:text-[var(--hw-text-primary)]"
-                        >
-                          {t(labelKey)}
-                          <span className="rounded-full bg-[var(--hw-bg-elevated)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-[var(--hw-text-muted)]">
-                            Soon
-                          </span>
-                        </button>
-                      </li>
-                    ) : (
+                  {column.links.map(([labelKey, href, special]) => {
+                    if (special === "comingSoon") {
+                      return (
+                        <li key={href}>
+                          <button
+                            type="button"
+                            onClick={() => toast.info(`${t(labelKey)} — coming soon!`)}
+                            className="flex items-center gap-2 text-left text-sm text-[var(--hw-text-secondary)] cursor-default hover:text-[var(--hw-text-primary)]"
+                          >
+                            {t(labelKey)}
+                            <span className="rounded-full bg-[var(--hw-bg-elevated)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-[var(--hw-text-muted)]">
+                              Soon
+                            </span>
+                          </button>
+                        </li>
+                      );
+                    }
+                    if (special === "watchIntro") {
+                      return (
+                        <li key={href}>
+                          <button
+                            type="button"
+                            onClick={() => window.location.assign(href)}
+                            className="text-left text-sm text-[var(--hw-text-secondary)] hover:text-[var(--hw-orange)]"
+                          >
+                            {t(labelKey)}
+                          </button>
+                        </li>
+                      );
+                    }
+                    return (
                       <li key={href}>
                         <Link href={href} className="text-sm text-[var(--hw-text-secondary)] hover:text-[var(--hw-orange)]">
                           {t(labelKey)}
                         </Link>
                       </li>
-                    )
-                  )}
+                    );
+                  })}
                 </ul>
               </div>
             );
