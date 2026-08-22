@@ -22,6 +22,18 @@ import {
 
 const STORAGE_KEY = "heavywheels_intro_seen";
 
+// The intro greets a first-time visitor wherever they land — a shared link
+// to one listing is how most people meet the site, and gating it to "/"
+// meant those visitors never saw it at all.
+//
+// Excluded: flows where an overlay would actively get in the way rather
+// than introduce anything. Someone mid-checkout, signing in, or posting an
+// ad is already past the point of needing a brand introduction.
+const EXCLUDED_PREFIXES = ["/dashboard", "/admin", "/auth", "/payment", "/post-ad", "/post-part"];
+
+const isIntroAllowed = (pathname) =>
+  typeof pathname === "string" && !EXCLUDED_PREFIXES.some((p) => pathname.startsWith(p));
+
 // Every tile is a real destination in the existing marketplace taxonomy —
 // nothing here is decorative.
 const CATEGORIES = [
@@ -44,7 +56,9 @@ const VALUES = [
 
 /**
  * IntroExperience — a single-screen cinematic first-visit intro, shown once
- * per browser (localStorage-gated) on the homepage only.
+ * per browser (localStorage-gated) on any public route, so a visitor who
+ * arrives via a shared listing link meets the brand too. Dismissing it
+ * reveals whatever page they actually came for, untouched.
  *
  * Everything is real markup rather than a flattened screenshot: the seven
  * category tiles navigate into the marketplace, the gear actually rotates,
@@ -67,7 +81,7 @@ export default function IntroExperience() {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    if (pathname !== "/") return;
+    if (!isIntroAllowed(pathname)) return;
     // ?intro=1 forces a replay — see the footer's "Watch Intro" link.
     const forced = new URLSearchParams(window.location.search).get("intro") === "1";
     let seen;
@@ -104,7 +118,7 @@ export default function IntroExperience() {
     setVisible(false);
   }, []);
 
-  if (pathname !== "/" || !visible) return null;
+  if (!isIntroAllowed(pathname) || !visible) return null;
 
   // Staggered fade-up: same class on every block, only the delay differs so
   // the sequence reads top-to-bottom.
