@@ -11,6 +11,7 @@ import AdBanner from "@/components/ads/AdBanner";
 import IntroExperience from "@/components/intro/IntroExperience";
 import { getLang } from "@/lib/i18n-server";
 import { fallbackImage } from "@/lib/constants";
+import { serializeJsonLd } from "@/lib/seo";
 
 const SITE_NAME = "HeavyWheels Pakistan";
 const SITE_URL = "https://heavywheelspk.com";
@@ -47,21 +48,66 @@ export const metadata = {
 // Organization + WebSite JSON-LD — tells Google this domain is HeavyWheels
 // (not just "some new domain"), and gives it a preferred site name to show
 // in results. Emitted once, site-wide, on every page via the root layout.
+//
+// This block existed but was never rendered — it was declared and then never
+// referenced, so the site shipped with no entity markup at all. That is the
+// single most direct signal for brand searches ("heavy wheels pakistan"), so
+// it is now actually emitted below.
+//
+// alternateName carries the spellings people actually type. The brand is one
+// word in our own copy but two words in most searches, and "PK" appears
+// because the domain does — without these, a search for "heavy wheels
+// pakistan" has nothing tying it to this entity.
 const structuredData = [
   {
     "@context": "https://schema.org",
     "@type": "Organization",
     name: SITE_NAME,
+    alternateName: [
+      "HeavyWheels",
+      "Heavy Wheels",
+      "Heavy Wheels Pakistan",
+      "HeavyWheels PK",
+      "Heavy Wheels PK",
+    ],
     url: SITE_URL,
-    logo: `${SITE_URL}/heavywheels-logo.png`,
+    logo: {
+      "@type": "ImageObject",
+      url: `${SITE_URL}/heavywheels-logo.png`,
+    },
+    description: SITE_DESCRIPTION,
+    areaServed: {
+      "@type": "Country",
+      name: "Pakistan",
+    },
+    knowsLanguage: ["en", "ur"],
   },
   {
     "@context": "https://schema.org",
     "@type": "WebSite",
     name: SITE_NAME,
+    alternateName: "Heavy Wheels Pakistan",
     url: SITE_URL,
+    description: SITE_DESCRIPTION,
+    inLanguage: ["en", "ur"],
+    publisher: { "@id": `${SITE_URL}/#organization` },
+    // Declares the on-site search endpoint. Google uses this for the sitelinks
+    // search box on brand queries, and answer engines use it to understand
+    // that this is a searchable catalogue rather than a brochure site.
+    potentialAction: {
+      "@type": "SearchAction",
+      target: {
+        "@type": "EntryPoint",
+        urlTemplate: `${SITE_URL}/search?q={search_term_string}`,
+      },
+      "query-input": "required name=search_term_string",
+    },
   },
 ];
+
+// Give the Organization a stable @id so WebSite.publisher resolves to it
+// rather than describing a second, unrelated entity.
+structuredData[0]["@id"] = `${SITE_URL}/#organization`;
 
 export default async function RootLayout({ children }) {
   // Read the language cookie on the server so the very first paint has the
@@ -71,6 +117,13 @@ export default async function RootLayout({ children }) {
 
   return (
     <html lang={lang} dir={dir} suppressHydrationWarning>
+      {/* Entity markup for the whole site. Escaped through serializeJsonLd for
+          the same reason the listing pages are: never hand-build a <script>
+          body with raw JSON.stringify. */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(structuredData) }}
+      />
       {/* pb-16 reserves space for the fixed mobile bottom nav (h-16) so the
           footer isn't hidden behind it; removed at lg where the bar is hidden. */}
       <body suppressHydrationWarning className="min-h-screen flex flex-col bg-[var(--hw-bg-base)] text-[var(--hw-text-primary)] antialiased font-sans pb-16 lg:pb-0">
