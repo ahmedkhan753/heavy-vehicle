@@ -21,17 +21,17 @@ const STATIC_ROUTES = [
   { path: "/vehicles", priority: 0.9, changeFrequency: "hourly" },
   { path: "/parts", priority: 0.9, changeFrequency: "hourly" },
   { path: "/dealers", priority: 0.7, changeFrequency: "daily" },
-  { path: "/businesses", priority: 0.6, changeFrequency: "daily" },
   // Indexable pages with their own title and description that were simply
   // never listed here, so nothing pointed a crawler at them.
   { path: "/featured", priority: 0.7, changeFrequency: "daily" },
   { path: "/promote", priority: 0.4, changeFrequency: "monthly" },
   { path: "/faq", priority: 0.6, changeFrequency: "monthly" },
-  // /inspectors and /businesses are deliberately absent. Both list zero
+  // /businesses and /inspectors are deliberately absent. Both list zero
   // records today and render as header-and-footer only, which Google reported
-  // as soft 404s — advertising an empty page in the sitemap is what caused
-  // that. They noindex themselves while empty (see their generateMetadata)
-  // and should be added back here once they actually list someone.
+  // as soft 404s — advertising an empty page in the sitemap is what invited
+  // the crawl that found them. They noindex themselves while empty (see their
+  // generateMetadata), so listing them here as well would have the sitemap
+  // arguing with the pages it points at. Add them back once they list someone.
   { path: "/post-ad", priority: 0.5, changeFrequency: "monthly" },
   { path: "/post-part", priority: 0.5, changeFrequency: "monthly" },
   { path: "/advertise", priority: 0.3, changeFrequency: "monthly" },
