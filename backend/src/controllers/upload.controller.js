@@ -98,7 +98,20 @@ async function deleteImage(req, res, next) {
       return next(new AppError("publicId is required.", 400));
     }
 
-    // Security: only allow deleting from the heavywheels folder
+    // Uploads land in `${CLOUDINARY_FOLDER}/${req.user._id}/...` (see
+    // uploadImage/uploadImages above), so the owner is encoded in the path.
+    // Checking only the "heavywheels/" prefix — as this did — let any signed-in
+    // user delete any other seller's photos: public IDs are visible in every
+    // listing's image URLs, and Cloudinary is the only copy. Admins keep the
+    // ability to remove anything, for moderation.
+    const expectedPrefix = `${env.CLOUDINARY_FOLDER}/${req.user._id}/`;
+
+    if (req.user.role !== "admin" && !publicId.startsWith(expectedPrefix)) {
+      return next(new AppError("You can only delete your own images.", 403));
+    }
+
+    // Admins are still confined to this app's own folder tree, so a stray
+    // call can never reach unrelated assets in the Cloudinary account.
     if (!publicId.startsWith("heavywheels/")) {
       return next(new AppError("Invalid publicId.", 403));
     }
