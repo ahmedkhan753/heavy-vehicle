@@ -12,6 +12,31 @@
 
 const { CATEGORY_TYPES } = require("../config/taxonomy");
 
+// Neutralise every regex metacharacter so a query value is matched as the
+// literal text a buyer typed. Without this, "?q=" went straight into $regex:
+// a crafted catastrophic-backtracking pattern is evaluated against every
+// document in the collection, and even a stray "(" from a real search like
+// "hino (6 wheeler" threw a cast error instead of returning results.
+const escapeRegex = (value) =>
+  String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+// Query values arrive as strings, or as arrays when a param is repeated
+// (?make=a&make=b), or as objects when bracket syntax is used (?make[$ne]=x).
+// Only a plain string is a usable scalar filter — anything else is ignored
+// rather than coerced into "[object Object]" or a comma-joined string.
+const asScalar = (value) => (typeof value === "string" ? value.trim() : "");
+
+// Numeric bounds were passed straight to Number(), so "?price[min]=abc"
+// became NaN, which Mongoose then failed to cast — a 500 for what is really
+// a malformed URL. Returns null for anything that isn't a finite number, and
+// the caller omits that bound entirely.
+const asFiniteNumber = (value) => {
+  const raw = asScalar(value);
+  if (raw === "") return null;
+  const n = Number(raw);
+  return Number.isFinite(n) ? n : null;
+};
+
 class APIFeatures {
   /**
    * @param {Object} query      - Mongoose query object (e.g. Vehicle.find())
@@ -27,8 +52,8 @@ class APIFeatures {
    * URL param: ?q=hino+prime+mover
    */
   search() {
-    if (this.queryString.q) {
-      const searchTerm = this.queryString.q.trim();
+    const searchTerm = escapeRegex(asScalar(this.queryString.q));
+    if (searchTerm) {
       this.query = this.query.find({
         $or: [
           { title:       { $regex: searchTerm, $options: "i" } },
@@ -68,11 +93,13 @@ class APIFeatures {
 
     const filterObj = {};
 
-    // Exact matches
+    // Exact matches — anchored and escaped, so "?make=." matches the literal
+    // make "." rather than every listing in the collection.
     EXACT_FIELDS.forEach((field) => {
-      if (this.queryString[field]) {
+      const value = asScalar(this.queryString[field]);
+      if (value) {
         filterObj[field] = {
-          $regex: `^${this.queryString[field]}$`,
+          $regex: `^${escapeRegex(value)}$`,
           $options: "i", // Case-insensitive
         };
       }
@@ -97,32 +124,21 @@ class APIFeatures {
     // Only show active listings by default
     filterObj.status = "active";
 
-    // Price range: price[min] and price[max]
-    if (this.queryString["price[min]"] || this.queryString["price[max]"]) {
-      filterObj.price = {};
-      if (this.queryString["price[min]"]) {
-        filterObj.price.$gte = Number(this.queryString["price[min]"]);
-      }
-      if (this.queryString["price[max]"]) {
-        filterObj.price.$lte = Number(this.queryString["price[max]"]);
-      }
-    }
+    // Numeric ranges. A bound that isn't a finite number is dropped rather
+    // than passed through as NaN, which Mongoose can't cast — a crawler
+    // following a malformed filter URL used to get a 500 instead of results.
+    const applyRange = (field, minKey, maxKey) => {
+      const min = asFiniteNumber(this.queryString[minKey]);
+      const max = asFiniteNumber(this.queryString[maxKey]);
+      const range = {};
+      if (min !== null) range.$gte = min;
+      if (max !== null) range.$lte = max;
+      if (Object.keys(range).length) filterObj[field] = range;
+    };
 
-    // Year range
-    if (this.queryString["year[min]"] || this.queryString["year[max]"]) {
-      filterObj.year = {};
-      if (this.queryString["year[min]"]) {
-        filterObj.year.$gte = Number(this.queryString["year[min]"]);
-      }
-      if (this.queryString["year[max]"]) {
-        filterObj.year.$lte = Number(this.queryString["year[max]"]);
-      }
-    }
-
-    // Mileage max
-    if (this.queryString["mileage[max]"]) {
-      filterObj.mileage = { $lte: Number(this.queryString["mileage[max]"]) };
-    }
+    applyRange("price",   "price[min]",   "price[max]");
+    applyRange("year",    "year[min]",    "year[max]");
+    applyRange("mileage", "mileage[min]", "mileage[max]");
 
     this.query = this.query.find(filterObj);
     return this;
