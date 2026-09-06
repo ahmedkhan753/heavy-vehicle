@@ -591,7 +591,12 @@ async function googleLogin(req, res, next) {
       user = new User({
         name: name || email.split("@")[0],
         email: email.toLowerCase().trim(),
-        phone: "",          // Will be prompted to complete later
+        // Deliberately left unset, NOT "". The phone_1 index is unique+sparse,
+        // and sparse only skips documents where the field is ABSENT - an empty
+        // string is a real indexed value, so the second social signup collided
+        // with the first and failed with E11000. Omitting the key entirely lets
+        // every social account share the "no phone yet" state until the user
+        // completes it in the profile.
         googleId,
         isEmailVerified: true, // Google already verified the email
         avatar: picture ? { url: picture, publicId: "" } : undefined,
@@ -731,7 +736,12 @@ async function facebookLogin(req, res, next) {
       user = new User({
         name,
         email,
-        phone: "",          // Will be prompted to complete later
+        // Deliberately left unset, NOT "". The phone_1 index is unique+sparse,
+        // and sparse only skips documents where the field is ABSENT - an empty
+        // string is a real indexed value, so the second social signup collided
+        // with the first and failed with E11000. Omitting the key entirely lets
+        // every social account share the "no phone yet" state until the user
+        // completes it in the profile.
         facebookId,
         isEmailVerified: true, // Facebook already verified the email
         avatar: picture ? { url: picture, publicId: "" } : undefined,
