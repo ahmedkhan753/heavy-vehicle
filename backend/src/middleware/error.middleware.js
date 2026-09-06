@@ -74,9 +74,17 @@ function errorMiddleware(err, req, res, next) {
   }
 
   // ── Send response ─────────────────────────────────────────
+  // Errors we raised ourselves (AppError) carry a message written for the
+  // user, so those are always safe to send. An unexpected 500 does not — its
+  // message comes from whatever threw, which can expose driver internals,
+  // file paths or query fragments. Those get a fixed string; the real message
+  // is still logged above.
+  const isSafeMessage = err.isOperational === true || statusCode < 500;
+  const clientMessage = isSafeMessage ? message : "Something went wrong. Please try again.";
+
   res.status(statusCode).json({
     success:    false,
-    message,
+    message:    clientMessage,
     code:       err.code && typeof err.code === "string" ? err.code : undefined,
     errors:     errors.length > 0 ? errors : undefined,
     // Only include stack trace in development

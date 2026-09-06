@@ -271,11 +271,16 @@ async function changePassword(req, res, next) {
 // ─────────────────────────────────────────────────────────────
 async function getPublicProfile(req, res, next) {
   try {
+    // isBanned/isActive must be selected for the guard below to see them —
+    // without them the check read `undefined` and never fired, so banning a
+    // seller left their profile and listings reachable by direct link.
     const user = await User.findById(req.params.id)
-      .select("name city avatar bio role isVerifiedSeller createdAt links whatsapp")
+      .select("name city avatar bio role isVerifiedSeller createdAt links whatsapp isBanned isActive")
       .lean();
 
-    if (!user || user.isBanned) return next(new AppError("Seller not found.", 404));
+    if (!user || user.isBanned || user.isActive === false) {
+      return next(new AppError("Seller not found.", 404));
+    }
 
     const liveFilter = {
       sellerId: user._id,
