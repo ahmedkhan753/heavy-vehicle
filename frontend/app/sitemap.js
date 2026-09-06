@@ -53,11 +53,55 @@ async function fetchSitemapIds(path) {
   }
 }
 
+// Category landing pages. /vehicles?type=excavator and /parts?category=engine
+// already render with their own titles ("Excavators for Sale in Pakistan",
+// "Engine Parts for Sale in Pakistan") and self-canonicalise — the metadata
+// work was done, but nothing ever pointed a crawler at them. Search Console
+// shows impressions for exactly these phrasings ("excavator", "engines for
+// sale", "heavy machinery for sale in pakistan"), so these are the pages that
+// should be competing for them.
+//
+// Built from live data rather than the full taxonomy, so a category page is
+// only advertised while it actually has listings — an empty landing page is
+// worse than no landing page.
+//
+// Deliberately limited to type and category. Both come from validated enums.
+// make and city are free-text seller input and currently contain "hitichi",
+// "hit" and "karachi pakistan", so building public URLs from them would
+// publish misspellings as page titles.
+async function fetchFacets() {
+  try {
+    const res = await fetch(`${SERVER_API_BASE_URL}/meta/filters`, { next: { revalidate: 3600 } });
+    if (!res.ok) return { vehicleTypes: [], partCategories: [] };
+    const json = await res.json();
+    return {
+      vehicleTypes: json.data?.vehicleTypes || [],
+      partCategories: json.data?.partCategories || [],
+    };
+  } catch {
+    return { vehicleTypes: [], partCategories: [] };
+  }
+}
+
 export default async function sitemap() {
-  const [vehicles, parts] = await Promise.all([
+  const [vehicles, parts, facets] = await Promise.all([
     fetchSitemapIds("/vehicles/sitemap"),
     fetchSitemapIds("/parts/sitemap"),
+    fetchFacets(),
   ]);
+
+  const facetEntries = [
+    ...facets.vehicleTypes.map((type) => ({
+      url: `${SITE_URL}/vehicles?type=${encodeURIComponent(type)}`,
+      changeFrequency: "daily",
+      priority: 0.8,
+    })),
+    ...facets.partCategories.map((category) => ({
+      url: `${SITE_URL}/parts?category=${encodeURIComponent(category)}`,
+      changeFrequency: "daily",
+      priority: 0.7,
+    })),
+  ];
 
   const staticEntries = STATIC_ROUTES.map((route) => ({
     url: `${SITE_URL}${route.path}`,
@@ -79,5 +123,7 @@ export default async function sitemap() {
     priority: 0.7,
   }));
 
-  return [...staticEntries, ...vehicleEntries, ...partEntries];
+  // Category pages sit ahead of individual listings: they are stable URLs that
+  // stay useful as stock turns over, whereas a listing URL dies when it sells.
+  return [...staticEntries, ...facetEntries, ...vehicleEntries, ...partEntries];
 }

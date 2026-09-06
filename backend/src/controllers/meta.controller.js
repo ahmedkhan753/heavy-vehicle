@@ -21,16 +21,28 @@ const clean = (arr) =>
 
 async function getFilters(req, res, next) {
   try {
-    const [vMakes, pMakes, vCities, pCities] = await Promise.all([
+    const live = { status: "active", expiresAt: { $gt: new Date() } };
+
+    const [vMakes, pMakes, vCities, pCities, vTypes, pCategories] = await Promise.all([
       Vehicle.distinct("make", { status: "active" }),
       Part.distinct("make", { status: "active" }),
       Vehicle.distinct("city", { status: "active" }),
       Part.distinct("city", { status: "active" }),
+      // Types and part categories come from validated enums (taxonomy.js and
+      // partTaxonomy.js), unlike make/city which are free-text seller input.
+      // Only these two are safe to build public URLs from — see the note in
+      // frontend/app/sitemap.js.
+      Vehicle.distinct("type", live),
+      Part.distinct("category", live),
     ]);
 
     respond(res, 200, {
       makes: clean([...vMakes, ...pMakes]),
       cities: clean([...vCities, ...pCities]),
+      // Only values that currently have at least one live listing. The sitemap
+      // uses these so it never advertises an empty category page.
+      vehicleTypes: clean(vTypes),
+      partCategories: clean(pCategories),
     });
   } catch (err) {
     next(err);
