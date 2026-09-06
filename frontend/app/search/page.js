@@ -7,6 +7,19 @@ import { getT } from "@/lib/i18n-server";
 
 export const revalidate = 0; // search results must always reflect the live query
 
+// Internal search results are deliberately kept out of the index. Google's own
+// quality guidelines single them out: every distinct ?q= is a new URL, so an
+// indexable search page is an unbounded source of thin, near-duplicate pages
+// that competes with the category pages actually built to rank
+// (/vehicles?type=excavator and friends, which self-canonicalise).
+//
+// `follow` is kept so crawlers still traverse through to the listings a search
+// surfaces — the pages are worth crawling, just not worth indexing.
+export const metadata = {
+  title: "Search",
+  robots: { index: false, follow: true },
+};
+
 async function getResults(q) {
   if (!q) return [];
   try {
