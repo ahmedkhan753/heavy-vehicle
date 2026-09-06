@@ -28,4 +28,58 @@ function rejectHtmlTags(value) {
   return true;
 }
 
-module.exports = { rejectHtmlTags, HTML_TAG_RE };
+// ── Make / city canonicalisation ──────────────────────────────
+// Listings previously stored whatever the seller typed, which left production
+// holding "hitachi", "hitichi", "hit" and "hino pak" as four separate makes.
+// Filtering is an exact match, so a buyer searching Hitachi missed three
+// quarters of the Hitachi stock.
+//
+// These come in pairs, and the ORDER in the validation chain matters:
+//   .custom(...)          rejects unrecognised input, with a suggestion
+//   .customSanitizer(...) rewrites req.body so the controller stores the
+//                         canonical slug rather than the raw text
+// The validator runs on what the seller typed so the error can quote it back;
+// the sanitizer then normalises what actually gets saved.
+const {
+  normalizeMake,
+  normalizeCity,
+  suggestMake,
+  suggestCity,
+} = require("../config/normalization");
+
+// Turn a slug back into something readable for an error message.
+const pretty = (slug) =>
+  String(slug || "")
+    .split("-")
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
+
+function buildChecker(normalize, suggest, label) {
+  return (value) => {
+    if (normalize(value)) return true;
+
+    const hint = suggest(value);
+    throw new Error(
+      hint
+        ? `We don't recognise "${value}" as a ${label}. Did you mean "${pretty(hint)}"?`
+        : `"${value}" isn't a ${label} we recognise. Please pick one from the list.`
+    );
+  };
+}
+
+const isKnownMake = buildChecker(normalizeMake, suggestMake, "make");
+const isKnownCity = buildChecker(normalizeCity, suggestCity, "city");
+
+// Fall back to the original value when unresolved so the .custom() above is
+// what produces the error, rather than a confusing empty field.
+const toCanonicalMake = (value) => normalizeMake(value) || value;
+const toCanonicalCity = (value) => normalizeCity(value) || value;
+
+module.exports = {
+  rejectHtmlTags,
+  HTML_TAG_RE,
+  isKnownMake,
+  isKnownCity,
+  toCanonicalMake,
+  toCanonicalCity,
+};

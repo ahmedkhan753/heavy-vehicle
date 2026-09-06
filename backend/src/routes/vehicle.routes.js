@@ -14,7 +14,9 @@
 
 const express        = require("express");
 const { body }       = require("express-validator");
-const { rejectHtmlTags } = require("../utils/validators");
+const {
+  rejectHtmlTags, isKnownMake, isKnownCity, toCanonicalMake, toCanonicalCity,
+} = require("../utils/validators");
 const { VEHICLE_TYPE_SLUGS } = require("../config/taxonomy");
 const {
   list, getById, getSitemapIds, getFeatured, getSimilar,
@@ -46,7 +48,9 @@ const createValidation = [
 
   body("make")
     .trim()
-    .notEmpty().withMessage("Make is required"),
+    .notEmpty().withMessage("Make is required")
+    .custom(isKnownMake)
+    .customSanitizer(toCanonicalMake),
 
   body("model")
     .trim()
@@ -67,7 +71,9 @@ const createValidation = [
 
   body("city")
     .trim()
-    .notEmpty().withMessage("City is required"),
+    .notEmpty().withMessage("City is required")
+    .custom(isKnownCity)
+    .customSanitizer(toCanonicalCity),
 
   body("images")
     .isArray({ min: 1 }).withMessage("At least one image is required")
@@ -103,6 +109,20 @@ const updateValidation = [
     .optional()
     .isInt({ min: 1980, max: new Date().getFullYear() + 1 })
     .withMessage("Enter a valid year"),
+
+  // Editing was previously unguarded for these two, so a listing could be
+  // corrected at creation and then edited straight back into free text.
+  body("make")
+    .optional({ values: "falsy" })
+    .trim()
+    .custom(isKnownMake)
+    .customSanitizer(toCanonicalMake),
+
+  body("city")
+    .optional({ values: "falsy" })
+    .trim()
+    .custom(isKnownCity)
+    .customSanitizer(toCanonicalCity),
 ];
 
 // ── Routes ────────────────────────────────────────────────────

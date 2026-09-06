@@ -13,7 +13,9 @@
 
 const express = require("express");
 const { body } = require("express-validator");
-const { rejectHtmlTags } = require("../utils/validators");
+const {
+  rejectHtmlTags, isKnownMake, isKnownCity, toCanonicalMake, toCanonicalCity,
+} = require("../utils/validators");
 const { PART_CATEGORY_SLUGS, PART_TYPE_VALUES, WARRANTY_VALUES } = require("../config/partTaxonomy");
 const {
   list, getSitemapIds, getFeatured, getById, getMyParts,
@@ -62,7 +64,17 @@ const createValidation = [
 
   body("city")
     .trim()
-    .notEmpty().withMessage("City is required"),
+    .notEmpty().withMessage("City is required")
+    .custom(isKnownCity)
+    .customSanitizer(toCanonicalCity),
+
+  // Many parts legitimately have no make (a generic hydraulic hose), so
+  // this stays optional — but when one IS given it must be canonical.
+  body("make")
+    .optional({ values: "falsy" })
+    .trim()
+    .custom(isKnownMake)
+    .customSanitizer(toCanonicalMake),
 
   body("images")
     .isArray({ min: 1 }).withMessage("At least one image is required")
@@ -93,6 +105,18 @@ const updateValidation = [
   body("price")
     .optional()
     .isInt({ min: 1 }).withMessage("Price must be a positive number"),
+
+  body("make")
+    .optional({ values: "falsy" })
+    .trim()
+    .custom(isKnownMake)
+    .customSanitizer(toCanonicalMake),
+
+  body("city")
+    .optional({ values: "falsy" })
+    .trim()
+    .custom(isKnownCity)
+    .customSanitizer(toCanonicalCity),
 ];
 
 router.get("/", optionalAuth, list);
