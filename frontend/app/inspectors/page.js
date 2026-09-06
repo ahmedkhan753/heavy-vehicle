@@ -6,10 +6,21 @@ import { getT, getLang } from "@/lib/i18n-server";
 
 export const revalidate = 60;
 
-export const metadata = {
-  title: "Vehicle Inspectors",
-  description: "Find verified heavy-vehicle inspectors across Pakistan. Compare fees and book an inspection before you buy.",
-};
+// Same reasoning as the business directory: no inspector has registered yet,
+// so this renders as header and footer only, which Google reads as a soft 404.
+// It stays out of the index until it lists someone, and becomes indexable
+// again by itself once the first inspector is approved.
+export async function generateMetadata({ searchParams }) {
+  const params = (await searchParams) || {};
+  const inspectors = await getInspectors(params);
+
+  return {
+    title: "Vehicle Inspectors",
+    description: "Find verified heavy-vehicle inspectors across Pakistan. Compare fees and book an inspection before you buy.",
+    alternates: { canonical: "/inspectors" },
+    ...(inspectors.length === 0 ? { robots: { index: false, follow: true } } : {}),
+  };
+}
 
 async function getInspectors(params) {
   try {

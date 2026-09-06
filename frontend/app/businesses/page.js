@@ -6,11 +6,26 @@ import { getT, getLang } from "@/lib/i18n-server";
 
 export const revalidate = 60;
 
-export const metadata = {
-  title: "Business Directory",
-  description:
-    "Find workshops, tyre shops, crane rental, transporters, insurance agents and other businesses serving heavy vehicles across Pakistan.",
-};
+// No business has registered yet, so this page renders nothing but the shared
+// header and footer. Google classified it as a soft 404 — correctly: a page
+// with no body content returning 200 is exactly that. Padding it with filler
+// to look substantial is the thing search guidelines actually penalise, so
+// instead it stays out of the index until it has something on it.
+//
+// Conditional rather than a hard noindex, so it heals itself: the first
+// approved business makes the page indexable again with no code change.
+export async function generateMetadata({ searchParams }) {
+  const result = await getBusinesses(searchParams);
+  const total = result.pagination?.total ?? (result.data || []).length;
+
+  return {
+    title: "Business Directory",
+    description:
+      "Find workshops, tyre shops, crane rental, transporters, insurance agents and other businesses serving heavy vehicles across Pakistan.",
+    alternates: { canonical: "/businesses" },
+    ...(total === 0 ? { robots: { index: false, follow: true } } : {}),
+  };
+}
 
 async function getBusinesses(searchParams) {
   const query = buildQuery({ ...(await searchParams), limit: 24 });

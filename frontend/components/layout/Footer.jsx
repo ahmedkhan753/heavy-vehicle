@@ -160,6 +160,9 @@ export default function Footer() {
           <div className="order-1 flex gap-4 sm:order-2">
             <Link href="/privacy" className="hover:text-[var(--hw-orange)]">{t("footer.privacy")}</Link>
             <Link href="/terms" className="hover:text-[var(--hw-orange)]">{t("footer.terms")}</Link>
+            {/* Linked site-wide so crawlers reach it from every page, not only
+                from the sitemap. */}
+            <Link href="/faq" className="hover:text-[var(--hw-orange)]">FAQ</Link>
             <Link href="/contact" className="hover:text-[var(--hw-orange)]">{t("footer.contact")}</Link>
           </div>
           <p className="order-2 sm:order-1">© {new Date().getFullYear()} {t("common.brandSub")}. {t("footer.rights")}</p>
