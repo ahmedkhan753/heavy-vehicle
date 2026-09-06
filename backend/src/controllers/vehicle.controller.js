@@ -23,6 +23,7 @@ const pricing = require("../config/pricing");
 const Commission = require("../models/Commission");
 const { recordSale } = require("../utils/recordSale");
 const { getEffectiveLimits, countActiveListings } = require("../utils/planLimits");
+const { assertCanPost } = require("../utils/postingEligibility");
 const { localizeListing } = require("../services/translation");
 
 // ── Standard response helper ──────────────────────────────────
@@ -241,6 +242,10 @@ async function create(req, res, next) {
     if (!images || images.length === 0) {
       return next(new AppError("At least one image is required.", 400));
     }
+
+    // Seller must be contactable. The listing denormalizes seller.phone below,
+    // so an incomplete profile would publish an ad no buyer can act on.
+    assertCanPost(req.user);
 
     // Seller must accept the sales commission terms to post.
     if (req.body.commissionConsent !== true) {

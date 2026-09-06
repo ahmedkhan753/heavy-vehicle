@@ -31,6 +31,21 @@ const updateProfileValidation = [
     .optional()
     .trim()
     .isLength({ min: 2, max: 60 }).withMessage("Name must be 2–60 characters"),
+
+  // Social sign-ups arrive with no phone at all, and a phone is required to
+  // publish a listing (see utils/postingEligibility) — so this has to be
+  // settable here, or those accounts could never post. Blank is treated as
+  // "leave unchanged" by the controller, so only a real value is checked.
+  body("phone")
+    .optional()
+    .trim()
+    .custom((value) => {
+      if (!value) return true; // blank → no change
+      if (!/^(\+92|0092|0)?[3][0-9]{9}$/.test(value)) {
+        throw new Error("Enter a valid Pakistani mobile number (e.g. 03001234567)");
+      }
+      return true;
+    }),
 ];
 
 const changePasswordValidation = [

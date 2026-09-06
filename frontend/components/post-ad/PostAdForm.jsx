@@ -13,6 +13,7 @@ import { TC_VERSION } from "@/lib/pricing";
 import SuggestInput from "@/components/ui/SuggestInput";
 import PhotoUploader from "@/components/ui/PhotoUploader";
 import UpgradePrompt from "@/components/marketing/UpgradePrompt";
+import ProfileIncompletePrompt from "@/components/marketing/ProfileIncompletePrompt";
 import { onLettersInput, onDigitsInput } from "@/lib/validators";
 
 // Free-text spec fields render from one map; `mode` picks the input filter.
@@ -74,6 +75,9 @@ export default function PostAdForm() {
   // Hitting the plan cap isn't really an error the seller can fix by
   // re-reading the form — it needs its own prompt with a way out.
   const [limitReached, setLimitReached] = useState(false);
+  // Missing profile fields the server rejected the post for (phone/city).
+  // null = profile is fine; an array = show the completion prompt.
+  const [missingProfile, setMissingProfile] = useState(null);
   // Photos picked for upload, owned here and managed by <PhotoUploader>.
   // Each entry: { id, file, url }. `photosBusy` is true while compression runs.
   const [photos, setPhotos] = useState([]);
@@ -84,6 +88,7 @@ export default function PostAdForm() {
     setLoading(true);
     setError("");
     setLimitReached(false);
+    setMissingProfile(null);
 
     const formData = new FormData(event.currentTarget);
 
@@ -134,6 +139,9 @@ export default function PostAdForm() {
       router.push(`/vehicles/${response.data._id}`);
     } catch (err) {
       if (err?.code === "PLAN_LIMIT_REACHED") setLimitReached(true);
+      if (err?.code === "PROFILE_INCOMPLETE") {
+        setMissingProfile((err.errors || []).map((e) => e.field).filter(Boolean));
+      }
       setError(normalizeApiError(err.payload || err));
     } finally {
       setLoading(false);
@@ -166,7 +174,8 @@ export default function PostAdForm() {
         Fields marked <Req /> are required.
       </p>
       {limitReached ? <UpgradePrompt message={error} /> : null}
-      {error && !limitReached ? (
+      {missingProfile ? <ProfileIncompletePrompt message={error} fields={missingProfile} /> : null}
+      {error && !limitReached && !missingProfile ? (
         <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-sm font-bold text-red-200">
           {error}
         </div>

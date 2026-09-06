@@ -86,8 +86,10 @@ async function updateProfile(req, res, next) {
       });
     }
 
-    // Only allow updating these fields
-    const ALLOWED_UPDATES = ["name", "city", "address", "bio", "whatsapp", "links"];
+    // Only allow updating these fields.
+    // "phone" is here because social sign-ups start without one and a phone is
+    // required to publish a listing — without this they could never post.
+    const ALLOWED_UPDATES = ["name", "phone", "city", "address", "bio", "whatsapp", "links"];
     const updates = {};
     ALLOWED_UPDATES.forEach((field) => {
       if (req.body[field] !== undefined) {
@@ -104,6 +106,31 @@ async function updateProfile(req, res, next) {
         }
       }
     });
+
+    // A blank phone means "left the field alone", never "clear it". Writing
+    // an empty string here would both strip the user's only contact detail
+    // and re-create the unique-index collision that broke social sign-ups,
+    // since "" is a real indexed value while an absent field is not.
+    if (updates.phone !== undefined && !String(updates.phone).trim()) {
+      delete updates.phone;
+    }
+
+    // The unique index is the real guarantee, but catching this first gives a
+    // message that says what to do instead of "Phone already exists".
+    if (updates.phone) {
+      const taken = await User.findOne({
+        phone: updates.phone,
+        _id: { $ne: req.user._id },
+      }).select("_id").lean();
+
+      if (taken) {
+        return next(new AppError(
+          "That mobile number is already registered to another account.",
+          409,
+          [{ field: "phone", message: "This number is already in use." }]
+        ));
+      }
+    }
 
     // Handle avatar upload if file provided
     if (req.file) {

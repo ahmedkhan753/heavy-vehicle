@@ -89,9 +89,22 @@ export default function ProfileForm() {
           WhatsApp Number
           <input name="whatsapp" defaultValue={profile?.whatsapp || ""} className="mt-2 h-12 w-full rounded-lg border border-[var(--hw-border-default)] bg-[var(--hw-bg-input)] px-4 text-[var(--hw-text-primary)] outline-none focus:border-[var(--hw-orange)]" placeholder="e.g. 03001234567" />
         </label>
+        {/* Editable: accounts created through Google or Facebook arrive with
+            no phone number, and a phone is required to publish a listing.
+            While this was read-only those sellers had no way to add one. */}
         <label className="text-sm font-bold text-[var(--hw-text-secondary)]">
           {t("auth.phone")}
-          <input value={profile?.phone || ""} disabled className="mt-2 h-12 w-full rounded-lg border border-[var(--hw-border-default)] bg-[var(--hw-bg-deep)] px-4 text-[var(--hw-text-muted)]" />
+          <input
+            name="phone"
+            defaultValue={profile?.phone || ""}
+            placeholder="e.g. 03001234567"
+            className="mt-2 h-12 w-full rounded-lg border border-[var(--hw-border-default)] bg-[var(--hw-bg-input)] px-4 text-[var(--hw-text-primary)] outline-none focus:border-[var(--hw-orange)]"
+          />
+          {!profile?.phone && (
+            <span className="mt-1.5 block text-xs font-semibold text-[var(--hw-orange)]">
+              Add your mobile number so buyers can reach you — it&apos;s required before you can post an ad.
+            </span>
+          )}
         </label>
         <label className="text-sm font-bold text-[var(--hw-text-secondary)] sm:col-span-2">
           Social Links (Comma separated)
