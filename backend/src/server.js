@@ -78,6 +78,20 @@ const app = express();
 // 4. SECURITY MIDDLEWARE
 // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
+// Exactly one proxy sits in front of this app: the Caddy container, which
+// terminates TLS and forwards /api/* over the Compose network. Without this,
+// req.ip is Caddy's bridge address (172.16-31.x) for EVERY visitor, which
+// broke rate limiting in both directions at once:
+//   - the global limiter's isInternalIp() skip matched every real request,
+//     so it never limited anything;
+//   - the auth limiter, which has no skip, put the entire internet into a
+//     single 10-per-15-minutes bucket, so ten failed logins anywhere locked
+//     login/register/reset for everybody.
+// Trusting exactly one hop makes req.ip the client address from the last
+// entry in X-Forwarded-For. It must stay 1 (not `true`): trusting the whole
+// chain would let a client spoof its own address by sending the header.
+app.set("trust proxy", 1);
+
 // Helmet â€” sets secure HTTP headers
 app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" }, // Allow images to load cross-origin
@@ -160,7 +174,11 @@ if (env.IS_DEVELOPMENT) {
 // 7. HEALTH CHECK
 // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-app.get("/health", (req, res) => {
+// Caddy only forwards /api/* to this container, so a bare /health lands on
+// the Next.js frontend and returns its 404 page — there was no reachable
+// health endpoint in production at all. Both paths are served: /api/health
+// is the one an uptime monitor can actually poll.
+function healthCheck(req, res) {
   res.status(200).json({
     success: true,
     message: "HeavyWheels API is running",
@@ -168,7 +186,10 @@ app.get("/health", (req, res) => {
     timestamp:   new Date().toISOString(),
     uptime:      `${Math.floor(process.uptime())}s`,
   });
-});
+}
+
+app.get("/health", healthCheck);
+app.get("/api/health", healthCheck);
 
 // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // 8. API ROUTES
