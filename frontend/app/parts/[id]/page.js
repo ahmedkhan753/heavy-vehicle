@@ -15,7 +15,7 @@ import Comments from "@/components/listing/Comments";
 import ShareMenu from "@/components/listing/ShareMenu";
 import ReportListingButton from "@/components/listing/ReportListingButton";
 import { Chip, QuickSpecs, SpecGrid, Panel } from "@/components/listing/ListingBits";
-import { productJsonLd, breadcrumbJsonLd } from "@/lib/seo";
+import { productJsonLd, breadcrumbJsonLd, serializeJsonLd } from "@/lib/seo";
 
 export const revalidate = 60;
 
@@ -145,7 +145,7 @@ export default async function PartDetailPage({ params }) {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify([
+          __html: serializeJsonLd([
             productJsonLd({
               name: title,
               description: descPrimary,

@@ -14,6 +14,7 @@
 
 const express        = require("express");
 const { body }       = require("express-validator");
+const { rejectHtmlTags } = require("../utils/validators");
 const { VEHICLE_TYPE_SLUGS } = require("../config/taxonomy");
 const {
   list, getById, getSitemapIds, getFeatured, getSimilar,
@@ -30,12 +31,14 @@ const createValidation = [
   body("title")
     .trim()
     .notEmpty().withMessage("Title is required")
-    .isLength({ min: 10, max: 120 }).withMessage("Title must be 10–120 characters"),
+    .isLength({ min: 10, max: 120 }).withMessage("Title must be 10–120 characters")
+    .custom(rejectHtmlTags),
 
   body("description")
     .trim()
     .notEmpty().withMessage("Description is required")
-    .isLength({ min: 30, max: 3000 }).withMessage("Description must be 30–3000 characters"),
+    .isLength({ min: 30, max: 3000 }).withMessage("Description must be 30–3000 characters")
+    .custom(rejectHtmlTags),
 
   body("type")
     .notEmpty().withMessage("Vehicle type is required")
@@ -83,12 +86,14 @@ const updateValidation = [
   body("title")
     .optional()
     .trim()
-    .isLength({ min: 10, max: 120 }).withMessage("Title must be 10–120 characters"),
+    .isLength({ min: 10, max: 120 }).withMessage("Title must be 10–120 characters")
+    .custom(rejectHtmlTags),
 
   body("description")
     .optional()
     .trim()
-    .isLength({ min: 30, max: 3000 }).withMessage("Description must be 30–3000 characters"),
+    .isLength({ min: 30, max: 3000 }).withMessage("Description must be 30–3000 characters")
+    .custom(rejectHtmlTags),
 
   body("price")
     .optional()

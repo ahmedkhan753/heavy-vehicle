@@ -7,6 +7,40 @@
 
 const SITE_URL = "https://heavywheelspk.com";
 
+/**
+ * Serialize a JSON-LD object for injection inside a <script> tag.
+ *
+ * JSON.stringify does NOT escape "<", ">" or "&", so a listing whose seller
+ * typed a closing script tag into the title closed this block and ran
+ * arbitrary JS on the page — with the access token sitting in localStorage,
+ * that was full account takeover on every vehicle and part page. Titles and
+ * descriptions are seller-supplied and only length-validated, so the escaping
+ * has to happen here, at the point of injection.
+ *
+ * Each character is replaced with its six-character escape sequence, which
+ * JSON reads as the same character but the HTML parser reads as ordinary
+ * text — so no substring can close the surrounding tag. U+2028 and U+2029
+ * are included because they are valid in JSON but are line terminators in
+ * JavaScript, where an unescaped one is a syntax error.
+ *
+ * @param {unknown} data - any JSON-serializable value
+ * @returns {string} safe to place inside <script type="application/ld+json">
+ */
+export function serializeJsonLd(data) {
+  // Written as escape sequences rather than literal characters so this file
+  // stays pure ASCII — U+2028 is a line terminator to a JS parser, and an
+  // invisible one sitting in source breaks tooling in ways that are very
+  // hard to see.
+  const ESCAPES = {
+    "<": "\\u003c",
+    ">": "\\u003e",
+    "&": "\\u0026",
+    "\u2028": "\\u2028",
+    "\u2029": "\\u2029",
+  };
+  return JSON.stringify(data).replace(/[<>&\u2028\u2029]/g, (c) => ESCAPES[c]);
+}
+
 // Only "new" maps cleanly to schema.org's NewCondition; everything else
 // (used, imported, rebuilt) is UsedCondition — schema.org has no finer
 // enum, and guessing at RefurbishedCondition for "rebuilt" would overstate

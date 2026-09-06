@@ -13,6 +13,7 @@
 
 const express = require("express");
 const { body } = require("express-validator");
+const { rejectHtmlTags } = require("../utils/validators");
 const { PART_CATEGORY_SLUGS, PART_TYPE_VALUES, WARRANTY_VALUES } = require("../config/partTaxonomy");
 const {
   list, getSitemapIds, getFeatured, getById, getMyParts,
@@ -26,12 +27,14 @@ const createValidation = [
   body("title")
     .trim()
     .notEmpty().withMessage("Title is required")
-    .isLength({ min: 5, max: 120 }).withMessage("Title must be 5-120 characters"),
+    .isLength({ min: 5, max: 120 }).withMessage("Title must be 5-120 characters")
+    .custom(rejectHtmlTags),
 
   body("description")
     .trim()
     .notEmpty().withMessage("Description is required")
-    .isLength({ min: 20, max: 2000 }).withMessage("Description must be 20-2000 characters"),
+    .isLength({ min: 20, max: 2000 }).withMessage("Description must be 20-2000 characters")
+    .custom(rejectHtmlTags),
 
   body("category")
     .notEmpty().withMessage("Category is required")
@@ -78,12 +81,14 @@ const updateValidation = [
   body("title")
     .optional()
     .trim()
-    .isLength({ min: 5, max: 120 }).withMessage("Title must be 5-120 characters"),
+    .isLength({ min: 5, max: 120 }).withMessage("Title must be 5-120 characters")
+    .custom(rejectHtmlTags),
 
   body("description")
     .optional()
     .trim()
-    .isLength({ min: 20, max: 2000 }).withMessage("Description must be 20-2000 characters"),
+    .isLength({ min: 20, max: 2000 }).withMessage("Description must be 20-2000 characters")
+    .custom(rejectHtmlTags),
 
   body("price")
     .optional()

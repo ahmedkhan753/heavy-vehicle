@@ -15,7 +15,7 @@ import ListingTopBar from "@/components/listing/ListingTopBar";
 import ShareMenu from "@/components/listing/ShareMenu";
 import ReportListingButton from "@/components/listing/ReportListingButton";
 import { Chip, QuickSpecs, SpecGrid, Panel } from "@/components/listing/ListingBits";
-import { productJsonLd, breadcrumbJsonLd } from "@/lib/seo";
+import { productJsonLd, breadcrumbJsonLd, serializeJsonLd } from "@/lib/seo";
 
 export const revalidate = 60;
 
@@ -155,7 +155,7 @@ export default async function VehicleDetailPage({ params }) {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify([
+          __html: serializeJsonLd([
             productJsonLd({
               name: title,
               description: descPrimary,
